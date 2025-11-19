@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa4bbf2d240dac14e9a1d0cc469b10f1, type: 3}
+  m_Name: LocalDifficultyProvider
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameConfig.LocalDifficultySettingsProvider
+  _difficultySettings:
+    Easy:
+      InitialSpeed: 5
+      MaxSpeed: 8
+      Acceleration: 0.2
+      StartRunway: 10
+      MinTrackLength: 3
+      MaxTrackLength: 9
+      SafePreTurnDistance: 5
+      SafePostTurnDistance: 0.5
+      InputCoolDownForTurns: 1
+      NumberOfLives: 2147483647
+      ObstacleSpawnRate: 1
+      PowerUpSpawnRate: 1
+      ScoreMultiplier: 1
+      EnableAdvancedObstacles: 0
+    Medium:
+      InitialSpeed: 5
+      MaxSpeed: 8
+      Acceleration: 0.2
+      StartRunway: 10
+      MinTrackLength: 3
+      MaxTrackLength: 9
+      SafePreTurnDistance: 5
+      SafePostTurnDistance: 0.5
+      InputCoolDownForTurns: 1
+      NumberOfLives: 2147483647
+      ObstacleSpawnRate: 1
+      PowerUpSpawnRate: 1
+      ScoreMultiplier: 1
+      EnableAdvancedObstacles: 0
+    Hard:
+      InitialSpeed: 5
+      MaxSpeed: 8
+      Acceleration: 0.2
+      StartRunway: 10
+      MinTrackLength: 3
+      MaxTrackLength: 9
+      SafePreTurnDistance: 5
+      SafePostTurnDistance: 0.5
+      InputCoolDownForTurns: 1
+      NumberOfLives: 2147483647
+      ObstacleSpawnRate: 1
+      PowerUpSpawnRate: 1
+      ScoreMultiplier: 1
+      EnableAdvancedObstacles: 0
+    Insane:
+      InitialSpeed: 5
+      MaxSpeed: 8
+      Acceleration: 0.2
+      StartRunway: 10
+      MinTrackLength: 3
+      MaxTrackLength: 9
+      SafePreTurnDistance: 5
+      SafePostTurnDistance: 0.5
+      InputCoolDownForTurns: 1
+      NumberOfLives: 2147483647
+      ObstacleSpawnRate: 1
+      PowerUpSpawnRate: 1
+      ScoreMultiplier: 1
+      EnableAdvancedObstacles: 0
+    Exergame:
+      InitialSpeed: 5
+      MaxSpeed: 8
+      Acceleration: 0.2
+      StartRunway: 10
+      MinTrackLength: 3
+      MaxTrackLength: 9
+      SafePreTurnDistance: 5
+      SafePostTurnDistance: 0.5
+      InputCoolDownForTurns: 1
+      NumberOfLives: 2147483647
+      ObstacleSpawnRate: 1
+      PowerUpSpawnRate: 1
+      ScoreMultiplier: 1
+      EnableAdvancedObstacles: 0

@@ -1,0 +1,5 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Crawfis.Events.csproj" />
+  <Project Path="Crawfis.Events.Editor.csproj" />
+</Solution>

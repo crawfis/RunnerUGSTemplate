@@ -394,6 +394,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1581898277}
   - component: {fileID: 1581898278}
+  - component: {fileID: 1581898280}
   - component: {fileID: 1581898279}
   m_Layer: 0
   m_Name: InputControllers
@@ -429,8 +430,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0744b191ea70ab246b9cf61d61799942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputAsset: {fileID: -944628639613478452, guid: e5d1312428e16c344aadeea670c8d578,
-    type: 3}
 --- !u!114 &1581898279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -445,6 +444,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.Input.PauseQuitInputActions
   _inputAsset: {fileID: -944628639613478452, guid: 8de051f95e9d6814aa0777570e80c745,
     type: 3}
+--- !u!114 &1581898280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581898276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f319b3b02b27d74580bc044eaab2e01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.SwipeDetectorActions
 --- !u!1 &1587033300
 GameObject:
   m_ObjectHideFlags: 0
@@ -592,6 +603,8 @@ GameObject:
   - component: {fileID: 2145456648}
   - component: {fileID: 2145456649}
   - component: {fileID: 2145456650}
+  - component: {fileID: 2145456652}
+  - component: {fileID: 2145456651}
   m_Layer: 0
   m_Name: LoadVisuals
   m_TagString: Untagged
@@ -611,7 +624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _sceneName: TempleRunVisuals
+  _sceneName: TempleRunPlayerVisuals
 --- !u!4 &2145456646
 Transform:
   m_ObjectHideFlags: 0
@@ -679,6 +692,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _sceneName: TempleRunSfx
+--- !u!114 &2145456651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145456644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 185fbeb4117d22d46baed185e7e21324, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.FireEventAfterSceneLoads
+  _scenesNeeded:
+  - TempleRunPlayerVisuals
+  - TempleRunTrackVisuals
+  - TempleRunGuiOverlay
+  - TempleRunEnvironment
+  - TempleRunSfx
+  - AchievementNotifications
+  _eventToFire: GameScenesLoaded
+  _resetOnEvent: GameEnded
+--- !u!114 &2145456652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145456644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sceneName: AchievementNotifications
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

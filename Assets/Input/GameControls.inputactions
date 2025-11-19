@@ -50,6 +50,17 @@
                 },
                 {
                     "name": "",
+                    "id": "c81b2fba-9d3a-4fd7-914b-be89214a80bc",
+                    "path": "<Touchscreen>/touch*/Press",
+                    "interactions": "Hold(duration=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PauseAndResume",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "7980965d-042d-4863-89cd-c17f81972fda",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
@@ -64,6 +75,17 @@
                     "id": "930d6ec9-3599-4dde-8012-d404581dbfa1",
                     "path": "<Gamepad>/start",
                     "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5b3d7501-ae16-4739-a9d4-d2e1fcfc1360",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "MultiTap(tapCount=3)",
                     "processors": "",
                     "groups": "",
                     "action": "Quit",

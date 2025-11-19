@@ -1,0 +1,9 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row; flex-grow: 1; padding-top: 30px; padding-right: 30px; padding-bottom: 30px; padding-left: 30px;">
+        <ui:Label name="RankLabel" text="1" class="entry-label" style="width: 10%; -unity-text-align: upper-right; flex-grow: 0; background-color: rgb(7, 49, 156); color: rgb(255, 255, 255); -unity-font-style: bold; padding-right: 20px; padding-left: 20px; font-size: 28px;"/>
+        <ui:VisualElement name="Space" style="flex-grow: 1; width: 5%; flex-shrink: 0;"/>
+        <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label" style="width: 50%; background-color: rgb(7, 49, 156); color: rgb(255, 255, 255); padding-right: 20px; padding-left: 20px; font-size: 28px;"/>
+        <ui:VisualElement name="Space" style="flex-grow: 1; width: 5%; flex-shrink: 0;"/>
+        <ui:Label name="ScoreLabel" text="1,000,000" class="entry-label" style="width: 30%; background-color: rgb(7, 49, 156); color: rgb(255, 255, 255); padding-right: 20px; padding-left: 20px; padding-top: 4px; padding-bottom: 4px; margin-right: 2px; margin-left: 2px; font-size: 28px; -unity-text-align: upper-right;"/>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,66 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="LeaderboardContainer" class="leaderboard-container">
+        <ui:VisualElement name="LeaderboardHeader" class="leaderboard-header" style="flex-direction: row;">
+            <ui:Label text="Rank" class="header-label"/>
+            <ui:Label text="Player Name" class="header-label"/>
+            <ui:Label text="Score" class="header-label"/>
+        </ui:VisualElement>
+        <ui:ScrollView name="LeaderboardEntries" class="leaderboard-entries" style="flex-direction: column;">
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="Player ReadyOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="LeaderboardEntry" class="leaderboard-entry" style="flex-direction: row;">
+                <ui:Label name="RankLabel" text="1" class="entry-label"/>
+                <ui:Label name="PlayerNameLabel" text="PlayerOne" class="entry-label"/>
+                <ui:Label name="ScoreLabel" text="1000" class="entry-label"/>
+            </ui:VisualElement>
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

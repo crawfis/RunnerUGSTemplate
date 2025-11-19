@@ -19,7 +19,7 @@
                     "name": "Left",
                     "type": "Button",
                     "id": "3ab098ca-7704-4646-923a-8f05143e70ad",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -89,6 +89,54 @@
                     "processors": "",
                     "groups": "",
                     "action": "Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "PlayerTouch",
+            "id": "d8003738-461d-444f-9e26-a4eba0f8e8f7",
+            "actions": [
+                {
+                    "name": "InitialPress",
+                    "type": "Button",
+                    "id": "7bf3883b-ebc9-49f8-a31a-89fffa76676a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EndOfSwipe",
+                    "type": "Value",
+                    "id": "915047b9-6cea-408f-bed1-53a9019b42c1",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0fb19280-73eb-42fa-ba47-04ac3ad49efd",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "InitialPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "70fe5190-689b-49c8-8cea-8b5942d00ee3",
+                    "path": "<Touchscreen>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "EndOfSwipe",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

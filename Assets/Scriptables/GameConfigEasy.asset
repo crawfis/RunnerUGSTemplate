@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd9900aa909520c4bbb091a46bccb200, type: 3}
   m_Name: GameConfigEasy
   m_EditorClassIdentifier: 
-  InitialSpeed: 5
-  MaxSpeed: 30
-  Acceleration: 1
-  StartRunway: 10
+  InitialSpeed: 8
+  MaxSpeed: 15
+  Acceleration: 0.35
+  StartRunway: 5
   SafeTurnDistance: 5
-  MinDistance: 9
-  MaxDistance: 18
-  InputCoolDownForTurns: 0
-  NumberOfLives: 11
+  MinDistance: 3
+  MaxDistance: 9
+  InputCoolDownForTurns: 1
+  NumberOfLives: 5
