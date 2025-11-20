@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5dca77e348e4387458b18eaad6f4ab91
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Scripts/Editor/Blocks.Achievements.Editor.asmdef
+  uploadId: 814418

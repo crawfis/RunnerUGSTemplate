@@ -25,8 +25,8 @@ namespace CrawfisSoftware.TempleRun
 
         protected void SubscribeToEvents()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.SplineSegmentCreated, OnSplineCreated);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.TeleportEnded, OnActiveSplineChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.SplineSegmentCreated, OnSplineCreated);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportEnded, OnActiveSplineChanged);
             var parent = new GameObject("Generated Level");
             _parentTransform = parent.transform;
         }
@@ -68,8 +68,8 @@ namespace CrawfisSoftware.TempleRun
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.SplineSegmentCreated, OnSplineCreated);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.TeleportEnded, OnActiveSplineChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.SplineSegmentCreated, OnSplineCreated);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportEnded, OnActiveSplineChanged);
         }
     }
 }

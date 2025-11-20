@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ef3db04aad60657718f92ae5b644e387
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341926
+  packageName: Unity Building Block - Leaderboards
+  packageVersion: 1.1
+  assetPath: Assets/Blocks/Leaderboards/TestScenes/Blocks.Leaderboards.TestScene.api
+  uploadId: 819762

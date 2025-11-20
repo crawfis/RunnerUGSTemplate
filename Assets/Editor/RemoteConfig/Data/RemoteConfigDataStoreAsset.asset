@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 469c24fdb3bd6431b92cc1465bd9166b, type: 3}
+  m_Name: RemoteConfigDataStoreAsset
+  m_EditorClassIdentifier: Unity.RemoteConfig.Editor::Unity.RemoteConfig.Editor.RemoteConfigDataStore
+  _rsKeyList: "[\r\n  {\r\n    \"metadata\": {\r\n      \"entityId\": \"a992a5b5-38f6-4c6d-b236-78095bfd0409\"\r\n   
+    },\r\n    \"rs\": {\r\n      \"key\": \"InitialSpeed\",\r\n      \"type\": \"float\",\r\n     
+    \"value\": 5.0\r\n    }\r\n  }\r\n]"
+  _rsLastCachedKeyList: "[\r\n  {\r\n    \"metadata\": {\r\n      \"entityId\": \"a992a5b5-38f6-4c6d-b236-78095bfd0409\"\r\n   
+    },\r\n    \"rs\": {\r\n      \"key\": \"InitialSpeed\",\r\n      \"type\": \"float\",\r\n     
+    \"value\": 5.0\r\n    }\r\n  }\r\n]"
+  _environments: "[\r\n  {\r\n    \"projectId\": \"0fa285ea-643f-436d-8df3-34b4901cc279\",\r\n   
+    \"name\": \"production\",\r\n    \"id\": \"810fdb55-d62b-42d5-b90d-feb1139e9a59\",\r\n   
+    \"isDefault\": true,\r\n    \"createdAt\": \"2025-10-06T17:46:52Z\",\r\n    \"updatedAt\":
+    \"2025-10-06T17:46:52Z\"\r\n  },\r\n  {\r\n    \"projectId\": \"0fa285ea-643f-436d-8df3-34b4901cc279\",\r\n   
+    \"name\": \"development\",\r\n    \"id\": \"3214dbda-77a2-4922-ad16-c17b14f07551\",\r\n   
+    \"isDefault\": false,\r\n    \"createdAt\": \"2025-10-07T11:33:28Z\",\r\n   
+    \"updatedAt\": \"2025-10-07T11:33:28Z\"\r\n  }\r\n]"

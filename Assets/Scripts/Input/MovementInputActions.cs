@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.TempleRun.Input;
+using CrawfisSoftware.Events;
 
 using System.Collections;
 
@@ -9,16 +10,18 @@ namespace CrawfisSoftware.TempleRun
 {
     public class MovementInputActions : MonoBehaviour
     {
-        [SerializeField] private InputActionAsset _inputAsset;
+        [SerializeField] private LeftRightJumpSlide _inputAsset;
 
         const int PlayerNumber = 0;
         private LeftRightJumpSlide _inputActions;
         private InputAction _leftAction;
         private InputAction _rightAction;
 
-        private void Start()
+        private void OnEnable()
         {
-            _inputActions = new LeftRightJumpSlide();
+            if(_inputActions == null)
+                _inputActions = new LeftRightJumpSlide();
+            _inputActions.Enable();
             _leftAction = _inputActions.Player.Left;
             _leftAction.Enable();
             _leftAction.performed += LeftAction_performed;
@@ -26,19 +29,34 @@ namespace CrawfisSoftware.TempleRun
             _rightAction.Enable();
             _rightAction.performed += RightAction_performed;
         }
+        private void OnDisable()
+        {
+            _inputActions.Disable();
+            _leftAction.Disable();
+            _leftAction.performed -= LeftAction_performed;
+            _rightAction.Disable();
+            _rightAction.performed -= RightAction_performed;
 
+        }
+        private void OnDestroy()
+        {
+            if (_inputActions != null)
+            {
+                _inputActions.Dispose();
+            }
+        }
         private void LeftAction_performed(InputAction.CallbackContext obj)
         {
             _leftAction.Disable();
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.LeftTurnRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.LeftTurnRequested, this, PlayerNumber);
             StartCoroutine(EnableAfterDelay(_leftAction));
         }
 
         private void RightAction_performed(InputAction.CallbackContext obj)
         {
-            _leftAction.Disable();
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.RightTurnRequested, this, PlayerNumber);
-            StartCoroutine(EnableAfterDelay(_leftAction));
+            _rightAction.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.RightTurnRequested, this, PlayerNumber);
+            StartCoroutine(EnableAfterDelay(_rightAction));
         }
 
         private IEnumerator EnableAfterDelay(InputAction actionToEnable)

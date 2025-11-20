@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="./NumberGame.uss" />
+
+    <ui:VisualElement class="blocks-modal blocks-viewport-constrained number-game-container">
+        <ui:Label text="Guess a number between 1 and 100" class="number-game-title" />
+        <ui:VisualElement class="number-game-display-area">
+            <ui:Label name="LabelGoal" text="42" class="number-game-target-number" />
+            <ui:Label name="LabelScore" text="You scored: 96" class="number-game-score-display" />
+        </ui:VisualElement>
+
+        <ui:IntegerField name="guess-input" placeholder-text="Your guess" class="blocks-textfield number-game-input" />
+
+        <ui:VisualElement name="Buttons" class="number-game-buttons">
+            <ui:Button name="ButtonGame" text="Guess" class="blocks-button number-game-guess-button" />
+            <ui:Button name="ButtonReset" text="Reset Guess" class="blocks-button number-game-reset-button" />
+            <ui:Button name="ButtonPopulate" text="Populate Leaderboard" class="blocks-button number-game-populate-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

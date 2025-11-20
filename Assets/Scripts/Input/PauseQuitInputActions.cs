@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CrawfisSoftware.Events;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,12 +26,12 @@ namespace CrawfisSoftware.TempleRun.Input
         }
         private void TEMP_GameQuit(InputAction.CallbackContext obj)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.GameOver, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameEnding, this, UnityEngine.Time.time);
         }
 
         private void PauseResumeToggle_performed(InputAction.CallbackContext obj)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.PauseToggle, this, null);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.PauseToggle, this, UnityEngine.Time.time);
         }
     }
 }

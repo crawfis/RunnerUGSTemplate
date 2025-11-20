@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using CrawfisSoftware.Events;
+
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
@@ -22,11 +24,11 @@ namespace CrawfisSoftware.TempleRun
         private float _turnAvailableDistance;
         // Possible Bug: If Direction is changed to a Flag, then _nextTrackDirection needs to be masked. Could be done now just in case.
         private Direction _nextTrackDirection;
-        private readonly Dictionary<Direction, KnownEvents> _turnMapping = new()
+        private readonly Dictionary<Direction, GamePlayEvents> _turnMapping = new()
         {
-            [Direction.Left] = KnownEvents.LeftTurnSucceeded,
-            [Direction.Right] = KnownEvents.RightTurnSucceeded,
-            [Direction.Both] = KnownEvents.RightTurnSucceeded
+            [Direction.Left] = GamePlayEvents.LeftTurnSucceeded,
+            [Direction.Right] = GamePlayEvents.RightTurnSucceeded,
+            [Direction.Both] = GamePlayEvents.RightTurnSucceeded
         };
 
         public void ForceTurn()
@@ -35,13 +37,13 @@ namespace CrawfisSoftware.TempleRun
         }
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.LeftTurnRequested, OnLeftTurnRequested);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.RightTurnRequested, OnRightTurnRequested);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
-            _safeTurnDistance = Blackboard.Instance.GameConfig.SafeTurnDistance;
+            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.LeftTurnRequested, OnLeftTurnRequested);
+            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.RightTurnRequested, OnRightTurnRequested);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            _safeTurnDistance = Blackboard.Instance.GameConfig.SafePreTurnDistance;
         }
 
-        private void OnTurnRequested(object sender, object data, KnownEvents turnSucceedEvent)
+        private void OnTurnRequested(object sender, object data, GamePlayEvents turnSucceedEvent)
         {
             float distance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
             if (distance > _turnAvailableDistance)
@@ -54,7 +56,7 @@ namespace CrawfisSoftware.TempleRun
         {
             if (_nextTrackDirection != Direction.Right)
             {
-                OnTurnRequested(sender, data, KnownEvents.LeftTurnSucceeded);
+                OnTurnRequested(sender, data, GamePlayEvents.LeftTurnSucceeded);
             }
         }
 
@@ -62,7 +64,7 @@ namespace CrawfisSoftware.TempleRun
         {
             if (_nextTrackDirection != Direction.Left)
             {
-                OnTurnRequested(sender, data, KnownEvents.RightTurnSucceeded);
+                OnTurnRequested(sender, data, GamePlayEvents.RightTurnSucceeded);
             }
         }
 
@@ -76,9 +78,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.LeftTurnRequested, OnLeftTurnRequested);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.RightTurnRequested, OnRightTurnRequested);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.LeftTurnRequested, OnLeftTurnRequested);
+            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.RightTurnRequested, OnRightTurnRequested);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
         }
     }
 }

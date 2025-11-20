@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: ed184c5a596e345a6b5d1423bfff37ea
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341926
+  packageName: Unity Building Block - Leaderboards
+  packageVersion: 1.1
+  assetPath: Assets/Blocks/Leaderboards/TestScenes/NumberGame/Clients/INumberGameClient.cs
+  uploadId: 819762

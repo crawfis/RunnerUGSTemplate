@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 6f71ef65cd5045aa837759d7ce7baf1f
+timeCreated: 1758563605
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Scripts/Runtime/UI/AchievementProgressBar.cs
+  uploadId: 814418

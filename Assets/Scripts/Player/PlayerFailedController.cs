@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using CrawfisSoftware.GameConfig;
+
+using System.Collections;
 
 using UnityEngine;
 
@@ -19,7 +21,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.PlayerFailing, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailing);
         }
 
         private void OnPlayerFailing(string eventName, object sender, object data)
@@ -30,15 +32,14 @@ namespace CrawfisSoftware.TempleRun
         }
         private IEnumerator DeathDelay()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.Pause, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Pause, this, UnityEngine.Time.time);
             yield return new WaitForSecondsRealtime(GameConstants.ResumeDelay);
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.Resume, this, null);
         }
 
         private IEnumerator AdvanceAfterFailure()
         {
             // Wait until pause is almost over before advancing the player to the next track segment.
-            yield return new WaitForSecondsRealtime(GameConstants.ZeroHoldForResumeDelay);
+            yield return new WaitForSecondsRealtime(GameConstants.DelayAfterFailureBeforeAutoTurning);
             //_trackManager.AdvanceToNextSegment();
             _turnController.ForceTurn();
         }
@@ -46,7 +47,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             StopAllCoroutines(); // Saved them so could call individually instead.
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.PlayerFailing, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailing);
         }
     }
 }

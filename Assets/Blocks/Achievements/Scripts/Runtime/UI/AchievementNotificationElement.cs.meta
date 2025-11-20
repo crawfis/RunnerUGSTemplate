@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: f1b61671f3d3f4f2296184d4cde1e6b2
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Scripts/Runtime/UI/AchievementNotificationElement.cs
+  uploadId: 814418

@@ -1,0 +1,58 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Kits.Leaderboards
+{
+    public interface ILeaderboardsClient
+    {
+        public System.Threading.Tasks.Task AddPlayerScoreAsync(string leaderboardId, double score);
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<Unity.Services.Leaderboards.Models.LeaderboardEntry>> GetScoresAsync(string leaderboardId, int limit, bool isGlobal);
+    }
+
+    [UnityEngine.UIElements.UxmlElement] public class LeaderboardContainer : UnityEngine.UIElements.VisualElement
+    {
+        public LeaderboardContainer() {}
+        public LeaderboardContainer(string leaderboardId, bool useTrustedClient) {}
+        public System.Threading.Tasks.Task UpdateScoresAsync();
+        public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        {
+            public UxmlSerializedData() {}
+            public override object CreateInstance();
+            public override void Deserialize(object obj);
+            [UnityEngine.UIElements.RegisterUxmlCache] public static void Register();
+        }
+    }
+
+    public class LeaderboardData : System.IDisposable, UnityEngine.UIElements.IDataSourceViewHashProvider, UnityEngine.UIElements.INotifyBindablePropertyChanged
+    {
+        public event System.EventHandler<UnityEngine.UIElements.BindablePropertyChangedEventArgs> propertyChanged;
+        [Unity.Properties.CreateProperty] public System.Collections.Generic.List<Unity.Services.Leaderboards.Models.LeaderboardEntry> Scores { get; }
+        public LeaderboardData() {}
+        public void Dispose();
+        public long GetViewHashCode();
+        public void SetDummyData();
+        public void SetScores(System.Collections.Generic.List<Unity.Services.Leaderboards.Models.LeaderboardEntry> scores);
+    }
+
+    public class LeaderboardPrefab : UnityEngine.MonoBehaviour
+    {
+        public LeaderboardContainer LeaderboardContainer { get; }
+        public string LeaderboardId { get; }
+        public LeaderboardPrefab() {}
+        public void Initialize();
+        public void Initialize(bool useTrustedClient);
+        public System.Threading.Tasks.Task UpdateScoresAsync();
+    }
+
+    public class LeaderboardsObserver : System.IDisposable
+    {
+        public LeaderboardData globalData { get; }
+        public static LeaderboardsObserver Instance { get; }
+        public string LeaderboardId { get; set; }
+        public LeaderboardData selfData { get; }
+        public bool UseTrustedClient { get; set; }
+        public System.Threading.Tasks.Task AddPlayerScoreAsync(int score);
+        public void Dispose();
+        public System.Threading.Tasks.Task UpdateScoresAsync();
+    }
+}

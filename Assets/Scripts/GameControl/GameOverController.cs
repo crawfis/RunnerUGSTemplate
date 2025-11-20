@@ -1,72 +1,58 @@
-﻿using CrawfisSoftware.Events;
+﻿using CrawfisSoftware.GameConfig;
+using CrawfisSoftware.TempleRun;
 
 using System.Collections;
-using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-namespace CrawfisSoftware.TempleRun
+namespace CrawfisSoftware.CrawfisDash
 {
     /// <summary>
-    /// Handles quitting.
-    ///    Dependency: EventsPublisherTempleRun
-    ///    Subscribes: GameOver - Currently it quits the application.
+    /// Overall game control handling game initialization, pausing, resuming and player dying (triggering a Game Over).
+    ///    Dependency: GameInitialization, EventsPublisherCrawfisDash
+    ///    Subscribes: PlayerDied - Publishes a GameOver event
+    ///    Subscribes: Pause - pauses be setting time scale to zero
+    ///    Subscribes: Resume - resets the time scale to one
+    ///    Publishes: GameStarted
+    ///    Publishes: GameOver
     /// </summary>
-    public class GameOverController : MonoBehaviour
+    internal class GameController : MonoBehaviour
     {
+        private GameInitialization _gameInitializer;
+        private void Awake()
+        {
+            _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
+        }
+        private void UnsubscribeToEvents()
+        {
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
+        }
+
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameOver, OnGameOver);
+            _ = StartCoroutine(StartGame());
         }
 
-        private void OnGameOver(string EventName, object sender, object data)
+        private IEnumerator StartGame()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameOver, OnGameOver);
-            StartCoroutine(Quit());
+            yield return null;
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
+            yield return new WaitForSecondsRealtime(GameConstants.CountdownSeconds);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameStarted, this, UnityEngine.Time.time);
+            //EventsPublisherCrawfisDash.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
         }
-        private IEnumerator Quit()
+
+        private void OnPlayerDied(string EventName, object sender, object data)
         {
-            yield return new WaitForSecondsRealtime(GameConstants.QuitDelay);
-
-            // Unload all scenes except for scene 0
-            List<AsyncOperation> unloadOperations = new List<AsyncOperation>();
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.buildIndex != 0 && scene.isLoaded)
-                {
-                    AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(scene);
-                    if (unloadOp != null)
-                    {
-                        unloadOperations.Add(unloadOp);
-                    }
-                }
-            }
-            // Wait for all unloads to finish
-            foreach (var op in unloadOperations)
-            {
-                while (!op.isDone)
-                {
-                    yield return null;
-                }
-            }
-
-            // This shows the proper way to quit a game both in Editor and with a build
-#if UNITY_EDITOR
-            EventsPublisher publisher = (EventsPublisher)(EventsPublisher.Instance);
-            foreach ((string eventName, string targetName) subscriberData in publisher.GetSubscribers())
-            {
-                Debug.LogWarning($"{subscriberData.targetName} did not unsubscribe {subscriberData.eventName}.");
-            }
-            // Needed in Unity editor to clear any subscribers who forgot to unsubscribe.
-            // Best to unsubscribe in the OnDestroy method of the subscriber.
-            //If lazy, uncomment the next line to clear all subscribers.
-            //EventsPublisher.Instance.Clear();
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameEnding, this, UnityEngine.Time.time);
         }
+
+        private void OnDestroy()
+        {
+            UnsubscribeToEvents();
+            _gameInitializer.Dispose();
+        }
+
     }
 }

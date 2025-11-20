@@ -1,0 +1,73 @@
+{
+  "$schema": "https://ugs-config-schemas.unity3d.com/v1/remote-config.schema.json",
+  "entries": {
+    "achievements": [
+      {
+        "Id": "first_achievement",
+        "Icon": "thumbnail",
+        "Title": "Achievement 1",
+        "Description": "First achievement!",
+        "IsHidden": false
+      },
+      {
+        "Id": "second_achievment",
+        "Icon": "thumbnail_blue",
+        "Title": "Achievement 2",
+        "Description": "Second achievement!",
+        "IsHidden": false
+      },
+      {
+        "Id": "third_achievement",
+        "Icon": "thumbnail_green",
+        "Title": "Achievement 3",
+        "Description": "Third achievement!",
+        "IsHidden": false
+      },
+      {
+        "Id": "fourth_achievement",
+        "Icon": "thumbnail_red",
+        "Title": "Achievement 4",
+        "Description": "Fourth achievement!",
+        "IsHidden": false
+      },
+      {
+        "Id": "fifth_achievement",
+        "Icon": "thumbnail",
+        "Title": "Achievement 5",
+        "Description": "Fifth achievement!",
+        "IsHidden": false
+      },
+      {
+        "Id": "sixth_achievement",
+        "Icon": "thumbnail_blue",
+        "Title": "Achievement 6",
+        "Description": "Sixth achievement!",
+        "IsHidden": false
+      },
+      {
+        "Id": "seventh_achievement",
+        "Icon": "thumbnail_green",
+        "Title": "Achievement 7",
+        "Description": "First hidden achievement!",
+        "IsHidden": true
+      },
+      {
+        "Id": "eighth_achievement",
+        "Icon": "thumbnail_red",
+        "Title": "Achievement 8",
+        "Description": "Second hidden achievement!",
+        "IsHidden": true
+      },
+      {
+        "Id": "ninth_achievement",
+        "Icon": "thumbnail",
+        "Title": "Achievement 9",
+        "Description": "Third hidden achievement!",
+        "IsHidden": true
+      }
+    ]
+  },
+  "types": {
+    "achievements": "JSON"
+  }
+}

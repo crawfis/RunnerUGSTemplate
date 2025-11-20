@@ -28,12 +28,12 @@ namespace CrawfisSoftware.TempleRun
             _maxSpeed = Blackboard.Instance.GameConfig.MaxSpeed;
             _acceleration = Blackboard.Instance.GameConfig.Acceleration;
             _speed = _initialSpeed;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameOver, OnGameOver);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.TeleportStarted, OnTeleportStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.TeleportEnded, OnTeleportEnded);
-            //EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerFailing, OnResetSpeed);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportEnded, OnTeleportEnded);
+            //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
         }
 
         private void OnResetSpeed(string eventName, object sender, object data)
@@ -90,11 +90,11 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameOver, OnGameOver);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.TeleportStarted, OnTeleportStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.TeleportEnded, OnTeleportEnded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerFailing, OnResetSpeed);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportEnded, OnTeleportEnded);
             DeleteCoroutine();
         }
 

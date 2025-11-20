@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e1b402a714abd964795cc98088fb4053
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/README.md
+  uploadId: 814418

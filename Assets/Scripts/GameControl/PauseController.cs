@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.TempleRun;
+using CrawfisSoftware.Events;
 
 using UnityEngine;
 
@@ -12,16 +13,18 @@ namespace CrawfisSoftware.GameControl
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.PauseToggle, OnPauseToggle);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.Pause, OnPause);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.Resume, OnResume);
+            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.PauseToggle, OnPauseToggle);
+
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Pause, OnPause);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Resume, OnResume);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.PauseToggle, OnPauseToggle);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.Pause, OnPause);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.Resume, OnResume);
+            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.PauseToggle, OnPauseToggle);
+
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Pause, OnPause);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Resume, OnResume);
         }
         public void Pause()
         {
@@ -39,9 +42,9 @@ namespace CrawfisSoftware.GameControl
         public void TogglePauseResume()
         {
             if (_isPaused)
-                EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.Resume, this, null);
+                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
             else
-                EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.Pause, this, null);
+                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Pause, this, UnityEngine.Time.time);
         }
 
         private void OnPauseToggle(string eventName, object sender, object data)

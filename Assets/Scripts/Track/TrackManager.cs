@@ -29,30 +29,37 @@ namespace CrawfisSoftware.TempleRun
 
         protected virtual void Awake()
         {
-            _trackSegments = new(_numberOfLookAheadTracks);
-            var gameConfig = Blackboard.Instance.GameConfig;
-            Initialize(gameConfig.StartRunway, gameConfig.MinDistance,
-                gameConfig.MaxDistance, Blackboard.Instance.MasterRandom);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
-        }
-
-        protected virtual void OnGameStarted(string eventName, object sender, object data)
-        {
-            CreateInitialTrack();
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameScenesLoaded, OnGameStarting);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameConfigured);
+            if(GameState.IsGameConfigured) OnGameConfigured("junk", null, null);
         }
 
         protected virtual void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.LeftTurnSucceeded, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.RightTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameScenesLoaded, OnGameStarting);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameConfigured);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.LeftTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.RightTurnSucceeded, OnTurnSucceeded);
+        }
+
+        private void OnGameConfigured(string eventName, object sender, object data)
+        {
+            _trackSegments = new(_numberOfLookAheadTracks);
+            var gameConfig = Blackboard.Instance.GameConfig;
+            Initialize(gameConfig.StartRunway, gameConfig.MinTrackLength,
+                gameConfig.MaxTrackLength, Blackboard.Instance.MasterRandom);
+        }
+
+        protected virtual void OnGameStarting(string eventName, object sender, object data)
+        {
+            CreateInitialTrack();
         }
 
         public override void AdvanceToNextSegment()
         {
             _ = _trackSegments.Dequeue();
             AddTrackSegment();
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.ActiveTrackChanging, this, _trackSegments.Peek());
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.ActiveTrackChanging, this, _trackSegments.Peek());
         }
 
         protected virtual void Initialize(float startDistance, float minDistance, float maxDistance, System.Random random)
@@ -61,8 +68,8 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.LeftTurnSucceeded, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.RightTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.LeftTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.RightTurnSucceeded, OnTurnSucceeded);
         }
 
         protected virtual void CreateInitialTrack()
@@ -70,12 +77,12 @@ namespace CrawfisSoftware.TempleRun
             _maxDistance = Mathf.Max(_minDistance, _maxDistance);
             var newTrackSegment = (GetNewDirection(), _startDistance);
             _trackSegments.Enqueue(newTrackSegment);
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.TrackSegmentCreated, this, newTrackSegment);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TrackSegmentCreated, this, newTrackSegment);
             for (int i = 1; i < _numberOfLookAheadTracks; i++)
             {
                 AddTrackSegment();
             }
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.ActiveTrackChanging, this, _trackSegments.Peek());
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.ActiveTrackChanging, this, _trackSegments.Peek());
         }
 
         protected virtual void OnTurnSucceeded(string eventName, object sender, object data)
@@ -88,7 +95,7 @@ namespace CrawfisSoftware.TempleRun
             float segmentLength = GetNewSegmentLength();
             var newTrackSegment = (GetNewDirection(), segmentLength);
             _trackSegments.Enqueue(newTrackSegment);
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.TrackSegmentCreated, this, newTrackSegment);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TrackSegmentCreated, this, newTrackSegment);
         }
 
         protected virtual float GetNewSegmentLength()

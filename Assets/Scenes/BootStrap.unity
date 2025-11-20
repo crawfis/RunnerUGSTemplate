@@ -120,52 +120,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &135160483
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 135160484}
-  - component: {fileID: 135160485}
-  m_Layer: 0
-  m_Name: AuthorizationUGS
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &135160484
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 135160483}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2144641533}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &135160485
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 135160483}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 943320d2125c89543912e73f00444cbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.UGS_Initialization
-  _difficultyLevel: Easy
-  _usingAnalytics: 1
 --- !u!1 &183286776
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,7 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac018169e4143444b973492e9ee3721b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Blocks.PlayerAccount.TestScene.PlayerSignInController
-  uiDocument: {fileID: 434049981}
+  _uiDocument: {fileID: 434049981}
 --- !u!1 &507227616
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,9 +363,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 507227617}
-  - component: {fileID: 507227621}
   m_Layer: 0
-  m_Name: DEBUG_GameInitializer
+  m_Name: GameInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -432,23 +385,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2144641533}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &507227621
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 507227616}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d526bd9c98606c940906d14b02b22bc9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.GameInitializer
-  m_RandomProfilePicturesSO: {fileID: 11400000, guid: 413f763ae5ba2744ba3e1645c81fbbdd,
-    type: 2}
-  m_GameManagerUGSPrefab: {fileID: 4008204502651323202, guid: e52ca2a23742aea46957a581e69f0308,
-    type: 3}
-  _remoteConfigDifficultyLevel: Hard
 --- !u!1 &538130496
 GameObject:
   m_ObjectHideFlags: 0
@@ -490,7 +426,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 538130496}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30263ac25603dab44a26d8f243941616, type: 3}
+  m_Script: {fileID: 11500000, guid: 128250370f3d6994f9b0d415d96233fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameStateController
 --- !u!1 &556502428
@@ -624,7 +560,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e0a229ce68b7d44bb553364d725183c, type: 3}
+  m_Script: {fileID: 11500000, guid: e2e600c4395bf8a41b69175a51a032e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Crawfis.Events::CrawfisSoftware.Unity3D.Utility.RandomProviderFromList
 --- !u!1 &713316905
@@ -756,7 +692,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 803952789}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38fea054493648a4aaa014de8d562f68, type: 3}
+  m_Script: {fileID: 11500000, guid: 3577acdd2a9c54f41a3ffdf1a6980853, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UI.MainMenuController
   _uiDocument: {fileID: 803952790}
@@ -901,55 +837,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 990802483}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &856826521
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 856826522}
-  - component: {fileID: 856826523}
-  m_Layer: 0
-  m_Name: Analytics
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &856826522
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 856826521}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2144641533}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &856826523
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 856826521}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dba17e663f3b13d4bbcc93bf234482a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AnalyticsManager
-  perfSampleInterval: 10
-  maxBatchSize: 50
-  milestoneInterval: 100
-  _logExceptions: 0
-  _logErrors: 0
 --- !u!1 &990802481
 GameObject:
   m_ObjectHideFlags: 0
@@ -976,7 +863,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 990802481}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 522e0ba18f20fa44d98916b0629b4c30, type: 3}
+  m_Script: {fileID: 11500000, guid: 2cf2eac867fb7804799efd80f95b2136, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelController
   menuUI: {fileID: 803952790}
@@ -1005,51 +892,6 @@ Transform:
   - {fileID: 183286777}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1009762941
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1009762942}
-  - component: {fileID: 1009762943}
-  m_Layer: 0
-  m_Name: SignInAnonymous
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1009762942
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1009762941}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2144641533}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1009762943
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1009762941}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73c19f6a08c467047bb1178586c49847, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Authentication.AutoSignInAnonymous
-  m_DeleteAccountOnStart: 1
 --- !u!1 &1015553758
 GameObject:
   m_ObjectHideFlags: 0
@@ -1137,7 +979,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1033794975}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7051ecb675b8ad84082de907bd9342d5, type: 3}
+  m_Script: {fileID: 11500000, guid: 29140eab5ebe4274ea6815d4879a80f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
   _lastSceneToKeepIndex: 0
@@ -1222,50 +1064,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f2421fc3995e74e4f8326c98cdd0dcb0, type: 3}
---- !u!1 &1130524220
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1130524221}
-  - component: {fileID: 1130524222}
-  m_Layer: 0
-  m_Name: Quit
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1130524221
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1130524220}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1833760801}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1130524222
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1130524220}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e47ac972896dd834488c8e305466e3c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1139485616
 GameObject:
   m_ObjectHideFlags: 0
@@ -1827,6 +1625,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8627652695361806762, guid: 4f60822af0c06433c9c52cd9de5ecb11,
+        type: 3}
+      propertyPath: EnvironmentName
+      value: development
+      objectReference: {fileID: 0}
+    - target: {fileID: 8627652695361806762, guid: 4f60822af0c06433c9c52cd9de5ecb11,
+        type: 3}
+      propertyPath: UseCustomEnvironment
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1939,7 +1747,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1831227381
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1996,7 +1804,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1130524221}
   - {fileID: 1033794976}
   - {fileID: 200580834}
   - {fileID: 1015553759}
@@ -2044,54 +1851,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1852488105}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: deadbadb4fab82248a53b1cdad04e4ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 15c54da6b4fcd3d4b8de213362d50360, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.EventsPublisherUGS
---- !u!1 &1887819204
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1887819205}
-  - component: {fileID: 1887819206}
-  m_Layer: 0
-  m_Name: EnableLoadGamePlay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1887819205
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1887819204}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2144641533}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1887819206
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1887819204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 886234c797942b94897d016dc3297457, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.EnableGamePlayScene
-  _gameObjectToEnable: {fileID: 1438859063}
 --- !u!1 &1928440387
 GameObject:
   m_ObjectHideFlags: 0
@@ -2153,13 +1915,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 135160484}
-  - {fileID: 856826522}
-  - {fileID: 1887819205}
   - {fileID: 1852488106}
   - {fileID: 507227617}
   - {fileID: 1418159294}
-  - {fileID: 1009762942}
   - {fileID: 434049980}
   - {fileID: 1928440388}
   m_Father: {fileID: 0}

@@ -1,0 +1,159 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Kits.Achievements
+{
+    public class Achievement
+    {
+        public AchievementDefinition Definition { get; set; }
+        [Newtonsoft.Json.JsonIgnore] public string Id { get; }
+        public AchievementRecord Record { get; set; }
+        public Achievement() {}
+        public Achievement(AchievementDefinition definition) {}
+        public Achievement(Unity.Services.CloudCode.GeneratedBindings.KitsGameModule.Achievements.Achievement clientAchievement) {}
+    }
+
+    public class AchievementDefinition
+    {
+        public string Description;
+        public string Icon;
+        public string Id;
+        public bool IsHidden;
+        public int ProgressTarget;
+        public string Title;
+        public AchievementDefinition() {}
+        public AchievementDefinition(Unity.Services.CloudCode.GeneratedBindings.KitsGameModule.Achievements.AchievementDefinition clientDefinition) {}
+    }
+
+    public class AchievementException : System.Exception
+    {
+        public AchievementException(string message) {}
+    }
+
+    public class AchievementRecord
+    {
+        public event System.Action Changed;
+        public string Id { get; set; }
+        public int ProgressCount { get; set; }
+        public bool Unlocked { get; }
+        public AchievementRecord() {}
+        public AchievementRecord(Unity.Services.CloudCode.GeneratedBindings.KitsGameModule.Achievements.AchievementRecord clientRecord) {}
+        public AchievementRecord(string id, bool unlocked) {}
+        public void Update(bool unlocked);
+    }
+
+    public class AchievementsNotificationPrefab : UnityEngine.MonoBehaviour
+    {
+        public UI.AchievementNotificationElement AchievementsNotification;
+        public AchievementsNotificationPrefab() {}
+        public void Init(UnityEngine.UIElements.VisualElement rootElement = default(UnityEngine.UIElements.VisualElement));
+    }
+
+    public class AchievementsObserver : System.IDisposable
+    {
+        public event System.Action<Achievement> AchievementUnlocked;
+        public static AchievementsObserver Instance { get; }
+        public RuntimeAchievementData RuntimeAchievementData { get; }
+        public bool UseTrustedClient { set; }
+        public void Dispose();
+        public System.Threading.Tasks.Task ResetAchievementsAsync();
+        public System.Threading.Tasks.Task UnlockAchievementAsync(Achievement achievement);
+        public System.Threading.Tasks.Task UnlockAchievementAsync(string achievementId);
+        public System.Threading.Tasks.Task UpdateAchievementProgressAsync(Achievement achievement, int count);
+    }
+
+    public class AchievementsPrefab : UnityEngine.MonoBehaviour
+    {
+        public UI.AchievementsContainer AchievementsContainer { get; }
+        public AchievementsPrefab() {}
+        public void Initialize();
+        public void Initialize(bool useTrustedClient, UnityEngine.UIElements.VisualElement rootElement = default(UnityEngine.UIElements.VisualElement));
+    }
+
+    public interface IAchievementService
+    {
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<Achievement>> GetAchievementsAsync(string playerId);
+        public System.Threading.Tasks.Task ResetAllAchievementsAsync();
+        public System.Threading.Tasks.Task<bool> UnlockAchievementAsync(Achievement achievement);
+        public System.Threading.Tasks.Task UpdateAchievementProgressAsync(Achievement achievement, int count);
+    }
+
+    public class LocalAchievementClient : IAchievementService
+    {
+        public LocalAchievementClient(Unity.Services.Authentication.IAuthenticationService authentication, Unity.Services.CloudSave.ICloudSaveService cloudSave, Unity.Services.RemoteConfig.RemoteConfigService remoteConfig) {}
+        public virtual System.Threading.Tasks.Task<System.Collections.Generic.List<Achievement>> GetAchievementsAsync(string playerId);
+        public virtual System.Threading.Tasks.Task ResetAllAchievementsAsync();
+        public virtual System.Threading.Tasks.Task<bool> UnlockAchievementAsync(Achievement achievement);
+        public virtual System.Threading.Tasks.Task UpdateAchievementProgressAsync(Achievement achievement, int count);
+    }
+
+    public class RuntimeAchievementData : System.IDisposable, UnityEngine.UIElements.IDataSourceViewHashProvider, UnityEngine.UIElements.INotifyBindablePropertyChanged
+    {
+        public event System.EventHandler<UnityEngine.UIElements.BindablePropertyChangedEventArgs> propertyChanged;
+        [Unity.Properties.CreateProperty] public System.Collections.Generic.List<Achievement> Achievements { get; }
+        public RuntimeAchievementData() {}
+        public void Dispose();
+        public long GetViewHashCode();
+        public void SetAchievements(System.Collections.Generic.List<Achievement> achievements);
+        public void SetDummyData();
+    }
+
+    public class TrustedAchievementClient : LocalAchievementClient
+    {
+        public TrustedAchievementClient(Unity.Services.Authentication.IAuthenticationService authentication, Unity.Services.CloudCode.ICloudCodeService cloudCode, Unity.Services.CloudSave.ICloudSaveService cloudSave, Unity.Services.RemoteConfig.RemoteConfigService remoteConfig) {}
+        public override System.Threading.Tasks.Task<System.Collections.Generic.List<Achievement>> GetAchievementsAsync(string playerId);
+        public override System.Threading.Tasks.Task ResetAllAchievementsAsync();
+        public override System.Threading.Tasks.Task<bool> UnlockAchievementAsync(Achievement achievement);
+        public override System.Threading.Tasks.Task UpdateAchievementProgressAsync(Achievement achievement, int count);
+    }
+}
+
+namespace Kits.Achievements.UI
+{
+    public class AchievementBaseElement : UnityEngine.UIElements.VisualElement
+    {
+        public static System.Collections.Generic.List<UnityEngine.Texture2D> Icons;
+        protected UnityEngine.UIElements.Label m_TitleLabel;
+        protected Achievement Achievement { get; }
+        public AchievementBaseElement() {}
+        public virtual void Bind(Achievement achievement);
+        public virtual void Initialize();
+        public virtual void Unbind();
+        protected virtual void UpdateGUI();
+    }
+
+    [UnityEngine.UIElements.UxmlElement] public class AchievementCardElement : AchievementBaseElement
+    {
+        public AchievementCardElement() {}
+        public override void Bind(Achievement achievement);
+        public void Initialize(bool isDevelopmentMode = false);
+        public override void Unbind();
+        protected override void UpdateGUI();
+        public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        {
+            public UxmlSerializedData() {}
+            public override object CreateInstance();
+        }
+    }
+
+    [UnityEngine.UIElements.UxmlElement] public class AchievementNotificationElement : AchievementBaseElement
+    {
+        public AchievementNotificationElement() {}
+        public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        {
+            public UxmlSerializedData() {}
+            public override object CreateInstance();
+        }
+    }
+
+    [UnityEngine.UIElements.UxmlElement] public class AchievementsContainer : UnityEngine.UIElements.VisualElement
+    {
+        public AchievementsContainer() {}
+        public AchievementsContainer(bool useTrustedClient, bool isDevelopmentMode = false) {}
+        public class UxmlSerializedData : UnityEngine.UIElements.VisualElement.UxmlSerializedData
+        {
+            public UxmlSerializedData() {}
+            public override object CreateInstance();
+        }
+    }
+}

@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 49ee56b6a868c4bbea0d05ed76fcca0a
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Scripts/Runtime/AchievementsPrefab.cs
+  uploadId: 814418

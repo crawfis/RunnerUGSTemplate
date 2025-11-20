@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c89b90c1f63b2489789ade666212fb7b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341926
+  packageName: Unity Building Block - Leaderboards
+  packageVersion: 1.1
+  assetPath: Assets/Blocks/Leaderboards/Prefabs/LeaderboardPrefab.prefab
+  uploadId: 819762

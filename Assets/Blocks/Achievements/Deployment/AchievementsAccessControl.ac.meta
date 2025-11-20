@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: dc20cafc69240417db91ee24cb04dfe6
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 255028f76840642cfa8ac392175f012d, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Deployment/AchievementsAccessControl.ac
+  uploadId: 814418

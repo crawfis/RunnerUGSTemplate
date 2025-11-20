@@ -21,9 +21,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameOver, OnGameEnded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
         }
 
         private void Update()
@@ -33,15 +33,15 @@ namespace CrawfisSoftware.TempleRun
             {
                 _isRunning = false;
                 Debug.Log(string.Format("Player Died at Distance: {0}", (int)_currentSegmentDistance));
-                EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.PlayerFailing, this, distance);
+                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.PlayerFailing, this, distance);
             }
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameOver, OnGameEnded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
         }
 
         private void OnTrackChanging(string eventName, object sender, object data)

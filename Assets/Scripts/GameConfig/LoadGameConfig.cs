@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using CrawfisSoftware.GameConfig;
+
+using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -8,7 +10,7 @@ namespace CrawfisSoftware.TempleRun
     /// </summary>
     public class LoadGameConfig : MonoBehaviour
     {
-        [SerializeField] private TempleRunGameConfig _gameConfig;
+        [SerializeField] private DifficultyConfig _gameConfig;
 
         private void Start()
         {

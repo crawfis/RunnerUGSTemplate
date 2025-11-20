@@ -1,0 +1,38 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Kits.Leaderboards
+{
+    public class NumberGameResult
+    {
+        public int Goal { get; }
+        public int Score { get; }
+        public NumberGameResult(Unity.Services.CloudCode.GeneratedBindings.KitsGameModule.Leaderboards.NumberGameResult result) {}
+        public NumberGameResult(int goal, int score) {}
+    }
+
+    public class TrustedNumberGameClient
+    {
+        public TrustedNumberGameClient() {}
+        public System.Threading.Tasks.Task<NumberGameResult> RequestGoalAndScore(string leaderboardId, int guess);
+    }
+}
+
+namespace Kits.Leaderboards.TestScene
+{
+    public class LocalNumberGameClient
+    {
+        public LocalNumberGameClient() {}
+        public System.Threading.Tasks.Task<NumberGameResult> RequestGoalAndScore(string leaderboardName, int guess);
+    }
+
+    public class NumberGameManager : UnityEngine.MonoBehaviour
+    {
+        public NumberGameManager() {}
+    }
+
+    public class ViewToggle : UnityEngine.MonoBehaviour
+    {
+        public ViewToggle() {}
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Blocks.Achievements.TestScene",
+    "rootNamespace": "Blocks.Achievements.TestScene",
+    "references": [
+        "Unity.Services.Authentication",
+        "Unity.Services.Core",
+        "Unity.Services.CloudCode",
+        "Unity.Services.CloudSave",
+        "Blocks.Achievements"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

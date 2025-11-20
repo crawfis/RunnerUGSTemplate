@@ -1,0 +1,34 @@
+﻿namespace CrawfisSoftware.UGS
+{
+    public enum UGS_EventsEnum
+    {
+        ScoreUpdating,
+        ScoreUpdated,
+        ScoreFailedToUpdate,
+        RewardAdWatching,
+        RewardAdWatched,
+        RemoteConfigFetched,
+        RemoteConfigFetchFailed,
+        RemoteConfigUpdated,
+        RemoteConfigFailed,
+        UnityServicesInitialized,
+        UserAccountDeleted,
+        GameManagerInstantiated,
+        PlayerResumedFromExpiredToken,
+        PlayerSignedIn,
+        PlayerAuthenticated,
+        PlayerSignedOut,
+        PlayerSignInFailed,
+        PlayerSessionExpired,
+        UnityServicesInitializationFailed,
+        LeaderboardClosing,
+        LeaderboardClosed,
+        LeaderboardOpening,
+        LeaderboardOpened,
+        AchievementsOpening,
+        AchievementsOpened,
+        AchievementsClosing,
+        AchievementsClosed,
+        None
+    }
+}

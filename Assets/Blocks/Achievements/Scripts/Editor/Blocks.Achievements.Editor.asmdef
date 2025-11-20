@@ -1,0 +1,21 @@
+{
+    "name": "Blocks.Achievements.Editor",
+    "rootNamespace": "Blocks.Achievements.Editor",
+    "references": [
+        "Unity.Services.DeploymentApi",
+        "Unity.Services.RemoteConfig.Authoring.Editor",
+        "Unity.Services.RemoteConfig.Editor.Authoring.Core",
+        "Blocks.Achievements"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

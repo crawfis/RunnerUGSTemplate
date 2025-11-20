@@ -1,0 +1,13 @@
+.apply-revert {
+    flex-direction: row;
+}
+
+.grow-button {
+    flex-grow: 1;
+}
+
+.separator {
+    margin-top:5px;
+    margin-bottom:5px;
+    height:2px;
+}

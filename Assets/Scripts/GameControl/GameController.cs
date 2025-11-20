@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using CrawfisSoftware.GameConfig;
+
+using System.Collections;
 
 using UnityEngine;
 
@@ -19,7 +21,11 @@ namespace CrawfisSoftware.TempleRun
         private void Awake()
         {
             _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
+        }
+        private void UnsubscribeToEvents()
+        {
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
         }
 
         private void Start()
@@ -30,13 +36,15 @@ namespace CrawfisSoftware.TempleRun
         private IEnumerator StartGame()
         {
             yield return null;
-            yield return new WaitForSecondsRealtime(GameConstants.StartDelay);
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.GameStarted, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
+            yield return new WaitForSecondsRealtime(GameConstants.CountdownSeconds);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameStarted, this, UnityEngine.Time.time);
+            //EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
         }
 
         private void OnPlayerDied(string EventName, object sender, object data)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.GameOver, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameEnding, this, UnityEngine.Time.time);
         }
 
         private void OnDestroy()
@@ -45,9 +53,5 @@ namespace CrawfisSoftware.TempleRun
             _gameInitializer.Dispose();
         }
 
-        private void UnsubscribeToEvents()
-        {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.PlayerDied, OnPlayerDied);
-        }
     }
 }

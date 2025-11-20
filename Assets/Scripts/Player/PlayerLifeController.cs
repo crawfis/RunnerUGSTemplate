@@ -18,7 +18,7 @@ namespace CrawfisSoftware.TempleRun
         {
             _numberOfLives = numberOfLives;
             _playerID = playerID;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.PlayerFailing, OnPlayerFailed);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailed);
         }
 
         private void OnPlayerFailed(string eventName, object sender, object data)
@@ -27,19 +27,14 @@ namespace CrawfisSoftware.TempleRun
             _numberOfLives--;
             if (_numberOfLives <= 0)
             {
-                EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.PlayerDied, this, _playerID);
+                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.PlayerDied, this, _playerID);
+                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
             }
-        }
-
-        // Not used unless we change this to a MonoBehaviour. Left here to make sure we do this in that case.
-        private void OnDestroy()
-        {
-            Dispose();
         }
 
         public void Dispose()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.PlayerFailing, OnPlayerFailed);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailed);
         }
     }
 }

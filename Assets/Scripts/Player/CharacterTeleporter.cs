@@ -16,7 +16,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
             _yPosition = transform.localPosition.y;
         }
 
@@ -54,7 +54,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
         }
     }
 }

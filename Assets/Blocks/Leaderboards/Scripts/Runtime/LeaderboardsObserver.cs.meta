@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 125bc10e4f024a0faea1a4cb1fa4559f
+timeCreated: 1752672932
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341926
+  packageName: Unity Building Block - Leaderboards
+  packageVersion: 1.1
+  assetPath: Assets/Blocks/Leaderboards/Scripts/Runtime/LeaderboardsObserver.cs
+  uploadId: 819762

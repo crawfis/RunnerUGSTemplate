@@ -1,0 +1,15 @@
+<ui:UXML
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns="UnityEngine.UIElements"
+    editor-extension-mode="True">
+    <Style src="./AchievementsInspector.uss"/>
+    <ui:VisualElement name="ContainerConfig"/>
+    <ui:VisualElement name="ContainerApplyRevert" class="apply-revert">
+        <ui:Button name="ButtonApply" text="Apply" class="grow-button"/>
+        <ui:Button name="ButtonRevert" text="Revert" class="grow-button"/>
+    </ui:VisualElement>
+    <ui:VisualElement class="separator"/>
+    <ui:VisualElement name="ContainerFooter">
+        <ui:Button name="ViewInDeployment" text="View in Deployment Window"/>
+    </ui:VisualElement>
+</ui:UXML>

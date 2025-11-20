@@ -1,0 +1,26 @@
+// This file is generated. Do not modify by hand.
+// XML documentation file not found. To check if public methods have XML comments,
+// make sure the XML doc file is present and located next to the scraped dll
+namespace Kits.Achievements.Editor
+{
+    public class AchievementSettings : System.Collections.Generic.List<AchievementDefinition>
+    {
+        public AchievementSettings() {}
+    }
+
+    public class AchievementsFile : Unity.Services.RemoteConfig.Editor.Authoring.Core.Model.RemoteConfigFile
+    {
+        public AchievementsFile() {}
+    }
+}
+
+namespace Unity.Services.Kits.Achievements.Editor
+{
+    [UnityEditor.CustomEditor(typeof(AchievementsAsset))] public class AchievementsAssetInspector : UnityEditor.Editor
+    {
+        public AchievementsAssetInspector() {}
+        public override UnityEngine.UIElements.VisualElement CreateInspectorGUI();
+        public override void DiscardChanges();
+        public override void SaveChanges();
+    }
+}

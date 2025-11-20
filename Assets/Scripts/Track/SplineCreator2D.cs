@@ -35,23 +35,23 @@ namespace CrawfisSoftware.TempleRun
 
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.TrackSegmentCreated, OnTrackCreated);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.TeleportEnded, OnTrackChanged);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TrackSegmentCreated, OnTrackCreated);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportEnded, OnTrackChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.TrackSegmentCreated, OnTrackCreated);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.TeleportEnded, OnTrackChanged);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TrackSegmentCreated, OnTrackCreated);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportEnded, OnTrackChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
         }
 
         private void OnGameStarted(string eventName, object sender, object data)
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
             Debug.Log("GameStarted in SplineCreator2D");
         }
 
@@ -69,7 +69,7 @@ namespace CrawfisSoftware.TempleRun
         {
             var point1 = _anchorPoint + distance * _directionAxes[_directionIndex];
             Splines.Enqueue((_anchorPoint, point1, direction));
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.SplineSegmentCreated, this, (_anchorPoint, point1, direction));
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.SplineSegmentCreated, this, (_anchorPoint, point1, direction));
             _totalSplineDistance += Vector3.Distance(point1, _point0);
             _totalEventDistance += distance;
             _anchorPoint = point1;
@@ -77,12 +77,12 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnTrackChanging(string eventName, object sender, object data)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.CurrentSplineChanging, this, ActiveSpline);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.CurrentSplineChanging, this, ActiveSpline);
         }
 
         private void OnTrackChanged(string eventName, object sender, object data)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(KnownEvents.CurrentSplineChanged, this, ActiveSpline);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.CurrentSplineChanged, this, ActiveSpline);
             _ = Splines.Dequeue();
         }
 

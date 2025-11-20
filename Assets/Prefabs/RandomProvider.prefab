@@ -41,10 +41,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 561945479365497037}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e0a229ce68b7d44bb553364d725183c, type: 3}
+  m_Script: {fileID: 11500000, guid: e2e600c4395bf8a41b69175a51a032e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Crawfis.Events::CrawfisSoftware.Unity3D.Utility.RandomProviderFromList
   _currentSeed: 0
-  _generateNewSeed: 1
-  _fixedSeedList: {fileID: 11400000, guid: 24cb6de9f55e1fd4dbf1bc3e64e1cbcc, type: 2}
+  _generateNewSeed: 0
+  _fixedSeedList: {fileID: 11400000, guid: 4f9c25a159ee6fe478aacd3137c7e242, type: 2}
   _seedIndex: -1

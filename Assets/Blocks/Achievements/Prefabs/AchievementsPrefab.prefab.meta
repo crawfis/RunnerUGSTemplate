@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f2421fc3995e74e4f8326c98cdd0dcb0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Prefabs/AchievementsPrefab.prefab
+  uploadId: 814418

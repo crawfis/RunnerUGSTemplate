@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" aui="Kits.Achievements.UI" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="./AchievementsTestScene.uss" />
+    <ui:VisualElement name="RootContainer" class="root-container">
+        <ui:VisualElement name="Header" class="reset-button-container">
+            <ui:Button text="Reset Achievements" display-tooltip-when-elided="true" name="Reset" class="reset-button"/>
+        </ui:VisualElement>
+        <ui:VisualElement focusable="true" name="ContentContainer" />
+        <ui:Label tabindex="-1" text="Loading" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Loading" class="loading"/>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,21 @@
+{
+    "name": "Blocks.Leaderboards.TestScene",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Services.Core",
+        "Unity.Services.Leaderboards",
+        "Unity.Services.CloudCode.GeneratedBindings",
+        "Unity.Services.Authentication",
+        "Unity.Services.CloudCode",
+        "Blocks.Leaderboards"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

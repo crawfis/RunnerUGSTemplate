@@ -22,8 +22,8 @@ namespace CrawfisSoftware.TempleRun.Audio
             //AudioFactoryRegistry.Instance.RegisterAudioFactory("TurnLeftPooledAudio", leftFactory);
             ISfxAudioPlayer sfxAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("Metronome", leftFactory, leftClipProvider);
 
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameStarted, StartMetronome);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.GameOver, StopMetronome);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, StartMetronome);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, StopMetronome);
         }
 
         private void StopMetronome(string eventName, object sender, object eventData)
@@ -33,8 +33,8 @@ namespace CrawfisSoftware.TempleRun.Audio
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameStarted, StartMetronome);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.GameOver, StopMetronome);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, StartMetronome);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, StopMetronome);
         }
 
         private void StartMetronome(string eventName, object sender, object eventData)

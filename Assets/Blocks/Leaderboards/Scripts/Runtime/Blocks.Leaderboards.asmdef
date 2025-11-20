@@ -1,0 +1,21 @@
+{
+    "name": "Blocks.Leaderboards",
+    "rootNamespace": "Blocks.Leaderboards",
+    "references": [
+        "Unity.Services.Authentication",
+        "Unity.Services.CloudCode",
+        "Unity.Services.Leaderboards",
+        "Unity.Services.Core",
+        "Unity.Services.CloudCode.GeneratedBindings",
+        "Blocks.Common"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e785ba6d2c701d54481b8ef2e6e32060
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/TestScenes/AchievementsTestScene.unity
+  uploadId: 814418

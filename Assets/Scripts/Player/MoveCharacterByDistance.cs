@@ -19,7 +19,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(KnownEvents.CurrentSplineChanged, OnSplineChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.CurrentSplineChanged, OnSplineChanged);
             _yPosition = transform.localPosition.y;
         }
 
@@ -52,7 +52,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(KnownEvents.CurrentSplineChanged, OnSplineChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.CurrentSplineChanged, OnSplineChanged);
         }
     }
 }

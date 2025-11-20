@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0f243e92e123446a1aa891573b1f6b95
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341918
+  packageName: Unity Building Block - Achievements
+  packageVersion: 1.0
+  assetPath: Assets/Blocks/Achievements/Scripts/Editor/UI/Templates/Achievements.ach.txt
+  uploadId: 814418

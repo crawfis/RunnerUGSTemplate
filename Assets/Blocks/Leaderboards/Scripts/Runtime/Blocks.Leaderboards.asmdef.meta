@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: be0096b3a73187b4783627e880d545e9
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 341926
+  packageName: Unity Building Block - Leaderboards
+  packageVersion: 1.1
+  assetPath: Assets/Blocks/Leaderboards/Scripts/Runtime/Blocks.Leaderboards.asmdef
+  uploadId: 819762
