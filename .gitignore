@@ -73,3 +73,10 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 /ProjectSettings/ProjectVersion.txt
 /ProjectSettings/Packages/com.unity.dedicated-server/MultiplayerRolesSettings.asset
+/Assets/CloudCode/BlocksAdminModule~/Project/bin/Release/net6.0
+/Assets/CloudCode/BlocksAdminModule~/Project/obj
+/Assets/CloudCode/BlocksGameModule~/Project/bin/Release/net6.0
+/Assets/CloudCode/BlocksGameModule~/Project/obj
+/Assets/CloudCode/GeneratedModuleBindings
+/Assets/Scripts/UnityGamingServices/CloudCode/TempleRunUGSCloud~/Project/bin
+/Assets/Scripts/UnityGamingServices/CloudCode/TempleRunUGSCloud~/Project/obj
