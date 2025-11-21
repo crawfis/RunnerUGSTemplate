@@ -6,34 +6,58 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/BootStrap.unity
+    path: Assets/Scenes/Boot/0_BootStrap.unity
     guid: 72a40dca9aa5f2f41b974d0f84159de2
   - enabled: 1
-    path: Assets/Scenes/AchievementNotifications.unity
-    guid: 93d8c3d5097af894ab6dcf02fdccac12
+    path: Assets/Scenes/Boot/UGS_Boot_0_Initialization.unity
+    guid: 9e41f512bef570248865e5805818e3f6
   - enabled: 1
-    path: Assets/Scenes/Achievements.unity
+    path: Assets/Scenes/Boot/Game_Boot_0_Initialization.unity
+    guid: bf9e94577fea3f849b2e2e642db6c68c
+  - enabled: 1
+    path: Assets/Scenes/Boot/Game_Boot_1_UI.unity
+    guid: d5b81091373cb5245b2da2b188c7322a
+  - enabled: 1
+    path: Assets/Scenes/Boot/UGS_Boot_1_RemoteConfig.unity
+    guid: 40955da1a8a683e44b31c3c75357eb2e
+  - enabled: 1
+    path: Assets/Scenes/Boot/UGS_Boot_2_Authentication.unity
+    guid: ac7af94e402ae0344a26bfdf8fe23659
+  - enabled: 1
+    path: Assets/Scenes/Boot/Game_Boot_2_Play.unity
+    guid: b1176f7300a6cb3448601f97f1097659
+  - enabled: 1
+    path: Assets/Scenes/Boot/UGS_Boot_4_Leaderboards.unity
+    guid: 51ee7295eacd8514e91ffe87b205a442
+  - enabled: 1
+    path: Assets/Scenes/UGS/Achievements.unity
     guid: d0403b6237a9979438047d87ba19840e
   - enabled: 1
-    path: Assets/Scenes/Leaderboards.unity
+    path: Assets/Scenes/UGS/Leaderboards.unity
     guid: fa56826d61f527442bdc0ebd26b48f00
   - enabled: 1
-    path: Assets/Scenes/TempleRunGameplay.unity
+    path: Assets/Scenes/UGS/AchievementNotifications.unity
+    guid: 93d8c3d5097af894ab6dcf02fdccac12
+  - enabled: 1
+    path: Assets/Scenes/Gameplay/TempleRunGameplay.unity
     guid: 5c8a07c9987c8cb4b871067833f229ca
   - enabled: 1
-    path: Assets/Scenes/TempleRunGuiOverlay.unity
+    path: Assets/Scenes/Gameplay/TempleRunTrackPCG.unity
+    guid: db28af7ef1fe91046bbe0377e0421f98
+  - enabled: 1
+    path: Assets/Scenes/Gameplay/TempleRunGuiOverlay.unity
     guid: 22df7bc11514f2c4499de2a200d43841
   - enabled: 1
-    path: Assets/Scenes/TempleRunVisuals.unity
-    guid: 6d8aeb17918f53f4b99db3e5de9fa60d
+    path: Assets/Scenes/Gameplay/TempleRunPlayerVisuals.unity
+    guid: c4ae64d535a72d746808d12a6e421bfd
   - enabled: 1
-    path: Assets/Scenes/TempleRunTrackVisuals.unity
+    path: Assets/Scenes/Gameplay/TempleRunTrackVisuals.unity
     guid: 1b830593780cdf84f8dfc9c8fd813cc0
   - enabled: 1
-    path: Assets/Scenes/TempleRunSfx.unity
+    path: Assets/Scenes/Gameplay/TempleRunSfx.unity
     guid: de0ef9bd24412eb4c956d5a3aec9a1d5
   - enabled: 1
-    path: Assets/Scenes/TempleRunEnvironment.unity
+    path: Assets/Scenes/Gameplay/TempleRunEnvironment.unity
     guid: 7399d8211a2525c4e8f545cc9f952967
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 9dd285d0b329cb5408566176ac04d737,

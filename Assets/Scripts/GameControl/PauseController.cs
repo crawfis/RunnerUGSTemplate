@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CrawfisSoftware.GameControl
 {
-    internal class PauseController : MonoBehaviour
+    public class PauseController : MonoBehaviour
     {
         private bool _isPaused = false;
 

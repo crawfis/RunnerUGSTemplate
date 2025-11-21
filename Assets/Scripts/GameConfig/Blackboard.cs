@@ -20,8 +20,8 @@ namespace CrawfisSoftware.TempleRun
         public static Blackboard Instance { get; private set; }
         public System.Random MasterRandom { get { return _randomProvider.RandomGenerator; } }
         public GameDifficultyManager GameDifficultyManager { get; set; }
-        public DifficultyConfig GameConfig { get; set; }
-        public DistanceTracker DistanceTracker { get; set; }
+        public DifficultyConfig GameConfig { get; set; }  = new DifficultyConfig();
+        public DistanceTracker DistanceTracker { get; set; } = new DistanceTracker();
         public float TrackWidthOffset { get; set; } = 1f;
         public float TileLength { get; set; } = 4f;
         public float CurrentSpeed { get; set; }

@@ -21,7 +21,8 @@ public class UIPanelController : MonoBehaviour
     public UIDocument gameOverUI;
     public UIDocument loadingUI;
 
-    private bool _isSignedIn = false;
+    // Todo: Remove login logic from here later
+    private bool _isSignedIn = true;
 
     void Awake()
     {
@@ -33,23 +34,25 @@ public class UIPanelController : MonoBehaviour
 
         Go(UIState.Loading);
 
-        if (UnityServices.State == ServicesInitializationState.Initialized)
-        {
-            StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
-        }
-        else
-        {
-            StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityInitialized);
-        }
-        EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
-        EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
-        EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
+        //if (UnityServices.State == ServicesInitializationState.Initialized)
+        //{
+        //    StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
+        //}
+        //else
+        //{
+        //    StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
+        //    EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityInitialized);
+        //}
+        //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+        //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
+        //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
 
         EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarting, OnGameStarting);
         EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
         EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnding);
         EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
+        // Todo: Wait for an event that the menu is ready (e.g., remote config loaded, addressables, etc.) before showing it
+        StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
 
     }
 
@@ -66,10 +69,10 @@ public class UIPanelController : MonoBehaviour
 
     private void OnDestroy()
     {
-        EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityInitialized);
-        EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
-        EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
-        EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+        //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityInitialized);
+        //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+        //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
+        //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
 
         EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarting, OnGameStarting);
         EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
@@ -113,7 +116,8 @@ public class UIPanelController : MonoBehaviour
 
     private void OnGameEnded(string eventName, object sender, object data)
     {
-        Go(UIState.Feedback);
+        //Go(UIState.Feedback);
+        Go(UIState.Menu);
     }
 
     private IEnumerator ShowLoadingRoutine(float seconds)

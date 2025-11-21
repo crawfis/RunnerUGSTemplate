@@ -33,8 +33,9 @@ namespace CrawfisSoftware.TempleRun
         private IEnumerator TeleportWithDelay(object data)
         {
             EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TeleportStarted, this, (_teleportDuration, data));
-            yield return new WaitForSeconds(_teleportDuration);
+            yield return new WaitForSecondsRealtime(_teleportDuration);
             EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TeleportEnded, this, data);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, data);
         }
     }
 }

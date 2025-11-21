@@ -45,7 +45,7 @@ namespace CrawfisSoftware.TempleRun
                 //Quaternion rotation = Quaternion.RotateTowards(initialRotation, targetDirection, maxTurnRate * Time.deltaTime);
                 Quaternion rotation = Quaternion.Slerp(initialRotation, targetDirection, t);
                 _objectToMove.SetLocalPositionAndRotation(position, rotation);
-                timeRemaining -= Time.deltaTime;
+                timeRemaining -= Time.unscaledDeltaTime;
                 yield return null;
             }
             _objectToMove.localPosition = targetPosition;

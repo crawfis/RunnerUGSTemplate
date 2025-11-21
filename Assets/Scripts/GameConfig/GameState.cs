@@ -5,7 +5,7 @@
         public static bool IsGameStarted { get; set; } = false;
         public static bool IsGameOver { get; internal set; } = false;
         public static bool IsGamePaused { get; internal set; } = false;
-        public static bool IsGameConfigured { get; internal set; } = false;
+        public static bool IsGameConfigured { get; internal set; } = true;
         public static bool IsUserSignedIn { get; internal set; } = false;
         public static bool IsPlayerAlive { get; internal set; } = false;
         public static bool IsPlayerSignedIn { get; internal set; }
@@ -16,7 +16,7 @@
             IsGameStarted = false;
             IsGameOver = false;
             IsGamePaused = false;
-            IsGameConfigured = false;
+            IsGameConfigured = true;
             IsUserSignedIn = false;
             IsPlayerAlive = false;
             IsPlayerSignedIn = false;
