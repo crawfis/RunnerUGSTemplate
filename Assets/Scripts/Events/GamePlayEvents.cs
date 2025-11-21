@@ -6,7 +6,7 @@
     {
         LeftTurnSucceeded, RightTurnSucceeded,
         PlayerFailing, PlayerFailed, PlayerDied,
-        GameStarting, GameStarted, GameEnding, GameEnded, Pause, Resume, Quit,
+        GameStarting, GameStarted, GameEnding, GameEnded, Pause, Resume, Quitting,
         CountdownStarted, CountdownTick,
         SplineSegmentCreated, CurrentSplineChanging, CurrentSplineChanged,
         ActiveTrackChanging, TrackSegmentCreated,
@@ -16,6 +16,7 @@
         GameScenesUnloaded,
         GameScenesLoaded,
         LoadingScreenShowing, LoadingScreenShown, HidingLoadingScreen, LoadingScreenHidden,
-        LeaderboardClosing
+        LeaderboardClosing,
+        Quitted
     };
 }

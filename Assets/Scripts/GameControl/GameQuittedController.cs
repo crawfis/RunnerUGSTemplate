@@ -12,16 +12,16 @@ namespace CrawfisSoftware.TempleRun
     ///    Dependency: EventsPublisherTempleRun
     ///    Subscribes: GameOver - Currently it quits the application.
     /// </summary>
-    public class GameQuittingController : MonoBehaviour
+    public class GameQuittedController : MonoBehaviour
     {
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Quit, OnQuitting);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Quitting, OnQuitted);
         }
 
-        private void OnQuitting(string EventName, object sender, object data)
+        private void OnQuitted(string EventName, object sender, object data)
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Quit, OnQuitting);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Quitting, OnQuitted);
             StartCoroutine(Quit());
         }
         private IEnumerator Quit()

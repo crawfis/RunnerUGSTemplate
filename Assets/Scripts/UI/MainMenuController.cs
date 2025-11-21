@@ -29,7 +29,7 @@ namespace CrawfisSoftware.UI
 
         private void OnQuitButtonClicked()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Quit, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Quitting, this, null);
         }
 
         private void OnSignOutButtonClicked()

@@ -77,8 +77,7 @@ public class UIPanelController : MonoBehaviour
         EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarting, OnGameStarting);
         EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
         EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnding);
-        EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnded, OnGameEnded);
-
+        EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
     }
 
     private void OnPlayerAuthenticated(string eventName, object sender, object data)
