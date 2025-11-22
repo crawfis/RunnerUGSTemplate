@@ -4,7 +4,7 @@ using System;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.Authentication
+namespace CrawfisSoftware.UGS.Authentication
 {
     internal class UnityEventsToEventsPublisher : MonoBehaviour
     {

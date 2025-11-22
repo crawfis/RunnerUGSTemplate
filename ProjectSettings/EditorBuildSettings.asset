@@ -18,14 +18,17 @@ EditorBuildSettings:
     path: Assets/Scenes/Boot/Game_Boot_1_UI.unity
     guid: d5b81091373cb5245b2da2b188c7322a
   - enabled: 1
+    path: Assets/Scenes/Boot/Game_Boot_2_Play.unity
+    guid: b1176f7300a6cb3448601f97f1097659
+  - enabled: 1
     path: Assets/Scenes/Boot/UGS_Boot_1_RemoteConfig.unity
     guid: 40955da1a8a683e44b31c3c75357eb2e
   - enabled: 1
     path: Assets/Scenes/Boot/UGS_Boot_2_Authentication.unity
     guid: ac7af94e402ae0344a26bfdf8fe23659
   - enabled: 1
-    path: Assets/Scenes/Boot/Game_Boot_2_Play.unity
-    guid: b1176f7300a6cb3448601f97f1097659
+    path: Assets/Scenes/Boot/UGS_Boot_3_Achievements.unity
+    guid: 71b7e258485c91640afa5384d40e024d
   - enabled: 1
     path: Assets/Scenes/Boot/UGS_Boot_4_Leaderboards.unity
     guid: 51ee7295eacd8514e91ffe87b205a442

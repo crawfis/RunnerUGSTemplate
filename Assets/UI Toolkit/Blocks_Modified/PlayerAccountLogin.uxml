@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Blocks_Modified/PlayerAccountLogin.uss?fileID=7433441132597879392&amp;guid=21c2b38c8f55b494ca3d7c91925dc840&amp;type=3#PlayerAccountLogin"/>
+    <Style src="project://database/Assets/Blocks/PlayerAccount/Scripts/Runtime/UI/PlayerAccountStyle.uss?fileID=7433441132597879392&amp;guid=5d50a336515511548b5ab101fb2f304d&amp;type=3#PlayerAccountStyle"/>
+    <ui:VisualElement class="blocks-modal-container">
+        <ui:VisualElement name="player-account-modal" class="blocks-modal blocks-scene-modal blocks-scroll-view">
+            <Blocks.PlayerAccount.PlayerSignIn/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -120,7 +120,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &434049979
+--- !u!1 &200580833
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,69 +128,45 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 434049980}
-  - component: {fileID: 434049981}
-  - component: {fileID: 434049982}
+  - component: {fileID: 200580834}
+  - component: {fileID: 200580835}
   m_Layer: 0
-  m_Name: PlayerSignInController
+  m_Name: CloseLeaderboards
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &434049980
+--- !u!4 &200580834
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 434049979}
+  m_GameObject: {fileID: 200580833}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2144641533}
+  m_Father: {fileID: 1833760801}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &434049981
+--- !u!114 &200580835
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 434049979}
+  m_GameObject: {fileID: 200580833}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Script: {fileID: 11500000, guid: 56442bb8fdc0f1d41a040746938a87da, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: 097332d7a39dc7848947505b553aa666, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: bb35356fde6fea2479e1bfe9dfd8371f,
-    type: 3}
-  m_SortingOrder: 0
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &434049982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 434049979}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aba152faf5e50354d8d47dee3112938b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.Authentication.PlayerSignInController
-  uiDocument: {fileID: 434049981}
---- !u!1 &1732126173
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.FireEventWhenSceneCloses
+  _sceneName: Leaderboards
+  _eventName: LeaderboardClosed
+--- !u!1 &556502428
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -198,167 +174,47 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1732126175}
-  - component: {fileID: 1732126174}
+  - component: {fileID: 556502429}
+  - component: {fileID: 556502430}
   m_Layer: 0
-  m_Name: UGS_EventsHandler.02
+  m_Name: ShowAchievements
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1732126174
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732126173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0204aca7a7edec4393f9dba48e6fa9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Authentication.UnityEventsToEventsPublisher
---- !u!4 &1732126175
+--- !u!4 &556502429
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732126173}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2144641533}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1837662927
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1837662928}
-  - component: {fileID: 1837662929}
-  m_Layer: 0
-  m_Name: PlayerAuthenticationService
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1837662928
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1837662927}
+  m_GameObject: {fileID: 556502428}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2144641533}
+  m_Father: {fileID: 1833760801}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1837662929
+--- !u!114 &556502430
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1837662927}
+  m_GameObject: {fileID: 556502428}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d9bc7f42c0e1b349829e6e45ba8bf95, type: 3}
+  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Services.Authentication::Unity.Services.Authentication.Components.PlayerAuthentication
-  UseCustomServices: 0
-  ServicesIdentifier: 
-  ShowAdvancedFeatures: 0
-  SetCustomProfile: 1
-  Profile: development
-  SignInAnonymously: 0
-  FetchPlayerInfo: 1
-  FetchPlayerName: 1
-  GenerateName: 1
-  Events:
-    SignedIn:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1732126174}
-          m_TargetAssemblyTypeName: CrawfisSoftware.Authentication.UnityEventsToEventsPublisher,
-            Assembly-CSharp
-          m_MethodName: SignedIn
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    SignInFailed:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1732126174}
-          m_TargetAssemblyTypeName: CrawfisSoftware.Authentication.UnityEventsToEventsPublisher,
-            Assembly-CSharp
-          m_MethodName: SignInFailed
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    SignedOut:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1732126174}
-          m_TargetAssemblyTypeName: CrawfisSoftware.Authentication.UnityEventsToEventsPublisher,
-            Assembly-CSharp
-          m_MethodName: SignOut
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    Expired:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1732126174}
-          m_TargetAssemblyTypeName: CrawfisSoftware.Authentication.UnityEventsToEventsPublisher,
-            Assembly-CSharp
-          m_MethodName: SessionExpired
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    SignInCodeReceived:
-      m_PersistentCalls:
-        m_Calls: []
-    SignInCodeExpired:
-      m_PersistentCalls:
-        m_Calls: []
---- !u!1 &2144641532
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
+  _sceneName: Achievements
+  _loadadditively: 1
+  _eventToListenTo: LeaderboardClosing
+  _delayInSeconds: 0
+--- !u!1 &1015553758
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -366,34 +222,187 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2144641533}
+  - component: {fileID: 1015553759}
+  - component: {fileID: 1015553760}
   m_Layer: 0
-  m_Name: UnityGamingServices
+  m_Name: ClosedAchievements
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2144641533
+--- !u!4 &1015553759
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2144641532}
+  m_GameObject: {fileID: 1015553758}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1833760801}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1015553760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015553758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56442bb8fdc0f1d41a040746938a87da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.FireEventWhenSceneCloses
+  _sceneName: Achievements
+  _eventName: AchievementsClosed
+--- !u!1 &1833760800
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1833760801}
+  m_Layer: 0
+  m_Name: GameFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1833760801
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833760800}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1732126175}
-  - {fileID: 434049980}
-  - {fileID: 1837662928}
+  - {fileID: 200580834}
+  - {fileID: 1015553759}
+  - {fileID: 556502429}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1928440387
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1928440388}
+  m_Layer: 0
+  m_Name: Achievements
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1928440388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928440387}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2100242337}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2100242336
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1928440388}
+    m_Modifications:
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9033333563459808054, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+        type: 3}
+      propertyPath: m_Name
+      value: AchievementsPrefab.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 180634fb92d23974dbcdc4eaa7bca05e, type: 3}
+--- !u!4 &2100242337 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 953466524407839279, guid: 180634fb92d23974dbcdc4eaa7bca05e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2100242336}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 2144641533}
+  - {fileID: 1928440388}
+  - {fileID: 1833760801}
