@@ -1,5 +1,7 @@
 ﻿//using Blocks.Leaderboards;
 
+using Blocks.Leaderboards;
+
 using CrawfisSoftware.TempleRun;
 
 using System;
@@ -18,7 +20,6 @@ namespace CrawfisSoftware.UGS.Leaderboard
         [SerializeField] private bool _useTrustedClient = false;
 
         public bool IsUpdating { get; private set; } = false;
-#if false
         private void Start()
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
@@ -34,7 +35,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
             IsUpdating = true;
             long score = (long)Blackboard.Instance.DistanceTracker.DistanceTravelled;
             // Use an async lambda to handle the awaiting
-            var _ =  HandleScoreUpload(LeaderboardId, score);
+            var _ = HandleScoreUpload(LeaderboardId, score);
             //var _ = LeaderboardsService.Instance.AddPlayerScoreAsync("DailyDistance", score);
             //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.ScoreUpdated, this, null);
         }
@@ -58,7 +59,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
                 IsUpdating = false;
             }
         }
-        
+
         public async Task<LeaderboardEntry> AddPlayerScore(string leaderboardId, long score)
         {
             try
@@ -72,6 +73,5 @@ namespace CrawfisSoftware.UGS.Leaderboard
                 throw; // Re-throw so calling code can handle it
             }
         }
-#endif
     }
-    }
+}
