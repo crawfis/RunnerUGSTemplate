@@ -1,4 +1,6 @@
-﻿using GTMY.Audio;
+﻿using CrawfisSoftware.Events;
+
+using GTMY.Audio;
 
 using System;
 
@@ -15,10 +17,10 @@ namespace CrawfisSoftware.TempleRun.Audio
         {
             AudioManagerSingleton.Instance.SetMusicPlayer(_musicPlayer);
             _musicPlayer.Volume = _initialVolume;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Pause, OnPause);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Pause, OnPause);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resume, OnResume);
         }
 
         private void OnPause(string eventName, object sender, object data)
@@ -35,10 +37,10 @@ namespace CrawfisSoftware.TempleRun.Audio
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Pause, OnPause);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Pause, OnPause);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resume, OnResume);
         }
 
         private void OnGameStarted(string eventName, object sender, object data)

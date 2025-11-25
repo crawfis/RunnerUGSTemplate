@@ -165,6 +165,62 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &201395418
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 201395420}
+  - component: {fileID: 201395419}
+  m_Layer: 0
+  m_Name: Loading Panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &201395419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 201395418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: acfdbc5d6d4958343915e11cada06eb9, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 82ac024cc8a78ad43a88005f57cf68d3,
+    type: 3}
+  m_SortingOrder: 1000
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &201395420
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 201395418}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &811702129
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,8 +436,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1234304535}
-  - component: {fileID: 1234304536}
   - component: {fileID: 1234304537}
+  - component: {fileID: 1234304538}
   m_Layer: 0
   m_Name: GameEventsPublisher
   m_TagString: Untagged
@@ -404,18 +460,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1234304536
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1234304534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e9623b23077ff44f97027e6e9721da2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1234304537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,6 +472,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62b27800e110a5841976eadb7dc76b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Events.EventsPublisherUserInitiated
+--- !u!114 &1234304538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1234304534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6065ee9a5d1744db5e8899c37beeb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.EventsPublisherGameFlow
 --- !u!1 &1333641297
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,8 +529,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
   _lastSceneToKeepIndex: 0
-  _unloadScenesTriggerEvent: 11
-  _scenesUnloadedEvent: 30
+  _unloadScenesTriggerEvent: 6
+  _scenesUnloadedEvent: 7
 --- !u!1 &1351158183
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,6 +742,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1351158186}
   - {fileID: 811702130}
+  - {fileID: 201395420}
   - {fileID: 974278450}
   - {fileID: 28231001}
   - {fileID: 1139485621}

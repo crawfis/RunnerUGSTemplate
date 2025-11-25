@@ -21,7 +21,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailing, OnPlayerFailing);
         }
 
         private void OnPlayerFailing(string eventName, object sender, object data)
@@ -32,7 +32,7 @@ namespace CrawfisSoftware.TempleRun
         }
         private IEnumerator DeathDelay()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Pause, this, UnityEngine.Time.time);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerPause, this, UnityEngine.Time.time);
             yield return new WaitForSecondsRealtime(GameConstants.ResumeDelay);
         }
 
@@ -47,7 +47,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             StopAllCoroutines(); // Saved them so could call individually instead.
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnPlayerFailing);
         }
     }
 }

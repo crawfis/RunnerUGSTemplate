@@ -1,4 +1,5 @@
-﻿using CrawfisSoftware.TempleRun;
+﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.TempleRun;
 
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace CrawfisSoftware.GameConfig
             if(_difficultyConfigs.ContainsKey(difficultyName))
             {
                 Blackboard.Instance.GameConfig = _difficultyConfigs[difficultyName];
-                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameDifficultyChanged, this, _difficultyConfigs[difficultyName]);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChanged, this, _difficultyConfigs[difficultyName]);
                 Debug.Log($"Successfully set game difficulty to '{difficultyName}'");
             }
         }

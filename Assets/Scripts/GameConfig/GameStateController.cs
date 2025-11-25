@@ -16,11 +16,11 @@ namespace CrawfisSoftware.TempleRun
             //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
             //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
 
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameConfigured);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Pause, OnPause);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Pause, OnPause);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resume, OnResume);
         }
 
         private void OnDestroy()
@@ -28,11 +28,11 @@ namespace CrawfisSoftware.TempleRun
             //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
             //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
 
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameConfigured);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Pause, OnPause);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Pause, OnPause);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resume, OnResume);
         }
 
         private void OnUnityServicesInitialized(string eventName, object sender, object data)

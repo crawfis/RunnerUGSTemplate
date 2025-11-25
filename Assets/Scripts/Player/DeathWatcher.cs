@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using CrawfisSoftware.Events;
+
+using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -21,9 +23,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
         }
 
         private void Update()
@@ -33,15 +35,15 @@ namespace CrawfisSoftware.TempleRun
             {
                 _isRunning = false;
                 Debug.Log(string.Format("Player Died at Distance: {0}", (int)_currentSegmentDistance));
-                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.PlayerFailing, this, distance);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerFailing, this, distance);
             }
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
         }
 
         private void OnTrackChanging(string eventName, object sender, object data)

@@ -282,7 +282,7 @@ MonoBehaviour:
   ServicesIdentifier: 
   ShowAdvancedFeatures: 0
   SetCustomProfile: 1
-  Profile: development
+  Profile: initial-development
   SignInAnonymously: 0
   FetchPlayerInfo: 1
   FetchPlayerName: 1

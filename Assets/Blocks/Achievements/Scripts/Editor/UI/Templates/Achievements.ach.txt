@@ -10,7 +10,7 @@
         "IsHidden": false
       },
       {
-        "Id": "second_achievment",
+        "Id": "second_achievement",
         "Icon": "thumbnail_blue",
         "Title": "Achievement 2",
         "Description": "Second achievement!",

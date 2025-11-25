@@ -1,4 +1,5 @@
-﻿using CrawfisSoftware.TempleRun;
+﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.TempleRun;
 
 using System;
 using System.Collections;
@@ -13,16 +14,16 @@ namespace CrawfisSoftware.GameControl
     public class UnloadNonActiveScenes : MonoBehaviour
     {
         [SerializeField] private int _lastSceneToKeepIndex = 0;
-        [SerializeField] private GamePlayEvents _unloadScenesTriggerEvent = GamePlayEvents.GameEnded;
-        [SerializeField] private GamePlayEvents _scenesUnloadedEvent = GamePlayEvents.GameScenesUnloaded;
+        [SerializeField] private GameFlowEvents _unloadScenesTriggerEvent = GameFlowEvents.GameEnded;
+        [SerializeField] private GameFlowEvents _scenesUnloadedEvent = GameFlowEvents.GameScenesUnloaded;
 
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(_unloadScenesTriggerEvent, OnGameOver);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(_unloadScenesTriggerEvent, OnGameOver);
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(_unloadScenesTriggerEvent, OnGameOver);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(_unloadScenesTriggerEvent, OnGameOver);
         }
 
         private void OnGameOver(string arg1, object arg2, object arg3)
@@ -56,7 +57,7 @@ namespace CrawfisSoftware.GameControl
                     yield return null;
                 }
             }
-            EventsPublisherTempleRun.Instance.PublishEvent(_scenesUnloadedEvent, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(_scenesUnloadedEvent, this, null);
         }
     }
 }

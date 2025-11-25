@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using CrawfisSoftware.Events;
+
+using System.Collections;
 
 using UnityEngine;
 
@@ -28,11 +30,11 @@ namespace CrawfisSoftware.TempleRun
             _maxSpeed = Blackboard.Instance.GameConfig.MaxSpeed;
             _acceleration = Blackboard.Instance.GameConfig.Acceleration;
             _speed = _initialSpeed;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportEnded, OnTeleportEnded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
             //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
         }
 
@@ -79,8 +81,8 @@ namespace CrawfisSoftware.TempleRun
             {
                 if (_isMoving)
                 {
-                    _distanceTracker.UpdateDistance(_speed * Time.deltaTime);
-                    _speed += _acceleration * Time.deltaTime;
+                    _distanceTracker.UpdateDistance(_speed * GameTime.Instance.deltaTime);
+                    _speed += _acceleration * GameTime.Instance.deltaTime;
                     _speed = Mathf.Clamp(_speed, _initialSpeed, _maxSpeed);
                     Blackboard.Instance.CurrentSpeed = _speed;
                 }
@@ -90,11 +92,11 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportEnded, OnTeleportEnded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
             DeleteCoroutine();
         }
 

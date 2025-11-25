@@ -18,7 +18,7 @@ namespace CrawfisSoftware.TempleRun
         {
             _numberOfLives = numberOfLives;
             _playerID = playerID;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailed);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailing, OnPlayerFailed);
         }
 
         private void OnPlayerFailed(string eventName, object sender, object data)
@@ -27,14 +27,14 @@ namespace CrawfisSoftware.TempleRun
             _numberOfLives--;
             if (_numberOfLives <= 0)
             {
-                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.PlayerDied, this, _playerID);
-                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerDied, this, _playerID);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResume, this, UnityEngine.Time.time);
             }
         }
 
         public void Dispose()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerFailing, OnPlayerFailed);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnPlayerFailed);
         }
     }
 }

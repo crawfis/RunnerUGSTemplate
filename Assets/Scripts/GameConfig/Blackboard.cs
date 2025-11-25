@@ -1,4 +1,5 @@
-﻿using CrawfisSoftware.GameConfig;
+﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.GameConfig;
 using CrawfisSoftware.Utility;
 
 using System;
@@ -55,12 +56,12 @@ namespace CrawfisSoftware.TempleRun
 
         private void SubscribeToEvents()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameDifficultyChanged);
         }
 
         private void UnsubscribeToEvents()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameDifficultyChanged);
         }
 
 #if UNITY_EDITOR

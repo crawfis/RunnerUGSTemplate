@@ -26,7 +26,8 @@ namespace CrawfisSoftware.UGS.Leaderboard
 
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameScenesUnloaded, OnGameOver);
+            //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameScenesUnloaded, OnGameOver);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.LeaderboardOpening, OnGameOver);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnScoreUpdating);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreUpdated, OnScoreUpdated);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreFailedToUpdate, OnScoreUpdated);
@@ -34,7 +35,8 @@ namespace CrawfisSoftware.UGS.Leaderboard
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameScenesUnloaded, OnGameOver);
+            //EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameScenesUnloaded, OnGameOver);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.LeaderboardOpening, OnGameOver);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnScoreUpdating);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreUpdated, OnScoreUpdated);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreFailedToUpdate, OnScoreUpdated);
@@ -58,51 +60,12 @@ namespace CrawfisSoftware.UGS.Leaderboard
         {
             SceneManager.LoadSceneAsync(_sceneToLoad, LoadSceneMode.Additive);
             StartCoroutine(CloseLeaderboard());
-            //_ = ShowLeaderboard();
         }
 
         private IEnumerator CloseLeaderboard()
         {
             yield return new WaitForSeconds(GameConstants.LeaderboardDisplayTime);
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.LeaderboardClosing, this, UnityEngine.Time.time);
-        }
-
-        private async Task ShowLeaderboard()
-        {
-            try
-            {
-                // Fetch Leaderboard scores
-                var tierOptions = new GetScoresByTierOptions()
-                {
-                    Limit = _numberToDisplay
-                };
-                var options = new GetScoresOptions()
-                {
-                    Limit = _numberToDisplay
-                };
-
-                // If an update is in progress, await the event instead of polling
-                var tcs = _scoreUpdatedTcs;
-                if (_isUpdating && tcs != null)
-                {
-                    await tcs.Task;
-                }
-
-                //var page = await LeaderboardsService.Instance.GetScoresByTierAsync("WeeklyDistance", _tier, tierOptions);
-                var page = await LeaderboardsService.Instance.GetScoresAsync(LeaderboardId, options);
-
-                int position = 1;
-                foreach (var item in page.Results)
-                {
-                    Debug.Log($"{position++}, {item.PlayerName},  {item.Score}");
-                }
-
-                EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.LeaderboardDisplayed, this, UnityEngine.Time.time);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex);
-            }
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.LeaderboardClosing, this, UnityEngine.Time.time);
         }
     }
 }

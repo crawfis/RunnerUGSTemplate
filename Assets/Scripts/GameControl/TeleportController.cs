@@ -17,12 +17,12 @@ namespace CrawfisSoftware.TempleRun
         [SerializeField] private float _teleportDuration = 1.0f;
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.CurrentSplineChanging, OnActiveSplineChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.CurrentSplineChanging, OnActiveSplineChanging);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.CurrentSplineChanging, OnActiveSplineChanging);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.CurrentSplineChanging, OnActiveSplineChanging);
         }
 
         private void OnActiveSplineChanging(string EventName, object sender, object data)
@@ -32,10 +32,10 @@ namespace CrawfisSoftware.TempleRun
 
         private IEnumerator TeleportWithDelay(object data)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TeleportStarted, this, (_teleportDuration, data));
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TeleportStarted, this, (_teleportDuration, data));
             yield return new WaitForSecondsRealtime(_teleportDuration);
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TeleportEnded, this, data);
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, data);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TeleportEnded, this, data);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResume, this, data);
         }
     }
 }

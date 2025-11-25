@@ -24,11 +24,11 @@ namespace CrawfisSoftware.TempleRun
         private float _turnAvailableDistance;
         // Possible Bug: If Direction is changed to a Flag, then _nextTrackDirection needs to be masked. Could be done now just in case.
         private Direction _nextTrackDirection;
-        private readonly Dictionary<Direction, GamePlayEvents> _turnMapping = new()
+        private readonly Dictionary<Direction, TempleRunEvents> _turnMapping = new()
         {
-            [Direction.Left] = GamePlayEvents.LeftTurnSucceeded,
-            [Direction.Right] = GamePlayEvents.RightTurnSucceeded,
-            [Direction.Both] = GamePlayEvents.RightTurnSucceeded
+            [Direction.Left] = TempleRunEvents.LeftTurnSucceeded,
+            [Direction.Right] = TempleRunEvents.RightTurnSucceeded,
+            [Direction.Both] = TempleRunEvents.RightTurnSucceeded
         };
 
         public void ForceTurn()
@@ -39,11 +39,11 @@ namespace CrawfisSoftware.TempleRun
         {
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.LeftTurnRequested, OnLeftTurnRequested);
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.RightTurnRequested, OnRightTurnRequested);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             _safeTurnDistance = Blackboard.Instance.GameConfig.SafePreTurnDistance;
         }
 
-        private void OnTurnRequested(object sender, object data, GamePlayEvents turnSucceedEvent)
+        private void OnTurnRequested(object sender, object data, TempleRunEvents turnSucceedEvent)
         {
             float distance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
             if (distance > _turnAvailableDistance)
@@ -56,7 +56,7 @@ namespace CrawfisSoftware.TempleRun
         {
             if (_nextTrackDirection != Direction.Right)
             {
-                OnTurnRequested(sender, data, GamePlayEvents.LeftTurnSucceeded);
+                OnTurnRequested(sender, data, TempleRunEvents.LeftTurnSucceeded);
             }
         }
 
@@ -64,7 +64,7 @@ namespace CrawfisSoftware.TempleRun
         {
             if (_nextTrackDirection != Direction.Left)
             {
-                OnTurnRequested(sender, data, GamePlayEvents.RightTurnSucceeded);
+                OnTurnRequested(sender, data, TempleRunEvents.RightTurnSucceeded);
             }
         }
 
@@ -80,7 +80,7 @@ namespace CrawfisSoftware.TempleRun
         {
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.LeftTurnRequested, OnLeftTurnRequested);
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.RightTurnRequested, OnRightTurnRequested);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
         }
     }
 }

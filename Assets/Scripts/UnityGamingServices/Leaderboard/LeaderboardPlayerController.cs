@@ -22,13 +22,13 @@ namespace CrawfisSoftware.UGS.Leaderboard
         public bool IsUpdating { get; private set; } = false;
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
             LeaderboardsObserver.Instance.LeaderboardId = LeaderboardId;
             LeaderboardsObserver.Instance.UseTrustedClient = _useTrustedClient;
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
         }
         private void OnPlayerDied(string eventName, object sender, object data)
         {

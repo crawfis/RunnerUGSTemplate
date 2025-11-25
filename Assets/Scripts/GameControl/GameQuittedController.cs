@@ -16,12 +16,12 @@ namespace CrawfisSoftware.TempleRun
     {
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.Quitting, OnQuitted);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Quitting, OnQuitted);
         }
 
         private void OnQuitted(string EventName, object sender, object data)
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.Quitting, OnQuitted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Quitting, OnQuitted);
             StartCoroutine(Quit());
         }
         private IEnumerator Quit()

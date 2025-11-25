@@ -1,6 +1,5 @@
-﻿using CrawfisSoftware.TempleRun;
-
-using System;
+﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.TempleRun;
 
 using Unity.Services.Authentication;
 using Unity.Services.Authentication.PlayerAccounts;
@@ -29,7 +28,7 @@ namespace CrawfisSoftware.UI
 
         private void OnQuitButtonClicked()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Quitting, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Quitting, this, null);
         }
 
         private void OnSignOutButtonClicked()
@@ -41,7 +40,7 @@ namespace CrawfisSoftware.UI
 
         private void OnStartGameButtonClicked()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.GameStarting, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameStarting, this, null);
         }
     }
 }

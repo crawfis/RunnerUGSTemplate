@@ -1,6 +1,9 @@
 using Blocks.PlayerAccount;
 
+using CrawfisSoftware.Events;
 using CrawfisSoftware.TempleRun;
+
+using Unity.Services.Authentication;
 
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -23,14 +26,14 @@ namespace CrawfisSoftware.UGS.Authentication
             _signInElement = _root.Q<PlayerSignIn>();
             m_AuthenticationObserver = new AuthenticationObserver();
 
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.LoadingScreenHidden, OnLoadingScreenHidden);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.LoadingScreenHidden, OnLoadingScreenHidden);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnSignIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.LoadingScreenHidden, OnLoadingScreenHidden);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.LoadingScreenHidden, OnLoadingScreenHidden);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnSignIn);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
         }
@@ -58,7 +61,7 @@ namespace CrawfisSoftware.UGS.Authentication
             _signInElement.RemoveFromClassList(k_HiddenClass);
         }
 
-        void Start()
+        async void Start()
         {
             if (uiDocument == null)
             {
@@ -73,6 +76,20 @@ namespace CrawfisSoftware.UGS.Authentication
                 _signInElement.AddToClassList(k_HiddenClass);
                 _root.AddToClassList(k_HiddenClass);
             });
+
+            // Sign in returning player using the Session Token stored after sign in.
+            // Players don't need to sign in with Unity Player Account again; using 
+            // this method will re-authorise them (they will keep the same Player ID).
+            if (AuthenticationService.Instance.SessionTokenExists)
+            {
+                _signedIn = true;
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                Debug.Log($"Returning Player ID: {AuthenticationService.Instance.PlayerId}");
+                Debug.Log($"Returning Player is SignedIn: {AuthenticationService.Instance.IsSignedIn}");
+                Debug.Log($"Returning Player is Authorized: {AuthenticationService.Instance.IsAuthorized}");
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+            }
         }
     }
 }

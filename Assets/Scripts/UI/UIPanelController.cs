@@ -1,11 +1,8 @@
-﻿using CrawfisSoftware.TempleRun;
+﻿using CrawfisSoftware.Events;
 using CrawfisSoftware.GameConfig;
-using CrawfisSoftware.UGS;
+using CrawfisSoftware.TempleRun;
 
-using System;
 using System.Collections;
-
-using Unity.Services.Core;
 
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -47,10 +44,10 @@ public class UIPanelController : MonoBehaviour
         //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
         //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
 
-        EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarting, OnGameStarting);
-        EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-        EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnding);
-        EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
+        EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarting, OnGameStarting);
+        EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+        EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
+        EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
         // Todo: Wait for an event that the menu is ready (e.g., remote config loaded, addressables, etc.) before showing it
         StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
 
@@ -74,10 +71,10 @@ public class UIPanelController : MonoBehaviour
         //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
         //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
 
-        EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarting, OnGameStarting);
-        EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameStarted, OnGameStarted);
-        EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnding);
-        EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameEnding, OnGameEnded);
+        EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarting, OnGameStarting);
+        EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+        EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
+        EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
     }
 
     private void OnPlayerAuthenticated(string eventName, object sender, object data)
@@ -99,6 +96,7 @@ public class UIPanelController : MonoBehaviour
     private void OnGameStarting(string eventName, object sender, object data)
     {
         Go(UIState.Gameplay);
+        if (hudUI) hudUI.rootVisualElement.visible = true;
         SetActive(countDownUI, true);
         ShowCountdown(GameConstants.CountdownSeconds);
     }
@@ -106,6 +104,7 @@ public class UIPanelController : MonoBehaviour
     private void OnGameStarted(string eventName, object sender, object data)
     {
         Go(UIState.Gameplay);
+        if (hudUI) hudUI.rootVisualElement.visible = true;
     }
 
     private void OnGameEnding(string eventName, object sender, object data)
@@ -121,14 +120,14 @@ public class UIPanelController : MonoBehaviour
 
     private IEnumerator ShowLoadingRoutine(float seconds)
     {
-        EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.LoadingScreenShowing, this, null);
-        EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.LoadingScreenShown, this, null);
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LoadingScreenShowing, this, null);
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LoadingScreenShown, this, null);
         yield return new WaitForSecondsRealtime(seconds);
         if(_isSignedIn)
             Go(UIState.Menu);
         else 
             Go(UIState.None);
-        EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.LoadingScreenHidden, this, null);
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LoadingScreenHidden, this, null);
     }
 
     void SetActive(UIDocument doc, bool on)

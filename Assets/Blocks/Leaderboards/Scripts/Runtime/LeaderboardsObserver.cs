@@ -152,14 +152,14 @@ namespace Blocks.Leaderboards
             CleanupAuthenticationServiceObserver();
 
             m_AuthenticationService = authenticationService;
-            if (IsSignedIn())
-            {
-                UpdateScores();
-            }
-            else
-            {
-                m_AuthenticationService.SignedIn += UpdateScores;
-            }
+            //if (IsSignedIn())
+            //{
+            //    UpdateScores();
+            //}
+            //else
+            //{
+            //    m_AuthenticationService.SignedIn += UpdateScores;
+            //}
         }
 
         void UpdateScores()

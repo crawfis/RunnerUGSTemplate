@@ -16,7 +16,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
             _yPosition = transform.localPosition.y;
         }
 
@@ -42,10 +42,10 @@ namespace CrawfisSoftware.TempleRun
             {
                 float t = (1f - timeRemaining / teleportTime);
                 Vector3 position = Vector3.Lerp(initialPosition, targetPosition, t);
-                //Quaternion rotation = Quaternion.RotateTowards(initialRotation, targetDirection, maxTurnRate * Time.deltaTime);
+                //Quaternion rotation = Quaternion.RotateTowards(initialRotation, targetDirection, maxTurnRate * GameTime.Instance.deltaTime);
                 Quaternion rotation = Quaternion.Slerp(initialRotation, targetDirection, t);
                 _objectToMove.SetLocalPositionAndRotation(position, rotation);
-                timeRemaining -= Time.unscaledDeltaTime;
+                timeRemaining -= GameTime.Instance.deltaTime;
                 yield return null;
             }
             _objectToMove.localPosition = targetPosition;
@@ -54,7 +54,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
         }
     }
 }

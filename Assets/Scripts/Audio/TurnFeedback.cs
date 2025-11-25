@@ -1,4 +1,6 @@
-﻿using GTMY.Audio;
+﻿using CrawfisSoftware.Events;
+
+using GTMY.Audio;
 
 using UnityEngine;
 
@@ -17,14 +19,14 @@ namespace CrawfisSoftware.TempleRun.Audio
             var leftFactory = new AudioFactoryPooled(this, this.gameObject);
             //AudioFactoryRegistry.Instance.RegisterAudioFactory("TurnLeftPooledAudio", leftFactory);
             ISfxAudioPlayer sfxAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("leftTurnFeedback", leftFactory, leftClipProvider);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.LeftTurnSucceeded, PlayLeftTurnSound);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, PlayLeftTurnSound);
 
             var rightClipProvider = new AudioClipProvider(new System.Random());
             rightClipProvider.AddClip(_turnRightAudioClips);
             var rightFactory = new AudioFactoryPooled(this, this.gameObject);
             //AudioFactoryRegistry.Instance.RegisterAudioFactory("TurnRightPooledAudio", rightFactory);
             ISfxAudioPlayer sfxRightAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("rightTurnFeedback", rightFactory, rightClipProvider);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.RightTurnSucceeded, PlayRightTurnSound);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
         }
 
         private static void PlayLeftTurnSound(string eventName, object sender, object data)
@@ -38,8 +40,8 @@ namespace CrawfisSoftware.TempleRun.Audio
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.LeftTurnSucceeded, PlayLeftTurnSound);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.RightTurnSucceeded, PlayRightTurnSound);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, PlayLeftTurnSound);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
         }
     }
 }

@@ -1,3 +1,5 @@
+using CrawfisSoftware.Events;
+
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -29,17 +31,17 @@ namespace CrawfisSoftware.TempleRun
 
         protected virtual void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameConfigured);
             if(GameState.IsGameConfigured) OnGameConfigured("junk", null, null);
         }
 
         protected virtual void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameDifficultyChanged, OnGameConfigured);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.LeftTurnSucceeded, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.RightTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameConfigured);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, OnTurnSucceeded);
         }
 
         private void OnGameConfigured(string eventName, object sender, object data)
@@ -59,7 +61,7 @@ namespace CrawfisSoftware.TempleRun
         {
             _ = _trackSegments.Dequeue();
             AddTrackSegment();
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.ActiveTrackChanging, this, _trackSegments.Peek());
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.ActiveTrackChanging, this, _trackSegments.Peek());
         }
 
         protected virtual void Initialize(float startDistance, float minDistance, float maxDistance, System.Random random)
@@ -68,8 +70,8 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.LeftTurnSucceeded, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.RightTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.RightTurnSucceeded, OnTurnSucceeded);
         }
 
         protected virtual void CreateInitialTrack()
@@ -77,12 +79,12 @@ namespace CrawfisSoftware.TempleRun
             _maxDistance = Mathf.Max(_minDistance, _maxDistance);
             var newTrackSegment = (GetNewDirection(), _startDistance);
             _trackSegments.Enqueue(newTrackSegment);
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TrackSegmentCreated, this, newTrackSegment);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
             for (int i = 1; i < _numberOfLookAheadTracks; i++)
             {
                 AddTrackSegment();
             }
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.ActiveTrackChanging, this, _trackSegments.Peek());
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.ActiveTrackChanging, this, _trackSegments.Peek());
         }
 
         protected virtual void OnTurnSucceeded(string eventName, object sender, object data)
@@ -95,7 +97,7 @@ namespace CrawfisSoftware.TempleRun
             float segmentLength = GetNewSegmentLength();
             var newTrackSegment = (GetNewDirection(), segmentLength);
             _trackSegments.Enqueue(newTrackSegment);
-            EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.TrackSegmentCreated, this, newTrackSegment);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
         }
 
         protected virtual float GetNewSegmentLength()
