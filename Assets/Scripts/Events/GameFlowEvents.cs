@@ -2,6 +2,9 @@
 {
     public enum GameFlowEvents
     {
+        LoadingScreenShowing, LoadingScreenShown, LoadingScreenHidding, LoadingScreenHidden,
+        GameplayReady,
+        MainMenuShowing, MainMenuShown, MainMenuHidden,
         GameStarting, GameStarted, GameEnding, GameEnded, 
         Pause, Resume, 
         Quitting, Quitted,
@@ -9,7 +12,5 @@
         GameDifficultyChanged,
         GameScenesUnloading, GameScenesUnloaded,
         GameScenesLoading, GameScenesLoaded,
-        GameplayReady,
-        LoadingScreenShowing,  LoadingScreenShown, LoadingScreenHidden
     }
 }

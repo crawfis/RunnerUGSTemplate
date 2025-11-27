@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CrawfisSoftware.TempleRun
+namespace CrawfisSoftware.Events
 {
     [DefaultExecutionOrder(-10000)]
     /// <summary>

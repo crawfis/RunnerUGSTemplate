@@ -87,6 +87,7 @@ namespace CrawfisSoftware.UGS
             if (response.status == ConfigRequestStatus.Success)
             {
                 Debug.Log($"Remote config fetched with response: {response.status}");
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.RemoteConfigFetched, this, response.status);
                 ApplyRemoteConfig();
                 if (_logRemoteConfigValues)
                 {

@@ -12,7 +12,7 @@ public enum UIState { None, Menu, Countdown, Gameplay, GameOverOverlay, Feedback
 public class UIPanelController : MonoBehaviour
 {
     [Header("UIDocuments (drag from scene)")]
-    public UIDocument menuUI;
+    //public UIDocument menuUI;
     public UIDocument hudUI;
     public UIDocument countDownUI;
     public UIDocument gameOverUI;
@@ -24,7 +24,7 @@ public class UIPanelController : MonoBehaviour
     void Awake()
     {
         // Optional: warm root VE references
-        if (menuUI) menuUI.rootVisualElement.visible = false;
+        //if (menuUI) menuUI.rootVisualElement.visible = false;
         if (hudUI) hudUI.rootVisualElement.visible = false;
         if (countDownUI) countDownUI.rootVisualElement.visible = false;
         if (gameOverUI) gameOverUI.rootVisualElement.visible = false;
@@ -53,16 +53,16 @@ public class UIPanelController : MonoBehaviour
 
     }
 
-    private void OnFeedbackClosed(string arg1, object arg2, object arg3)
-    {
-        Go(UIState.Menu);
-    }
+    //private void OnFeedbackClosed(string arg1, object arg2, object arg3)
+    //{
+    //    Go(UIState.Menu);
+    //}
 
-    private void OnPlayerSignOut(string arg1, object arg2, object arg3)
-    {
-        _isSignedIn = false;
-        Go(UIState.None);
-    }
+    //private void OnPlayerSignOut(string arg1, object arg2, object arg3)
+    //{
+    //    _isSignedIn = false;
+    //    Go(UIState.None);
+    //}
 
     private void OnDestroy()
     {
@@ -77,11 +77,11 @@ public class UIPanelController : MonoBehaviour
         EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
     }
 
-    private void OnPlayerAuthenticated(string eventName, object sender, object data)
-    {
-        _isSignedIn = true;
-        StartCoroutine(ShowMenuDelayed(1f));
-    }
+    //private void OnPlayerAuthenticated(string eventName, object sender, object data)
+    //{
+    //    _isSignedIn = true;
+    //    StartCoroutine(ShowMenuDelayed(1f));
+    //}
 
     private IEnumerator ShowMenuDelayed(float delay)
     {
@@ -120,7 +120,7 @@ public class UIPanelController : MonoBehaviour
 
     private IEnumerator ShowLoadingRoutine(float seconds)
     {
-        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LoadingScreenShowing, this, null);
+        //EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LoadingScreenShowing, this, null);
         EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LoadingScreenShown, this, null);
         yield return new WaitForSecondsRealtime(seconds);
         if(_isSignedIn)
@@ -140,7 +140,7 @@ public class UIPanelController : MonoBehaviour
 
     public void Go(UIState s)
     {
-        SetActive(menuUI, s == UIState.Menu);
+        //SetActive(menuUI, s == UIState.Menu);
         SetActive(hudUI, s == UIState.Gameplay);
         SetActive(countDownUI, s == UIState.Countdown);
         SetActive(gameOverUI, s == UIState.GameOverOverlay);

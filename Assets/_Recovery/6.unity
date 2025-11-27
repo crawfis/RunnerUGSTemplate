@@ -982,8 +982,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
   _lastSceneToKeepIndex: 0
-  _unloadScenesTriggerEvent: 10
-  _scenesUnloadedEvent: 21
+  _unloadScenesTriggerEvent: 7
+  _scenesUnloadedEvent: 23
 --- !u!1001 &1130468401
 PrefabInstance:
   m_ObjectHideFlags: 0
