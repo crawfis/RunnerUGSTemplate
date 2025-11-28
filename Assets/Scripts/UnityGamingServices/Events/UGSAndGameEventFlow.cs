@@ -24,13 +24,13 @@ namespace CrawfisSoftware.Events
             { UGS_EventsEnum.PlayerAuthenticating, UGS_EventsEnum.PlayerAuthenticated },
             { UGS_EventsEnum.PlayerSigningOut, UGS_EventsEnum.PlayerSignedOut },
             { UGS_EventsEnum.ScoreUpdating, UGS_EventsEnum.ScoreUpdated },
-            { UGS_EventsEnum.LeaderboardOpening, UGS_EventsEnum.LeaderboardOpened  },
-            { UGS_EventsEnum.LeaderboardOpened, UGS_EventsEnum.LeaderboardClosing },
-            { UGS_EventsEnum.LeaderboardClosing, UGS_EventsEnum.LeaderboardClosed },
+            //{ UGS_EventsEnum.LeaderboardOpening, UGS_EventsEnum.LeaderboardOpened }, // Published by: LeaderboardController
+            //{ UGS_EventsEnum.LeaderboardOpened, UGS_EventsEnum.LeaderboardClosing },
+            //{ UGS_EventsEnum.LeaderboardClosing, UGS_EventsEnum.LeaderboardClosed },
             { UGS_EventsEnum.LeaderboardClosed, UGS_EventsEnum.AchievementsOpening },
-            { UGS_EventsEnum.AchievementsOpening, UGS_EventsEnum.AchievementsOpened },
-            { UGS_EventsEnum.AchievementsOpened, UGS_EventsEnum.AchievementsClosing },
-            { UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
+            //{ UGS_EventsEnum.AchievementsOpening, UGS_EventsEnum.AchievementsOpened },
+            //{ UGS_EventsEnum.AchievementsOpened, UGS_EventsEnum.AchievementsClosing },
+            //{ UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
             { UGS_EventsEnum.AchievementsClosed, UGS_EventsEnum.RewardAdWatching },
             { UGS_EventsEnum.RewardAdWatching, UGS_EventsEnum.RewardAdWatched },
             { UGS_EventsEnum.RewardAdWatched, UGS_EventsEnum.PlayerAuthenticating }, // Loop back to PlayerAuthenticating for continuous flow and a check on whether the player is still authenticated
@@ -48,19 +48,20 @@ namespace CrawfisSoftware.Events
 
         protected readonly Dictionary<GameFlowEvents, GameFlowEvents> _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
         {
-            { GameFlowEvents.LoadingScreenShowing, GameFlowEvents.LoadingScreenShown }, // => Show Loading
+            //{ GameFlowEvents.LoadingScreenShowing, GameFlowEvents.LoadingScreenShown }, // => Show Loading
             //{ GameFlowEvents.LoadingScreenShown, GameFlowEvents.LoadingScreenHidding }, // => Start Hidding Loading
             //{ GameFlowEvents.LoadingScreenHidding, GameFlowEvents.LoadingScreenHidden },
             //{ GameFlowEvents.LoadingScreenHidden, GameFlowEvents.GameplayReady },
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowing }, // => Show Menu
-            { GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown },
-            { GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
-            { GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
+            //{ GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown },
+            //{ GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
+            //{ GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStarting },
             { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStarting },
             //{ GameFlowEvents.CountdownStarting, GameFlowEvents.CountdownStarted },
             //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
-            //{ GameFlowEvents.CountdownTick, GameFlowEvents.GameStarted },
+            { GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
+            //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
             { GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
             { GameFlowEvents.GameScenesUnloaded, GameFlowEvents.GameEnded },
@@ -75,6 +76,13 @@ namespace CrawfisSoftware.Events
             EventsPublisherUGS.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromUGSEvent);
             EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
             EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
+        }
+        private void OnDestroy()
+        {
+            EventsPublisherUGS.Instance.UnsubscribeToAllEnumEvents(AutoFireUGSEventFromUGSEvent);
+            EventsPublisherUGS.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromUGSEvent);
+            EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
+            EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
         }
 
         private void AutoFireUGSEventFromUGSEvent(string eventName, object sender, object data)
@@ -113,7 +121,8 @@ namespace CrawfisSoftware.Events
         {
             if (_delayBetweenEvents <= 0)
             {
-                EventsPublisher.Instance.PublishEvent(eventName, sender, data);
+                //EventsPublisher.Instance.PublishEvent(eventName, sender, data);
+                EventsPublisher.Instance.PublishEvent(eventName, this, data);
                 return;
             }
             StartCoroutine(DelayPublishingNextAutoEvent(eventName, sender, data));
@@ -122,7 +131,8 @@ namespace CrawfisSoftware.Events
         private IEnumerator DelayPublishingNextAutoEvent(string eventName, object sender, object data)
         {
             yield return new WaitForSeconds(_delayBetweenEvents);
-            EventsPublisher.Instance.PublishEvent(eventName, sender, data);
+            //EventsPublisher.Instance.PublishEvent(eventName, sender, data);
+            EventsPublisher.Instance.PublishEvent(eventName, this, data);
         }
     }
 }

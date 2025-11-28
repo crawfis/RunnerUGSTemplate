@@ -2,6 +2,7 @@
 using CrawfisSoftware.GameConfig;
 using CrawfisSoftware.TempleRun;
 
+using System;
 using System.Collections;
 
 using UnityEngine;
@@ -47,7 +48,6 @@ public class UIPanelController : MonoBehaviour
         EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarting, OnGameStarting);
         EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
         EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
-        EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
         // Todo: Wait for an event that the menu is ready (e.g., remote config loaded, addressables, etc.) before showing it
         StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
 
@@ -74,7 +74,6 @@ public class UIPanelController : MonoBehaviour
         EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarting, OnGameStarting);
         EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
         EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
-        EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
     }
 
     //private void OnPlayerAuthenticated(string eventName, object sender, object data)
@@ -82,16 +81,6 @@ public class UIPanelController : MonoBehaviour
     //    _isSignedIn = true;
     //    StartCoroutine(ShowMenuDelayed(1f));
     //}
-
-    private IEnumerator ShowMenuDelayed(float delay)
-    {
-        yield return new WaitForSecondsRealtime(delay);
-        Go(UIState.Menu);
-    }
-
-    private void OnUnityInitialized(string eventName, object sender, object data)
-    {
-    }
 
     private void OnGameStarting(string eventName, object sender, object data)
     {
@@ -109,13 +98,7 @@ public class UIPanelController : MonoBehaviour
 
     private void OnGameEnding(string eventName, object sender, object data)
     {
-        Go(UIState.GameOverOverlay);
-    }
-
-    private void OnGameEnded(string eventName, object sender, object data)
-    {
-        //Go(UIState.Feedback);
-        Go(UIState.Menu);
+        ShowGameOver();
     }
 
     private IEnumerator ShowLoadingRoutine(float seconds)
@@ -160,18 +143,36 @@ public class UIPanelController : MonoBehaviour
     {
         float t = seconds;
         var label = countDownUI.rootVisualElement.Q<Label>("Countdown");
+        int t_seconds = Mathf.FloorToInt(t);
+        int last_reported_second = t_seconds;
         while (t > 0f)
         {
             if (label != null) label.text = Mathf.CeilToInt(t).ToString();
             yield return null;
             t -= Time.deltaTime;
+            t_seconds = Mathf.FloorToInt(t);
+            if (t_seconds != last_reported_second)
+            {
+                last_reported_second = t_seconds;
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownTick, this, t_seconds);
+            }
         }
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownEnding, this, null);
         SetActive(countDownUI, false);
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownEnded, this, null);
     }
 
     public void ShowGameOver()
     {
         if (!gameOverUI) { Debug.LogWarning("GameOver UXML not set"); return; }
         SetActive(gameOverUI, true);
+        StartCoroutine(ShowGameOverRoutine());
+    }
+
+    private IEnumerator ShowGameOverRoutine()
+    {
+        yield return new WaitForSecondsRealtime(GameConstants.GameOverDisplayTime);
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameScenesUnloaded, this, null);
+        Go(UIState.None);
     }
 }

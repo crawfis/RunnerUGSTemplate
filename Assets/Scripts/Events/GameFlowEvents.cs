@@ -8,7 +8,7 @@
         GameStarting, GameStarted, GameEnding, GameEnded, 
         Pause, Resume, 
         Quitting, Quitted,
-        CountdownStarting, CountdownStarted, CountdownTick,
+        CountdownStarting, CountdownStarted, CountdownTick, CountdownEnding, CountdownEnded,
         GameDifficultyChanged,
         GameScenesUnloading, GameScenesUnloaded,
         GameScenesLoading, GameScenesLoaded,

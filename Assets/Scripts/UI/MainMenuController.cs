@@ -40,7 +40,7 @@ namespace CrawfisSoftware.UI
 
         private void OnStartGameButtonClicked()
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameStarting, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameScenesLoading, this, null);
         }
     }
 }

@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82a26bdedbe83b14cbef8657acd42368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Events.UGSAndGameEventFlow
-  _delayBetweenEvents: 0.2
+  _delayBetweenEvents: -1
 --- !u!4 &252218540
 Transform:
   m_ObjectHideFlags: 0

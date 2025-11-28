@@ -30,13 +30,13 @@ namespace CrawfisSoftware.UGS.Achievements
                 Initialize(UseTrustedClient);
             }
             m_UiDocument.rootVisualElement.style.display = DisplayStyle.None;
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnAchievementsClosed);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.LeaderboardClosed, OnAchievementsOpening);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
         }
         private void OnDisable()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnAchievementsClosed);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.LeaderboardClosed, OnAchievementsOpening);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnAchievementsClosing);
         }
         private void OnAchievementsOpening(string arg1, object arg2, object arg3)
         {
@@ -44,10 +44,11 @@ namespace CrawfisSoftware.UGS.Achievements
             this.gameObject.SetActive(true);
         }
 
-        private void OnAchievementsClosed(string arg1, object arg2, object arg3)
+        private void OnAchievementsClosing(string arg1, object arg2, object arg3)
         {
             m_UiDocument.rootVisualElement.style.display = DisplayStyle.None;
             this.gameObject.SetActive(false);
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.AchievementsClosed, this, null);
         }
 
         /// <summary>

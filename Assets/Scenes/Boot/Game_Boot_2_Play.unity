@@ -166,7 +166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
   _lastSceneToKeepIndex: 8
   _unloadScenesTriggerEvent: 10
-  _scenesUnloadedEvent: 21
+  _scenesUnloadedEvent: 22
 --- !u!1 &1438859063
 GameObject:
   m_ObjectHideFlags: 0
@@ -214,7 +214,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
   _sceneName: TempleRunGameplay
   _loadadditively: 1
-  _eventToListenTo: GameStarting
+  _eventToListenTo: GameScenesLoading
   _delayInSeconds: 0
 --- !u!114 &1438859068
 MonoBehaviour:
@@ -230,7 +230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
   _sceneName: TempleRunTrackPCG
   _loadadditively: 1
-  _eventToListenTo: GameStarting
+  _eventToListenTo: GameScenesLoading
   _delayInSeconds: 0
 --- !u!1 &1555168398
 GameObject:

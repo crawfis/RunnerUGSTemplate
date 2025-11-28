@@ -1,5 +1,4 @@
 ﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.GameConfig;
 
 using System.Collections;
 
@@ -23,13 +22,15 @@ namespace CrawfisSoftware.TempleRun
         {
             _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
         }
         private void UnsubscribeToEvents()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
         }
 
-        private void Start()
+        private void OnCountdownEnded(string EventName, object sender, object data)
         {
             _ = StartCoroutine(StartGame());
         }
@@ -37,15 +38,15 @@ namespace CrawfisSoftware.TempleRun
         private IEnumerator StartGame()
         {
             yield return null;
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Resume, this, UnityEngine.Time.time);
-            yield return new WaitForSecondsRealtime(GameConstants.CountdownSeconds);
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameStarted, this, UnityEngine.Time.time);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Resume, this, null);
+            //yield return new WaitForSecondsRealtime(GameConstants.CountdownSeconds);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameStarted, this, null);
             //EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
         }
 
         private void OnPlayerDied(string EventName, object sender, object data)
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, UnityEngine.Time.time);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, null);
         }
 
         private void OnDestroy()

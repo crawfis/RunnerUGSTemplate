@@ -10,23 +10,25 @@ namespace CrawfisSoftware.UI
         public UIDocument menuUI;
         private void Awake()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarting, (_, _, _) => HidePanel());
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameplayReady, (_, _, _) => ShowPanel());
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoading, (_, _, _) => HidePanel());
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.MainMenuShowing, (_, _, _) => ShowPanel());
         }
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarting, (_, _, _) => HidePanel());
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameplayReady, (_, _, _) => ShowPanel());
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameScenesLoading, (_, _, _) => HidePanel());
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.MainMenuShowing, (_, _, _) => ShowPanel());
         }
 
         private void ShowPanel()
         {
             menuUI.rootVisualElement.visible = true;
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.MainMenuShown, this, null);
         }
 
         private void HidePanel()
         {
             menuUI.rootVisualElement.visible = false;
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.MainMenuHidden, this, null);
         }
     }
 }
