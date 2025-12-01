@@ -9,6 +9,7 @@
         GameManagerInstantiated,
         PlayerResumedFromExpiredToken, PlayerSigningIn, PlayerSignedIn, PlayerAuthenticating, PlayerAuthenticated, 
         PlayerSigningOut, PlayerSignedOut, PlayerSignInFailed, PlayerSessionExpired,
+        CheckForExistingSession, CheckForExistingSessionFailed, CheckForExistingSessionSucceeded,
         ScoreUpdating, ScoreUpdated, ScoreFailedToUpdate,
         LeaderboardOpening, LeaderboardOpened, LeaderboardClosing, LeaderboardClosed,
         AchievementsOpening,AchievementsOpened,AchievementsClosing,AchievementsClosed,

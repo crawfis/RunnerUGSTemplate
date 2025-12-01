@@ -2,15 +2,17 @@ using CrawfisSoftware.GameConfig;
 
 using System;
 
+using Unity.Services.Core;
 using Unity.Services.RemoteConfig;
 
 using UnityEngine;
 
 namespace CrawfisSoftware.UGS
 {
-    public class RemoteConfigManager
+    public class RemoteConfigManager : MonoBehaviour, IDisposable
     {
-        private bool _logRemoteConfigValues = true;
+        [SerializeField] private string _remoteConfigDifficultyLevel = "Hard";
+        [SerializeField] private bool _logRemoteConfigValues = true;
 
         private GameDifficultyManager _gameDifficultyManager;
         private FeatureFlagsManager _featureFlagsManager;
@@ -22,6 +24,25 @@ namespace CrawfisSoftware.UGS
         public GameBalance GameBalance => _gameBalanceManager?.GameBalance ?? default;
         public CampaignEventConfig EventConfig => _eventConfigManager?.EventConfig ?? default;
         public bool IsInitialized => _isInitialized;
+
+        private void Awake()
+        {
+            //if(UnityServices.Instance != null && UnityServices.Instance.State == ServicesInitializationState.Initialized)
+            //if (UnityServices.State == ServicesInitializationState.Initialized)
+            if(UGS_State.IsUnityServicesInitialized)
+            {
+                OnUnityServicesInitialized("UnityServicesInitialized", this, null);
+            }
+            else
+            {
+                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
+            }
+        }
+
+        private void OnUnityServicesInitialized(string eventName, object sender, object data)
+        {
+            Initialize(_remoteConfigDifficultyLevel, _logRemoteConfigValues);
+        }
 
         public void Initialize(string difficultyLevel, bool logValues = true)
         {

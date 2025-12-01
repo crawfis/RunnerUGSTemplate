@@ -22,9 +22,9 @@ namespace CrawfisSoftware.UGS
         
         public void Awake()
         {
-            AuthenticationService.Instance.SwitchProfile("initial-development"); 
+            AuthenticationService.Instance.SwitchProfile(UGS_State.UGS_Environment); 
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, HandleSignedOut);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
             //AuthenticationService.Instance.SignedIn += HandleSuccessfulSignIn;
             //AuthenticationService.Instance.SignedOut += HandleSignedOut;
@@ -34,7 +34,7 @@ namespace CrawfisSoftware.UGS
         public void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, HandleSignedOut);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
             //AuthenticationService.Instance.SignedIn -= HandleSuccessfulSignIn;
             //AuthenticationService.Instance.SignedOut -= HandleSignedOut;
@@ -43,8 +43,11 @@ namespace CrawfisSoftware.UGS
 
         private async void Start()
         {
-            // Sign in here automatically from cached session on game start
-            await SignInCachedPlayerAsync();
+            if (UGS_State.IsCheckForExistingSession) // Missed the event being published.
+            {
+                // Sign in here automatically from cached session on game start
+                await SignInCachedPlayerAsync();
+            }
         }
 
         /// <summary>
@@ -61,36 +64,15 @@ namespace CrawfisSoftware.UGS
             if (!AuthenticationService.Instance.SessionTokenExists)
             {
                 Logger.LogDemo($"{k_KeyEmoji} No cached session found");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.CheckForExistingSessionFailed, this, null);
                 return;
             }
-            
-            try 
-            {
-                await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                Logger.LogDemo($"{k_KeyEmoji} Existing player returned");
+            Logger.Log($"{k_KeyEmoji} Existing player returned");
+            Debug.Log($"Returning Player ID: {AuthenticationService.Instance.PlayerId}");
+            Debug.Log($"Returning Player is Authorized: {AuthenticationService.Instance.IsAuthorized}");
 
-                // Sign in returning player using the Session Token stored after sign in.
-                // Players don't need to sign in with Unity Player Account again; using 
-                // this method will re-authorise them (they will keep the same Player ID).
-                if (AuthenticationService.Instance.IsAuthorized)
-                {
-                    //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
-                    Debug.Log($"Returning Player ID: {AuthenticationService.Instance.PlayerId}");
-                    Debug.Log($"Returning Player is Authorized: {AuthenticationService.Instance.IsAuthorized}");
-                    EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
-                }
-            }
-            catch (AuthenticationException ex) 
-            {
-                Logger.LogWarning($"💡 Authentication failed - if testing, try enabling 'Delete Account On Start' in GameInitializer to reset state {ex.Message}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
-            }
-            catch (RequestFailedException ex) 
-            {
-                Logger.LogWarning($"Network error during sign-in: {ex.Message}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
-            }
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.CheckForExistingSessionSucceeded, this, null);
+
         }
         
         /// <summary>
@@ -118,7 +100,7 @@ namespace CrawfisSoftware.UGS
                 EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
         }
-        
+
         private void HandleSuccessfulSignIn(string eventName, object sender, object data)
         {
             // For simplicity, requires being online
@@ -129,15 +111,44 @@ namespace CrawfisSoftware.UGS
                 m_IsResumingFromExpiredToken = false;
                 //return;
             }
-            _ = SignInCachedPlayerAsync();
-            //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, null);
-            // PlayerDataManagerClient handles sign in by fetching cloud data, this flows to overwriting local data
-            LogPlayerInfo();
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerId, AuthenticationService.Instance.AccessToken));
+            // Start the async handling without awaiting it here
+            _ = HandleSuccessfulSignInAsync();
+        }
+        private async Task HandleSuccessfulSignInAsync()
+        {
+            if(AuthenticationService.Instance.IsSignedIn)
+            {
+                Logger.LogDemo($"{k_KeyEmoji} Player already signed in");
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                LogPlayerInfo();
+                return;
+            }
+            try
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                if (AuthenticationService.Instance.IsAuthorized)
+                {
+                    EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                    LogPlayerInfo();
+                    return;
+                }
+            }
+            catch (AuthenticationException ex)
+            {
+                Logger.LogWarning($"💡 Authentication failed - if testing, try enabling 'Delete Account On Start' in GameInitializer to reset state {ex.Message}");
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+            }
+            catch (RequestFailedException ex)
+            {
+                Logger.LogWarning($"Network error during sign-in: {ex.Message}");
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+            }
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
         }
 
         private void HandleSignedOut(string eventName, object sender, object data)
         {
+            AuthenticationService.Instance.SignOut(true);
             Logger.LogDemo($"{k_KeyEmoji} Player signed out");
         }
 

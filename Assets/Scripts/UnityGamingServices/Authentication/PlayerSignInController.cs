@@ -1,9 +1,5 @@
 using Blocks.PlayerAccount;
 
-using CrawfisSoftware.Events;
-
-using Unity.VisualScripting;
-
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -28,6 +24,11 @@ namespace CrawfisSoftware.UGS.Authentication
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnSignIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
+
+            if(UGS_State.IsPlayerSigningIn)
+            {
+                OnPlayerSigningIn(UGS_EventsEnum.PlayerSigningIn.ToString(), this, null);
+            }
         }
 
         private void OnDestroy()
@@ -42,7 +43,6 @@ namespace CrawfisSoftware.UGS.Authentication
             _root.AddToClassList(k_HiddenClass);
             _signedIn = true;
             this.gameObject.SetActive(false);
-            //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, null);
         }
 
         private void OnPlayerSignOut(string eventName, object sender, object data)
@@ -51,13 +51,13 @@ namespace CrawfisSoftware.UGS.Authentication
             _signInElement.RemoveFromClassList(k_HiddenClass);
             _root.RemoveFromClassList(k_HiddenClass);
             this.gameObject.SetActive(true);
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSigningOut, this, null);
         }
 
         private void OnPlayerSigningIn(string eventName, object sender, object data)
         {
             if (_signedIn)
             {
-                //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, null);
                 return;
             }
             _root.RemoveFromClassList(k_HiddenClass);
@@ -71,9 +71,6 @@ namespace CrawfisSoftware.UGS.Authentication
                 Debug.LogError("No UIDocument found in scene!");
                 return;
             }
-            //_signInElement.AddToClassList(k_HiddenClass);
-            //_root.AddToClassList(k_HiddenClass);
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSigningIn, this, null);
 
             m_AuthenticationObserver.RegisterSignedInCallback(() =>
             {

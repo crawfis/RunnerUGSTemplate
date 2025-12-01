@@ -12,5 +12,6 @@
         GameDifficultyChanged,
         GameScenesUnloading, GameScenesUnloaded,
         GameScenesLoading, GameScenesLoaded,
+        GameplayNotReady
     }
 }

@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e55dc4bd72bfd0d43ba0441becf5105c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.CloseSceneOnEvent
-  _eventToSubscribeTo: 24
+  _eventToSubscribeTo: 27
   _unsubscribeOnEvent: 1
 --- !u!4 &200580836
 Transform:

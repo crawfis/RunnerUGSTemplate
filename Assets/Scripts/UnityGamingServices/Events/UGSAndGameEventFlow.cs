@@ -18,14 +18,18 @@ namespace CrawfisSoftware.Events
         protected readonly Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
         {
             // UnityServicesInitialized is fired by Unity's ServicesInitialization component in the InitializeServices GameObject in the UGS_Boot_0_Initialization scene.
+            // Since that happens before any of this is set-up, we need to handle it specially in Start()
             { UGS_EventsEnum.UnityServicesInitialized, UGS_EventsEnum.RemoteConfigFetching },
-            { UGS_EventsEnum.RemoteConfigFetching, UGS_EventsEnum.RemoteConfigFetched },
-            { UGS_EventsEnum.RemoteConfigFetched, UGS_EventsEnum.RemoteConfigUpdated },
-            //{ UGS_EventsEnum.RemoteConfigUpdated, UGS_EventsEnum.PlayerSigningIn },
+            //{ UGS_EventsEnum.RemoteConfigFetching, UGS_EventsEnum.RemoteConfigFetched },
+            //{ UGS_EventsEnum.RemoteConfigFetched, UGS_EventsEnum.RemoteConfigUpdated },
+            { UGS_EventsEnum.RemoteConfigUpdated, UGS_EventsEnum.CheckForExistingSession },
+            //{ UGS_EventsEnum.CheckForExistingSession, UGS_EventsEnum.CheckForExistingSessionSucceeded },
+            { UGS_EventsEnum.CheckForExistingSessionSucceeded, UGS_EventsEnum.PlayerAuthenticating },
+            { UGS_EventsEnum.CheckForExistingSessionFailed, UGS_EventsEnum.PlayerSigningIn },
             //{ UGS_EventsEnum.PlayerSigningIn, UGS_EventsEnum.PlayerSignedIn }, // PlayerSignedIn is fired by PlayerSignInController
-            //{ UGS_EventsEnum.PlayerSignedIn, UGS_EventsEnum.PlayerAuthenticating },
+            { UGS_EventsEnum.PlayerSignedIn, UGS_EventsEnum.PlayerAuthenticating },
             //{ UGS_EventsEnum.PlayerAuthenticating, UGS_EventsEnum.PlayerAuthenticated }, // PlayerAuthenticated is fired by PlayerSignInController
-            { UGS_EventsEnum.PlayerSigningOut, UGS_EventsEnum.PlayerSignedOut },
+            //{ UGS_EventsEnum.PlayerSigningOut, UGS_EventsEnum.PlayerSignedOut },
             { UGS_EventsEnum.PlayerSignedOut, UGS_EventsEnum.PlayerSigningIn }, // Loop back to PlayerSigningIn to allow re-sign in
             { UGS_EventsEnum.PlayerSignInFailed, UGS_EventsEnum.PlayerSigningIn }, // Loop back to PlayerSigningIn to allow re-sign in
             { UGS_EventsEnum.ScoreUpdating, UGS_EventsEnum.ScoreUpdated },
@@ -35,7 +39,7 @@ namespace CrawfisSoftware.Events
             { UGS_EventsEnum.LeaderboardClosed, UGS_EventsEnum.AchievementsOpening },
             //{ UGS_EventsEnum.AchievementsOpening, UGS_EventsEnum.AchievementsOpened },
             //{ UGS_EventsEnum.AchievementsOpened, UGS_EventsEnum.AchievementsClosing },
-            { UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
+            //{ UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
             { UGS_EventsEnum.AchievementsClosed, UGS_EventsEnum.RewardAdWatching },
             { UGS_EventsEnum.RewardAdWatching, UGS_EventsEnum.RewardAdWatched },
             { UGS_EventsEnum.RewardAdWatched, UGS_EventsEnum.PlayerAuthenticating }, // Loop back to PlayerAuthenticating for continuous flow and a check on whether the player is still authenticated
@@ -43,6 +47,7 @@ namespace CrawfisSoftware.Events
         protected readonly Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
         {
             { UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady },
+            { UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady },
             { UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHidding },
         };
 
@@ -58,6 +63,7 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.LoadingScreenHidding, GameFlowEvents.LoadingScreenHidden }, // LoadingScreenHidden is fired by UIPanelController in Game_Boot_1_UI
             //{ GameFlowEvents.LoadingScreenHidden, GameFlowEvents.GameplayReady },
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowing }, // => Show Menu
+            //{ GameFlowEvents.GameplayNotReady, GameFlowEvents.MainMenuHidden }, // => Hide Menu
             //{ GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown }, // MainMenuShown is fired by MainMenuPanelController in Game_Boot_1_UI scene
             //{ GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
             //{ GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
@@ -67,7 +73,7 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
             { GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
             //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
-            { GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
+            //{ GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
             { GameFlowEvents.GameScenesUnloaded, GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameEnded, GameFlowEvents.GameplayReady  }, //=> Show Menu
