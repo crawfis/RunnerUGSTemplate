@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using Unity.Services.Core;
+
 using UnityEngine;
 
 namespace CrawfisSoftware.Events
@@ -15,14 +17,17 @@ namespace CrawfisSoftware.Events
 
         protected readonly Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
         {
+            // UnityServicesInitialized is fired by Unity's ServicesInitialization component in the InitializeServices GameObject in the UGS_Boot_0_Initialization scene.
             { UGS_EventsEnum.UnityServicesInitialized, UGS_EventsEnum.RemoteConfigFetching },
-            //{ UGS_EventsEnum.RemoteConfigFetching, UGS_EventsEnum.RemoteConfigFetched },
-            //{ UGS_EventsEnum.RemoteConfigFetched, UGS_EventsEnum.RemoteConfigUpdated },
-            { UGS_EventsEnum.RemoteConfigUpdated, UGS_EventsEnum.PlayerSigningIn },
-            { UGS_EventsEnum.PlayerSigningIn, UGS_EventsEnum.PlayerSignedIn },
-            { UGS_EventsEnum.PlayerSignedIn, UGS_EventsEnum.PlayerAuthenticating },
-            { UGS_EventsEnum.PlayerAuthenticating, UGS_EventsEnum.PlayerAuthenticated },
+            { UGS_EventsEnum.RemoteConfigFetching, UGS_EventsEnum.RemoteConfigFetched },
+            { UGS_EventsEnum.RemoteConfigFetched, UGS_EventsEnum.RemoteConfigUpdated },
+            //{ UGS_EventsEnum.RemoteConfigUpdated, UGS_EventsEnum.PlayerSigningIn },
+            //{ UGS_EventsEnum.PlayerSigningIn, UGS_EventsEnum.PlayerSignedIn }, // PlayerSignedIn is fired by PlayerSignInController
+            //{ UGS_EventsEnum.PlayerSignedIn, UGS_EventsEnum.PlayerAuthenticating },
+            //{ UGS_EventsEnum.PlayerAuthenticating, UGS_EventsEnum.PlayerAuthenticated }, // PlayerAuthenticated is fired by PlayerSignInController
             { UGS_EventsEnum.PlayerSigningOut, UGS_EventsEnum.PlayerSignedOut },
+            { UGS_EventsEnum.PlayerSignedOut, UGS_EventsEnum.PlayerSigningIn }, // Loop back to PlayerSigningIn to allow re-sign in
+            { UGS_EventsEnum.PlayerSignInFailed, UGS_EventsEnum.PlayerSigningIn }, // Loop back to PlayerSigningIn to allow re-sign in
             { UGS_EventsEnum.ScoreUpdating, UGS_EventsEnum.ScoreUpdated },
             //{ UGS_EventsEnum.LeaderboardOpening, UGS_EventsEnum.LeaderboardOpened }, // Published by: LeaderboardController
             //{ UGS_EventsEnum.LeaderboardOpened, UGS_EventsEnum.LeaderboardClosing },
@@ -30,7 +35,7 @@ namespace CrawfisSoftware.Events
             { UGS_EventsEnum.LeaderboardClosed, UGS_EventsEnum.AchievementsOpening },
             //{ UGS_EventsEnum.AchievementsOpening, UGS_EventsEnum.AchievementsOpened },
             //{ UGS_EventsEnum.AchievementsOpened, UGS_EventsEnum.AchievementsClosing },
-            //{ UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
+            { UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
             { UGS_EventsEnum.AchievementsClosed, UGS_EventsEnum.RewardAdWatching },
             { UGS_EventsEnum.RewardAdWatching, UGS_EventsEnum.RewardAdWatched },
             { UGS_EventsEnum.RewardAdWatched, UGS_EventsEnum.PlayerAuthenticating }, // Loop back to PlayerAuthenticating for continuous flow and a check on whether the player is still authenticated
@@ -48,12 +53,12 @@ namespace CrawfisSoftware.Events
 
         protected readonly Dictionary<GameFlowEvents, GameFlowEvents> _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
         {
-            //{ GameFlowEvents.LoadingScreenShowing, GameFlowEvents.LoadingScreenShown }, // => Show Loading
+            //{ GameFlowEvents.LoadingScreenShowing, GameFlowEvents.LoadingScreenShown }, // (Inititally) Fired by UIPanelController in the Game_Boot_1_UI
             //{ GameFlowEvents.LoadingScreenShown, GameFlowEvents.LoadingScreenHidding }, // => Start Hidding Loading
-            //{ GameFlowEvents.LoadingScreenHidding, GameFlowEvents.LoadingScreenHidden },
+            //{ GameFlowEvents.LoadingScreenHidding, GameFlowEvents.LoadingScreenHidden }, // LoadingScreenHidden is fired by UIPanelController in Game_Boot_1_UI
             //{ GameFlowEvents.LoadingScreenHidden, GameFlowEvents.GameplayReady },
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowing }, // => Show Menu
-            //{ GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown },
+            //{ GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown }, // MainMenuShown is fired by MainMenuPanelController in Game_Boot_1_UI scene
             //{ GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
             //{ GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStarting },
@@ -67,7 +72,7 @@ namespace CrawfisSoftware.Events
             { GameFlowEvents.GameScenesUnloaded, GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameEnded, GameFlowEvents.GameplayReady  }, //=> Show Menu
             //{ GameFlowEvents.Pause, GameFlowEvents.Resume  },
-            { GameFlowEvents.Quitting, GameFlowEvents.Quitted },
+            //{ GameFlowEvents.Quitting, GameFlowEvents.Quitted }, // Quitted is fired by th Quitting GameObject in the 0_BootStrap scene
         };
 
         private void Awake()
@@ -85,11 +90,18 @@ namespace CrawfisSoftware.Events
             EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
         }
 
+        private void Start()
+        {
+            if(UnityServices.State == ServicesInitializationState.Initialized)
+            {
+                DelayedFire(0, UGS_EventsEnum.UnityServicesInitialized.ToString(), this, null);
+            }
+        }
         private void AutoFireUGSEventFromUGSEvent(string eventName, object sender, object data)
         {
             if (_autoUGS2UGSEvents.TryGetValue((UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName), out UGS_EventsEnum autoEvent))
             {
-                DelayedFire(autoEvent.ToString(), sender, data);
+                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
             }
         }
 
@@ -97,7 +109,7 @@ namespace CrawfisSoftware.Events
         {
             if (_autoGameFlow2UGSEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out UGS_EventsEnum autoEvent))
             {
-                DelayedFire(autoEvent.ToString(), sender, data);
+                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
             }
         }
 
@@ -105,7 +117,7 @@ namespace CrawfisSoftware.Events
         {
             if (_autoUGS2GameFlowEvents.TryGetValue((UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName), out GameFlowEvents autoEvent))
             {
-                DelayedFire(autoEvent.ToString(), sender, data);
+                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
             }
         }
 
@@ -113,13 +125,13 @@ namespace CrawfisSoftware.Events
         {
             if (_autoGameFlow2GameFlowEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out GameFlowEvents autoEvent))
             {
-                DelayedFire(autoEvent.ToString(), sender, data);
+                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
             }
         }
 
-        private void DelayedFire(string eventName, object sender, object data)
+        private void DelayedFire(float delayBetweenEvents, string eventName, object sender, object data)
         {
-            if (_delayBetweenEvents <= 0)
+            if (delayBetweenEvents <= 0)
             {
                 //EventsPublisher.Instance.PublishEvent(eventName, sender, data);
                 EventsPublisher.Instance.PublishEvent(eventName, this, data);

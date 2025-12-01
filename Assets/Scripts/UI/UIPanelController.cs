@@ -53,12 +53,12 @@ public class UIPanelController : MonoBehaviour
 
     }
 
-    //private void OnFeedbackClosed(string arg1, object arg2, object arg3)
+    //private void OnFeedbackClosed(string eventName, object sender, object data)
     //{
     //    Go(UIState.Menu);
     //}
 
-    //private void OnPlayerSignOut(string arg1, object arg2, object arg3)
+    //private void OnPlayerSignOut(string eventName, object sender, object data)
     //{
     //    _isSignedIn = false;
     //    Go(UIState.None);

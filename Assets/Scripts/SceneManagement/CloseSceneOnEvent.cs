@@ -18,7 +18,7 @@ namespace CrawfisSoftware.SceneManagement
             EventsPublisherUGS.Instance.UnsubscribeToEvent(_eventToSubscribeTo, OnEventReceived);
         }
 
-        private void OnEventReceived(string arg1, object arg2, object arg3)
+        private void OnEventReceived(string eventName, object sender, object data)
         {
             if(_unsubscribeOnEvent)
                 EventsPublisherUGS.Instance.UnsubscribeToEvent(_eventToSubscribeTo, OnEventReceived);

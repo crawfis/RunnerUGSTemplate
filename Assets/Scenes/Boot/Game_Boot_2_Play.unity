@@ -167,6 +167,7 @@ MonoBehaviour:
   _lastSceneToKeepIndex: 8
   _unloadScenesTriggerEvent: 10
   _scenesUnloadedEvent: 22
+  _unsubscribeOnEvent: 0
 --- !u!1 &1438859063
 GameObject:
   m_ObjectHideFlags: 0

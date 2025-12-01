@@ -1,5 +1,7 @@
-using System.Linq;
 using Blocks.Achievements.UI;
+
+using System.Linq;
+
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -33,21 +35,21 @@ namespace CrawfisSoftware.UGS.Achievements
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
         }
-        private void OnDisable()
+        private void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnAchievementsClosing);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
         }
-        private void OnAchievementsOpening(string arg1, object arg2, object arg3)
+        private void OnAchievementsOpening(string eventName, object sender, object data)
         {
             m_UiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
-            this.gameObject.SetActive(true);
+            //this.gameObject.SetActive(true);
         }
 
-        private void OnAchievementsClosing(string arg1, object arg2, object arg3)
+        private void OnAchievementsClosing(string eventName, object sender, object data)
         {
             m_UiDocument.rootVisualElement.style.display = DisplayStyle.None;
-            this.gameObject.SetActive(false);
+            //this.gameObject.SetActive(false);
             EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.AchievementsClosed, this, null);
         }
 

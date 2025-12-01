@@ -347,6 +347,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1831359990}
   - component: {fileID: 1831359989}
+  - component: {fileID: 1831359991}
   m_Layer: 0
   m_Name: Load_Authentication
   m_TagString: Untagged
@@ -382,6 +383,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1831359991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1831359988}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
+  _sceneName: UGS_Boot_2_Authentication
+  _loadadditively: 1
+  _eventToListenTo: UnityServicesInitialized
+  _delayInSeconds: 1
 --- !u!1 &1833760800
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,4 @@
-﻿using System;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -29,12 +27,18 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerResume, OnPlayerResume);
         }
 
-        private void OnPlayerPause(string arg1, object arg2, object arg3)
+        private void OnDestroy()
+        {
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerPause, OnPlayerPause);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerResume, OnPlayerResume);
+        }
+
+        private void OnPlayerPause(string eventName, object sender, object data)
         {
             _timeScale = 0f;
         }
 
-        private void OnPlayerResume(string arg1, object arg2, object arg3)
+        private void OnPlayerResume(string eventName, object sender, object data)
         {
             _timeScale = 1f;
         }

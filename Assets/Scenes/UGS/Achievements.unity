@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a4a3acd166bf184a982b8d8d3fb4df1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Utility.TimedEvent
-  _delayInSeconds: 10
+  _delayInSeconds: 5
   _eventName: AchievementsClosing
   _useRealtime: 1
 --- !u!4 &557542971
@@ -253,7 +253,7 @@ PrefabInstance:
     - target: {fileID: 9033333563459808054, guid: f2421fc3995e74e4f8326c98cdd0dcb0,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

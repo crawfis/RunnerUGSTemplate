@@ -1,9 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Threading.Tasks;
+
 using Unity.Services.Authentication;
 using Unity.Services.Core;
-using CrawfisSoftware.Utilities;
+
+using UnityEngine;
+
 using Logger = CrawfisSoftware.Utilities.Logger;
 namespace CrawfisSoftware.UGS
 {
@@ -12,37 +13,38 @@ namespace CrawfisSoftware.UGS
     /// Handles initial sign-in with cached credentials, access token expiry recovery,
     /// and authentication state changes through events. 
     /// </summary>
-    public class PlayerAuthenticationManager : IDisposable
+    public class PlayerAuthenticationManager : MonoBehaviour
     {
         public bool IsSignedIn => AuthenticationService.Instance.IsSignedIn;
         private bool m_IsResumingFromExpiredToken = false;
         
-        /// <summary>
-        /// Triggered when sign-in is successful.
-        /// </summary>
-        public event Action SignedIn;
-        /// <summary>
-        /// Triggered when sign-in succeeds after recovering from an expired access token.
-        /// This is distinct from initial sign-in and thus could be handled differently.
-        /// </summary>
-        public event Action SignedInAfterTokenExpiry;
-        public event Action SignInFailed;
         private const string k_KeyEmoji = "🔑";
         
-        public PlayerAuthenticationManager()
+        public void Awake()
         {
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, HandleSuccessfulSignIn);
+            AuthenticationService.Instance.SwitchProfile("initial-development"); 
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, HandleSignedOut);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
             //AuthenticationService.Instance.SignedIn += HandleSuccessfulSignIn;
-            AuthenticationService.Instance.SignedOut += HandleSignedOut;
-            AuthenticationService.Instance.Expired += HandleSessionExpired;
+            //AuthenticationService.Instance.SignedOut += HandleSignedOut;
+            //AuthenticationService.Instance.Expired += HandleSessionExpired;
         }
 
-        public void Dispose()
+        public void OnDestroy()
         {
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, HandleSignedOut);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
             //AuthenticationService.Instance.SignedIn -= HandleSuccessfulSignIn;
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, HandleSuccessfulSignIn);
-            AuthenticationService.Instance.SignedOut -= HandleSignedOut;
-            AuthenticationService.Instance.Expired -= HandleSessionExpired;
+            //AuthenticationService.Instance.SignedOut -= HandleSignedOut;
+            //AuthenticationService.Instance.Expired -= HandleSessionExpired;
+        }
+
+        private async void Start()
+        {
+            // Sign in here automatically from cached session on game start
+            await SignInCachedPlayerAsync();
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace CrawfisSoftware.UGS
             if (!AuthenticationService.Instance.SessionTokenExists)
             {
                 Logger.LogDemo($"{k_KeyEmoji} No cached session found");
-                SignInFailed?.Invoke();
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
                 return;
             }
             
@@ -67,16 +69,27 @@ namespace CrawfisSoftware.UGS
             {
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 Logger.LogDemo($"{k_KeyEmoji} Existing player returned");
+
+                // Sign in returning player using the Session Token stored after sign in.
+                // Players don't need to sign in with Unity Player Account again; using 
+                // this method will re-authorise them (they will keep the same Player ID).
+                if (AuthenticationService.Instance.IsAuthorized)
+                {
+                    //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                    Debug.Log($"Returning Player ID: {AuthenticationService.Instance.PlayerId}");
+                    Debug.Log($"Returning Player is Authorized: {AuthenticationService.Instance.IsAuthorized}");
+                    EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                }
             }
             catch (AuthenticationException ex) 
             {
                 Logger.LogWarning($"💡 Authentication failed - if testing, try enabling 'Delete Account On Start' in GameInitializer to reset state {ex.Message}");
-                SignInFailed?.Invoke();
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
             catch (RequestFailedException ex) 
             {
                 Logger.LogWarning($"Network error during sign-in: {ex.Message}");
-                SignInFailed?.Invoke();
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
         }
         
@@ -95,43 +108,40 @@ namespace CrawfisSoftware.UGS
             
             try
             {
-                Logger.LogDemo($"{k_KeyEmoji} Signing in again due to expired access token");
+                Logger.Log($"{k_KeyEmoji} Signing in again due to expired access token");
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 m_IsResumingFromExpiredToken = true;
             }
             catch (RequestFailedException ex) 
             {
                 Logger.LogWarning($"Network error during sign-in: {ex.Message}");
-                SignInFailed?.Invoke();
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
         }
         
         private void HandleSuccessfulSignIn(string eventName, object sender, object data)
         {
-            // For simplicity, GemHunterUGS requires being online
-            // In your projects, you'll likely want to handle start-up sign in and in-game "back online" sign-in separately
+            // For simplicity, requires being online
             if (m_IsResumingFromExpiredToken)
             {
                 // An event for handling coming online after being offline for a while (e.g. player progress is validated in and saved to cloud)
                 EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerResumedFromExpiredToken, this, UnityEngine.Time.time);
-                SignedInAfterTokenExpiry?.Invoke();
                 m_IsResumingFromExpiredToken = false;
-                return;
+                //return;
             }
-
+            _ = SignInCachedPlayerAsync();
             //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, null);
             // PlayerDataManagerClient handles sign in by fetching cloud data, this flows to overwriting local data
-            SignedIn?.Invoke();
             LogPlayerInfo();
             EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerId, AuthenticationService.Instance.AccessToken));
         }
 
-        private void HandleSignedOut()
+        private void HandleSignedOut(string eventName, object sender, object data)
         {
             Logger.LogDemo($"{k_KeyEmoji} Player signed out");
         }
 
-        private void HandleSessionExpired()
+        private void HandleSessionExpired(string eventName, object sender, object data)
         {
             Logger.LogDemo($"{k_KeyEmoji} Session expired! You'll need to sign in again when possible");
         }
@@ -140,7 +150,7 @@ namespace CrawfisSoftware.UGS
         {
             var playerId = AuthenticationService.Instance.PlayerId;
             var accessToken = AuthenticationService.Instance.AccessToken;
-            Logger.LogDemo($"{k_KeyEmoji} Authentication successful!" +
+            Logger.Log($"{k_KeyEmoji} Authentication successful!" +
                 $"\n{k_KeyEmoji} PlayerID: {playerId}" +
                 $"\n{k_KeyEmoji} Token: {accessToken}");
         }

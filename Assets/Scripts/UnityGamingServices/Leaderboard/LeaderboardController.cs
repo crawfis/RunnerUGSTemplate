@@ -52,7 +52,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
             _scoreUpdatedTcs?.TrySetResult(true);
         }
 
-        private void OnScoreUpdateFailed(string arg1, object arg2, object arg3)
+        private void OnScoreUpdateFailed(string eventName, object sender, object data)
         {
             Debug.LogWarning("LeaderboardController: Score update failed.");
         }

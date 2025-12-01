@@ -1,12 +1,9 @@
 ﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.TempleRun;
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
 
 namespace CrawfisSoftware.GameControl
@@ -16,6 +13,7 @@ namespace CrawfisSoftware.GameControl
         [SerializeField] private int _lastSceneToKeepIndex = 0;
         [SerializeField] private GameFlowEvents _unloadScenesTriggerEvent = GameFlowEvents.GameEnded;
         [SerializeField] private GameFlowEvents _scenesUnloadedEvent = GameFlowEvents.GameScenesUnloaded;
+        [SerializeField] private bool _unsubscribeOnEvent = true;
 
         private void Start()
         {
@@ -26,8 +24,12 @@ namespace CrawfisSoftware.GameControl
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(_unloadScenesTriggerEvent, OnGameOver);
         }
 
-        private void OnGameOver(string arg1, object arg2, object arg3)
+        private void OnGameOver(string eventName, object sender, object data)
         {
+            if (_unsubscribeOnEvent) 
+            {
+                EventsPublisherGameFlow.Instance.UnsubscribeToEvent(_unloadScenesTriggerEvent, OnGameOver);
+            }
             StartCoroutine(UnloadScenesAsync());
         }
 
