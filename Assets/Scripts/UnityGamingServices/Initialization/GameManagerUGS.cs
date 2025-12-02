@@ -35,9 +35,9 @@ namespace CrawfisSoftware.UGS
             HandleStartupAuthentication();
         }
         
-        private async void HandleStartupAuthentication()
+        private void HandleStartupAuthentication()
         {
-            await m_AuthenticationManager.SignInCachedPlayerAsync();
+            m_AuthenticationManager.SignInCachedPlayerAsync();
 
             if (m_AuthenticationManager.IsSignedIn)
             {

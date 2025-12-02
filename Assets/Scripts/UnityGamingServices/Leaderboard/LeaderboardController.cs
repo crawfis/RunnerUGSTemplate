@@ -76,7 +76,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
         {
             yield return new WaitUntil(() => !_isUpdating);
             yield return new WaitForSeconds(GameConstants.LeaderboardDisplayTime);
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.LeaderboardClosing, this, LeaderboardId);
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.LeaderboardClosing, "Leaderboard Controller", LeaderboardId);
         }
     }
 }

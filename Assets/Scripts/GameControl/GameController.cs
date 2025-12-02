@@ -46,7 +46,8 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnPlayerDied(string EventName, object sender, object data)
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, null);
+            float finalScore = (float)data;
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, finalScore);
         }
 
         private void OnDestroy()

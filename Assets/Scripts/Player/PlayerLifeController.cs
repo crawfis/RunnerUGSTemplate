@@ -27,7 +27,9 @@ namespace CrawfisSoftware.TempleRun
             _numberOfLives--;
             if (_numberOfLives <= 0)
             {
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerDied, this, _playerID);
+                float score = Blackboard.Instance.DistanceTracker.DistanceTravelled;
+                //EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerDied, this, _playerID);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerDied, this, score);
                 EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResume, this, UnityEngine.Time.time);
             }
         }

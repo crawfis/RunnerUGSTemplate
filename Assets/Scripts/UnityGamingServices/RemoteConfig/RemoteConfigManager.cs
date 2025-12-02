@@ -14,15 +14,15 @@ namespace CrawfisSoftware.UGS
         [SerializeField] private string _remoteConfigDifficultyLevel = "Hard";
         [SerializeField] private bool _logRemoteConfigValues = true;
 
-        private GameDifficultyManager _gameDifficultyManager;
-        private FeatureFlagsManager _featureFlagsManager;
-        private GameBalanceManager _gameBalanceManager;
-        private CampaignEventConfigManager _eventConfigManager;
+        //private GameDifficultyManager _gameDifficultyManager;
+        //private FeatureFlagsManager _featureFlagsManager;
+        //private GameBalanceManager _gameBalanceManager;
+        //private CampaignEventConfigManager _eventConfigManager;
         private bool _isInitialized = false;
 
-        public FeatureFlags FeatureFlags => _featureFlagsManager?.FeatureFlags ?? default;
-        public GameBalance GameBalance => _gameBalanceManager?.GameBalance ?? default;
-        public CampaignEventConfig EventConfig => _eventConfigManager?.EventConfig ?? default;
+        //public FeatureFlags FeatureFlags => _featureFlagsManager?.FeatureFlags ?? default;
+        //public GameBalance GameBalance => _gameBalanceManager?.GameBalance ?? default;
+        //public CampaignEventConfig EventConfig => _eventConfigManager?.EventConfig ?? default;
         public bool IsInitialized => _isInitialized;
 
         private void Awake()
@@ -50,24 +50,24 @@ namespace CrawfisSoftware.UGS
 
             _logRemoteConfigValues = logValues;
             
-            InitializeManagers(difficultyLevel);
+            //InitializeManagers(difficultyLevel);
             InitializeRemoteConfig();
 
             _isInitialized = true;
         }
 
-        private void InitializeManagers(string difficultyLevel)
-        {
-            _gameDifficultyManager = new GameDifficultyManager();
-            _featureFlagsManager = new FeatureFlagsManager();
-            _gameBalanceManager = new GameBalanceManager();
-            _eventConfigManager = new CampaignEventConfigManager();
+        //private void InitializeManagers(string difficultyLevel)
+        //{
+        //    _gameDifficultyManager = new GameDifficultyManager();
+        //    _featureFlagsManager = new FeatureFlagsManager();
+        //    _gameBalanceManager = new GameBalanceManager();
+        //    _eventConfigManager = new CampaignEventConfigManager();
 
-            _gameDifficultyManager.Initialize(difficultyLevel, _logRemoteConfigValues);
-            _featureFlagsManager.Initialize(_logRemoteConfigValues);
-            _gameBalanceManager.Initialize(_logRemoteConfigValues);
-            _eventConfigManager.Initialize(_logRemoteConfigValues);
-        }
+        //    _gameDifficultyManager.Initialize(difficultyLevel, _logRemoteConfigValues);
+        //    _featureFlagsManager.Initialize(_logRemoteConfigValues);
+        //    _gameBalanceManager.Initialize(_logRemoteConfigValues);
+        //    _eventConfigManager.Initialize(_logRemoteConfigValues);
+        //}
 
         private void InitializeRemoteConfig()
         {
@@ -126,10 +126,10 @@ namespace CrawfisSoftware.UGS
         {
             try
             {
-                _gameDifficultyManager.UpdateFromRemoteConfig();
-                _featureFlagsManager?.UpdateFromRemoteConfig();
-                _gameBalanceManager?.UpdateFromRemoteConfig();
-                _eventConfigManager?.UpdateFromRemoteConfig();
+                //_gameDifficultyManager.UpdateFromRemoteConfig();
+                //_featureFlagsManager?.UpdateFromRemoteConfig();
+                //_gameBalanceManager?.UpdateFromRemoteConfig();
+                //_eventConfigManager?.UpdateFromRemoteConfig();
                 EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.RemoteConfigUpdated, this, UnityEngine.Time.time);
             }
             catch (Exception e)
@@ -139,17 +139,17 @@ namespace CrawfisSoftware.UGS
             }
         }
 
-        public bool IsFeatureEnabled(string featureName)
-        {
-            return _featureFlagsManager?.IsFeatureEnabled(featureName) ?? false;
-        }
+        //public bool IsFeatureEnabled(string featureName)
+        //{
+        //    return _featureFlagsManager?.IsFeatureEnabled(featureName) ?? false;
+        //}
 
         private void LogRemoteConfigValues()
         {
             Debug.Log("=== Remote Config Values ===");
-            _featureFlagsManager?.LogValues();
-            _gameBalanceManager?.LogValues();
-            _eventConfigManager?.LogValues();
+            //_featureFlagsManager?.LogValues();
+            //_gameBalanceManager?.LogValues();
+            //_eventConfigManager?.LogValues();
         }
 
         public void Dispose()

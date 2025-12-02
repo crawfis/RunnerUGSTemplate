@@ -22,7 +22,8 @@ namespace CrawfisSoftware.UGS
         
         public void Awake()
         {
-            AuthenticationService.Instance.SwitchProfile(UGS_State.UGS_Environment); 
+            AuthenticationService.Instance.SwitchProfile(UGS_State.UGS_Environment);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
@@ -33,6 +34,7 @@ namespace CrawfisSoftware.UGS
 
         public void OnDestroy()
         {
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
@@ -41,12 +43,12 @@ namespace CrawfisSoftware.UGS
             //AuthenticationService.Instance.Expired -= HandleSessionExpired;
         }
 
-        private async void Start()
+        private void Start()
         {
             if (UGS_State.IsCheckForExistingSession) // Missed the event being published.
             {
                 // Sign in here automatically from cached session on game start
-                await SignInCachedPlayerAsync();
+                SignInCachedPlayerAsync();
             }
         }
 
@@ -59,7 +61,7 @@ namespace CrawfisSoftware.UGS
         /// SignInFailed event is also invoked. This method does not prompt the user for credentials and only succeeds
         /// if a valid cached session is present.</remarks>
         /// <returns>A task that represents the asynchronous sign-in operation.</returns>
-        public async Task SignInCachedPlayerAsync()
+        public void SignInCachedPlayerAsync()
         {
             if (!AuthenticationService.Instance.SessionTokenExists)
             {
@@ -99,6 +101,11 @@ namespace CrawfisSoftware.UGS
                 Logger.LogWarning($"Network error during sign-in: {ex.Message}");
                 EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
+        }
+
+        private void HandleCheckForExistingSession(string eventName, object sender, object data)
+        {
+            SignInCachedPlayerAsync();
         }
 
         private void HandleSuccessfulSignIn(string eventName, object sender, object data)

@@ -2,11 +2,12 @@
 
 using Blocks.Leaderboards;
 
-using CrawfisSoftware.TempleRun;
+using CrawfisSoftware.Events;
 
 using System;
 using System.Threading.Tasks;
 
+using Unity.Mathematics;
 using Unity.Services.Leaderboards;
 using Unity.Services.Leaderboards.Models;
 
@@ -22,18 +23,21 @@ namespace CrawfisSoftware.UGS.Leaderboard
         public bool IsUpdating { get; private set; } = false;
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnGameEnding);
             LeaderboardsObserver.Instance.LeaderboardId = LeaderboardId;
             LeaderboardsObserver.Instance.UseTrustedClient = _useTrustedClient;
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnGameEnding);
         }
-        private void OnPlayerDied(string eventName, object sender, object data)
+        private void OnGameEnding(string eventName, object sender, object data)
         {
             IsUpdating = true;
-            long score = (long)Blackboard.Instance.DistanceTracker.DistanceTravelled;
+            Type type = data.GetType();
+            Debug.Log($"LeaderboardPlayerController: OnGameEnding called with data of type {type}");
+            float? scoref = data as float?;
+            long score = (int)scoref.Value;
             // Use an async lambda to handle the awaiting
             var _ = HandleScoreUpload(LeaderboardId, score);
             //var _ = LeaderboardsService.Instance.AddPlayerScoreAsync("DailyDistance", score);
@@ -44,7 +48,6 @@ namespace CrawfisSoftware.UGS.Leaderboard
         {
             try
             {
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.ScoreUpdating, this, score);
                 var playerEntry = await AddPlayerScore(leaderboardId, score);
                 UnityEngine.Debug.Log($"Score {score} uploaded successfully! Player rank: {playerEntry.Rank}");
                 EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.ScoreUpdated, this, (playerEntry.PlayerName, playerEntry.Score, playerEntry.PlayerId));

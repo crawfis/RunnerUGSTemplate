@@ -28,7 +28,7 @@ namespace CrawfisSoftware.UI
 
         private void OnQuitButtonClicked()
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Quitting, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Quitting, "Main Menu", null);
         }
 
         private void OnSignOutButtonClicked()

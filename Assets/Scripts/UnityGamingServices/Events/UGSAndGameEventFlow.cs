@@ -1,5 +1,4 @@
-﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.UGS;
+﻿using CrawfisSoftware.UGS;
 
 using System;
 using System.Collections;
@@ -15,7 +14,10 @@ namespace CrawfisSoftware.Events
     {
         [SerializeField] private float _delayBetweenEvents = 0f;
 
-        protected readonly Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
+        // The Commented out events are not auto-fired here because they are fired by other components in the UGS framework.
+        // They are left here as comments for reference of the full flow.
+
+        protected Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
         {
             // UnityServicesInitialized is fired by Unity's ServicesInitialization component in the InitializeServices GameObject in the UGS_Boot_0_Initialization scene.
             // Since that happens before any of this is set-up, we need to handle it specially in Start()
@@ -44,19 +46,21 @@ namespace CrawfisSoftware.Events
             { UGS_EventsEnum.RewardAdWatching, UGS_EventsEnum.RewardAdWatched },
             { UGS_EventsEnum.RewardAdWatched, UGS_EventsEnum.PlayerAuthenticating }, // Loop back to PlayerAuthenticating for continuous flow and a check on whether the player is still authenticated
         };
-        protected readonly Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
+        protected Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
         {
             { UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady },
             { UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady },
             { UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHidding },
         };
 
-        protected readonly Dictionary<GameFlowEvents, UGS_EventsEnum> _autoGameFlow2UGSEvents = new Dictionary<GameFlowEvents, UGS_EventsEnum>()
+        protected Dictionary<GameFlowEvents, UGS_EventsEnum> _autoGameFlow2UGSEvents = new Dictionary<GameFlowEvents, UGS_EventsEnum>()
         {
-            { GameFlowEvents.GameScenesUnloaded, UGS_EventsEnum.LeaderboardOpening },
+            { GameFlowEvents.GameEnding, UGS_EventsEnum.ScoreUpdating },
+            { GameFlowEvents.GameEnded, UGS_EventsEnum.LeaderboardOpening },
+            //{ GameFlowEvents.GameScenesUnloaded, UGS_EventsEnum.LeaderboardOpening },
         };
 
-        protected readonly Dictionary<GameFlowEvents, GameFlowEvents> _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
+        protected Dictionary<GameFlowEvents, GameFlowEvents> _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
         {
             //{ GameFlowEvents.LoadingScreenShowing, GameFlowEvents.LoadingScreenShown }, // (Inititally) Fired by UIPanelController in the Game_Boot_1_UI
             //{ GameFlowEvents.LoadingScreenShown, GameFlowEvents.LoadingScreenHidding }, // => Start Hidding Loading
@@ -81,7 +85,7 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.Quitting, GameFlowEvents.Quitted }, // Quitted is fired by th Quitting GameObject in the 0_BootStrap scene
         };
 
-        private void Awake()
+        protected virtual void Awake()
         {
             EventsPublisherUGS.Instance.SubscribeToAllEnumEvents(AutoFireUGSEventFromUGSEvent);
             EventsPublisherUGS.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromUGSEvent);
@@ -96,7 +100,7 @@ namespace CrawfisSoftware.Events
             EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             if(UnityServices.State == ServicesInitializationState.Initialized)
             {

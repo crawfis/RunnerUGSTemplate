@@ -46,7 +46,7 @@ namespace CrawfisSoftware.CrawfisDash
 
         private void OnPlayerDied(string EventName, object sender, object data)
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, UnityEngine.Time.time);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, data);
         }
 
         private void OnDestroy()
