@@ -172,7 +172,7 @@ public class UIPanelController : MonoBehaviour
     private IEnumerator ShowGameOverRoutine()
     {
         yield return new WaitForSecondsRealtime(GameConstants.GameOverDisplayTime);
-        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameScenesUnloaded, this, null);
+        EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnded, this, null);
         Go(UIState.None);
     }
 }

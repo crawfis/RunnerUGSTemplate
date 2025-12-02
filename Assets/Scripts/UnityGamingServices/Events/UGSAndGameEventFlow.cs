@@ -77,10 +77,11 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
             { GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
             //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
-            //{ GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
+            //{ GameFlowEvents.GameEnding, GameFlowEvents.GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
-            { GameFlowEvents.GameScenesUnloaded, GameFlowEvents.GameEnded },
-            //{ GameFlowEvents.GameEnded, GameFlowEvents.GameplayReady  }, //=> Show Menu
+            //{ GameFlowEvents.GameEnded, GameFlowEvents.GameScenesUnloading },
+            { GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
+            //{ GameFlowEvents.GameScenesUnloaded, GameFlowEvents.GameplayReady  }, //=> Loop back to Show Menu
             //{ GameFlowEvents.Pause, GameFlowEvents.Resume  },
             //{ GameFlowEvents.Quitting, GameFlowEvents.Quitted }, // Quitted is fired by th Quitting GameObject in the 0_BootStrap scene
         };
@@ -92,7 +93,7 @@ namespace CrawfisSoftware.Events
             EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
             EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
         }
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToAllEnumEvents(AutoFireUGSEventFromUGSEvent);
             EventsPublisherUGS.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromUGSEvent);
@@ -107,7 +108,7 @@ namespace CrawfisSoftware.Events
                 DelayedFire(0, UGS_EventsEnum.UnityServicesInitialized.ToString(), this, null);
             }
         }
-        private void AutoFireUGSEventFromUGSEvent(string eventName, object sender, object data)
+        protected void AutoFireUGSEventFromUGSEvent(string eventName, object sender, object data)
         {
             if (_autoUGS2UGSEvents.TryGetValue((UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName), out UGS_EventsEnum autoEvent))
             {
@@ -115,7 +116,7 @@ namespace CrawfisSoftware.Events
             }
         }
 
-        private void AutoFireUGSEventFromGameFlowEvent(string eventName, object sender, object data)
+        protected void AutoFireUGSEventFromGameFlowEvent(string eventName, object sender, object data)
         {
             if (_autoGameFlow2UGSEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out UGS_EventsEnum autoEvent))
             {
@@ -123,7 +124,7 @@ namespace CrawfisSoftware.Events
             }
         }
 
-        private void AutoFireGameFlowEventFromUGSEvent(string eventName, object sender, object data)
+        protected void AutoFireGameFlowEventFromUGSEvent(string eventName, object sender, object data)
         {
             if (_autoUGS2GameFlowEvents.TryGetValue((UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName), out GameFlowEvents autoEvent))
             {
@@ -131,7 +132,7 @@ namespace CrawfisSoftware.Events
             }
         }
 
-        private void AutoFireGameFlowEventFromGameFlowEvent(string eventName, object sender, object data)
+        protected void AutoFireGameFlowEventFromGameFlowEvent(string eventName, object sender, object data)
         {
             if (_autoGameFlow2GameFlowEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out GameFlowEvents autoEvent))
             {

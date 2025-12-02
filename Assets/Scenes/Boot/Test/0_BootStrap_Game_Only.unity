@@ -120,51 +120,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &28230999
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 28231001}
-  - component: {fileID: 28231000}
-  m_Layer: 0
-  m_Name: Load_UGS_Init
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &28231000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28230999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.LoadSceneAdditively
-  _sceneName: UGS_Boot_0_Initialization
---- !u!4 &28231001
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28230999}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &811702129
 GameObject:
   m_ObjectHideFlags: 0
@@ -234,7 +189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.LoadSceneAdditively
-  _sceneName: Game_Boot_0_Initialization
+  _sceneName: Game_Boot_0_Test_Initialization
 --- !u!4 &974278450
 Transform:
   m_ObjectHideFlags: 0
@@ -380,8 +335,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1234304535}
-  - component: {fileID: 1234304536}
   - component: {fileID: 1234304537}
+  - component: {fileID: 1234304538}
   m_Layer: 0
   m_Name: GameEventsPublisher
   m_TagString: Untagged
@@ -404,18 +359,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1234304536
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1234304534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e9623b23077ff44f97027e6e9721da2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1234304537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,6 +371,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62b27800e110a5841976eadb7dc76b8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Events.EventsPublisherUserInitiated
+--- !u!114 &1234304538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1234304534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6065ee9a5d1744db5e8899c37beeb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Events.EventsPublisherGameFlow
 --- !u!1 &1333641297
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,8 +428,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
   _lastSceneToKeepIndex: 0
-  _unloadScenesTriggerEvent: 10
-  _scenesUnloadedEvent: 21
+  _unloadScenesTriggerEvent: 14
+  _scenesUnloadedEvent: 15
+  _unsubscribeOnEvent: 1
 --- !u!1 &1351158183
 GameObject:
   m_ObjectHideFlags: 0
@@ -687,7 +643,6 @@ SceneRoots:
   - {fileID: 1351158186}
   - {fileID: 811702130}
   - {fileID: 974278450}
-  - {fileID: 28231001}
   - {fileID: 1139485621}
   - {fileID: 1234304535}
   - {fileID: 1333641298}

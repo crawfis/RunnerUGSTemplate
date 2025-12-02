@@ -1,5 +1,9 @@
-﻿using System.Collections;
+﻿using CrawfisSoftware.UGS;
+
+using System.Collections;
 using System.Collections.Generic;
+
+using Unity.Services.Core;
 
 using UnityEngine;
 
@@ -14,7 +18,7 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.LoadingScreenHidding, GameFlowEvents.LoadingScreenHidden },
             { GameFlowEvents.LoadingScreenHidden, GameFlowEvents.GameplayReady },
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowing }, // => Show Menu
-            { GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown }, 
+            //{ GameFlowEvents.MainMenuShowing, GameFlowEvents.MainMenuShown }, 
             //{ GameFlowEvents.GameplayNotReady, GameFlowEvents.MainMenuHidden }, // => Hide Menu
             //{ GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
             //{ GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
@@ -24,9 +28,9 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
             { GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
             //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
-            //{ GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
+            //{ GameFlowEvents.GameEnding, GameFlowEvents.GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
-            { GameFlowEvents.GameScenesUnloaded, GameFlowEvents.GameEnded },
+            { GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloading },
             { GameFlowEvents.GameEnded, GameFlowEvents.GameplayReady  }, //=> Show Menu
             //{ GameFlowEvents.Pause, GameFlowEvents.Resume  },
             //{ GameFlowEvents.Quitting, GameFlowEvents.Quitted }, // Quitted is fired by the Quitting GameObject in the 0_BootStrap scene
@@ -35,7 +39,18 @@ namespace CrawfisSoftware.Events
         protected override void Awake()
         {
             base._autoGameFlow2GameFlowEvents = _newAutoGameFlow2GameFlowEvents;
-            base.Awake();
+            base._autoUGS2UGSEvents.Clear(); // No UGS events in this flow
+            base._autoUGS2GameFlowEvents.Clear(); // No UGS events in this flow
+            base._autoGameFlow2UGSEvents.Clear(); // No UGS events in this flow
+
+            //EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
+            EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
+        }
+
+        protected override void OnDestroy()
+        {
+            //EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
+            EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromGameFlowEvent);
         }
 
         protected override void Start()

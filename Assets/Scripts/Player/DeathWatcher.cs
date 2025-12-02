@@ -25,7 +25,7 @@ namespace CrawfisSoftware.TempleRun
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
         }
 
         private void Update()
@@ -43,7 +43,7 @@ namespace CrawfisSoftware.TempleRun
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnded);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
         }
 
         private void OnTrackChanging(string eventName, object sender, object data)
@@ -58,7 +58,7 @@ namespace CrawfisSoftware.TempleRun
             _gameStarted = true;
         }
 
-        private void OnGameEnded(string eventName, object sender, object data)
+        private void OnGameEnding(string eventName, object sender, object data)
         {
             _gameStarted = false;
         }

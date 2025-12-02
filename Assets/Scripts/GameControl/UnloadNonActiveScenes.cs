@@ -10,7 +10,7 @@ namespace CrawfisSoftware.GameControl
 {
     public class UnloadNonActiveScenes : MonoBehaviour
     {
-        [SerializeField] private int _lastSceneToKeepIndex = 0;
+        [SerializeField] private int _lastSceneIndexToKeep = 0;
         [SerializeField] private GameFlowEvents _unloadScenesTriggerEvent = GameFlowEvents.GameEnded;
         [SerializeField] private GameFlowEvents _scenesUnloadedEvent = GameFlowEvents.GameScenesUnloaded;
         [SerializeField] private bool _unsubscribeOnEvent = true;
@@ -41,7 +41,7 @@ namespace CrawfisSoftware.GameControl
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 Scene scene = SceneManager.GetSceneAt(i);
-                if (scene.buildIndex > _lastSceneToKeepIndex && scene.isLoaded)
+                if (scene.buildIndex > _lastSceneIndexToKeep && scene.isLoaded)
                 {
                     //yield return SceneManager.UnloadSceneAsync(scene);  // This would do it one at a time.
                     AsyncOperation unloadOp = SceneManager.UnloadSceneAsync(scene);

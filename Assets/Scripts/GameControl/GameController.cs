@@ -38,10 +38,7 @@ namespace CrawfisSoftware.TempleRun
         private IEnumerator StartGame()
         {
             yield return null;
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Resume, this, null);
-            //yield return new WaitForSecondsRealtime(GameConstants.CountdownSeconds);
             EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameStarted, this, null);
-            //EventsPublisherTempleRun.Instance.PublishEvent(GamePlayEvents.Resume, this, UnityEngine.Time.time);
         }
 
         private void OnPlayerDied(string EventName, object sender, object data)
