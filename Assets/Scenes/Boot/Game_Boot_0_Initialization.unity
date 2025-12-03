@@ -459,8 +459,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
   _lastSceneIndexToKeep: 8
-  _unloadScenesTriggerEvent: 10
-  _scenesUnloadedEvent: 22
+  _unloadScenesTriggerEvent: 22
+  _scenesUnloadedEvent: 23
   _unsubscribeOnEvent: 0
 --- !u!4 &1352712542
 Transform:
