@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CrawfisSoftware.GameConfig
+namespace CrawfisSoftware.TempleRun.GameConfig
 {
     [Serializable]
     public class DifficultySettings

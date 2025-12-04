@@ -1,16 +1,19 @@
 ﻿using CrawfisSoftware.Events;
 using CrawfisSoftware.TempleRun;
+using CrawfisSoftware.TempleRun.Assets.Scripts.UnityGamingServices.RemoteConfig;
+using CrawfisSoftware.TempleRun.GameConfig;
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using Unity.Services.RemoteConfig;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.GameConfig
+namespace CrawfisSoftware.UGS
 {
-    public class GameDifficultyManager
+    public class GameDifficultyManager : MonoBehaviour
     {
         private Dictionary<string, DifficultyConfig> _difficultyConfigs = new Dictionary<string, DifficultyConfig>();
 
@@ -33,16 +36,22 @@ namespace CrawfisSoftware.GameConfig
         public IEnumerable<string> AvailableDifficulties => _difficultyConfigs.Keys;
         public IEnumerable<DifficultyConfig> AvailableDifficultyConfigs => _difficultyConfigs.Values;
 
-        public GameDifficultyManager()
+        public void Awake()
         {
-            //_difficultyConfigs = new Dictionary<string, DifficultyConfig>();
-        }
-        public GameDifficultyManager(List<DifficultyConfig> difficultyConfigs)
-        {
-            foreach(var config in difficultyConfigs)
+            if (UGS_State.IsRemoteConfigUpdated)
             {
-                AddConfig(config);
+                UpdateFromRemoteConfig(RemoteConfigConstants.difficultySettingsKey);
             }
+            else
+            {
+                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
+            }
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
+        }
+        private void OnDestroy()
+        {
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
         }
 
         public void SetDifficulty(string difficultyName)
@@ -50,20 +59,23 @@ namespace CrawfisSoftware.GameConfig
             Debug.Log($"Attempting to set game difficulty to '{difficultyName}'");
             if(_difficultyConfigs.ContainsKey(difficultyName))
             {
-                Blackboard.Instance.GameConfig = _difficultyConfigs[difficultyName];
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChanged, this, _difficultyConfigs[difficultyName]);
-                Debug.Log($"Successfully set game difficulty to '{difficultyName}'");
+                CurrentDifficulty = difficultyName;
+                //Blackboard.Instance.GameConfig = _difficultyConfigs[difficultyName];
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChanged, this, _difficultyConfigs[CurrentDifficulty]);
+                //Debug.Log($"Successfully set game difficulty to '{difficultyName}'");
             }
         }
 
-        public void UpdateFromRemoteConfig()
+        public void UpdateFromRemoteConfig(string remoteConfigKey)
         {
             try
             {
                 Debug.Log("Attempting to update difficulty settings from remote config");
-                if (RemoteConfigService.Instance.appConfig.HasKey("difficulty_settings") == true)
+                var remoteConfig = RemoteConfigService.Instance.appConfig;
+                var keys = remoteConfig.GetKeys();
+                if (RemoteConfigService.Instance.appConfig.HasKey(remoteConfigKey) == true)
                 {
-                    string difficultyJson = RemoteConfigService.Instance.appConfig.GetJson("difficulty_settings");
+                    string difficultyJson = RemoteConfigService.Instance.appConfig.GetJson(remoteConfigKey);
                     DifficultySettings _remoteDifficultySettings = JsonUtility.FromJson<DifficultySettings>(difficultyJson);
                     if(_remoteDifficultySettings != null && _remoteDifficultySettings.Configs != null)
                     {
@@ -85,54 +97,26 @@ namespace CrawfisSoftware.GameConfig
         public void Clear()
         {
             _difficultyConfigs?.Clear();
-            //_difficultyConfigs = null;
         }
         public void AddConfig(DifficultyConfig difficultyConfig)
         {
-            //if (_difficultyConfigs == null)
-            //{
-            //    _difficultyConfigs = new Dictionary<string, DifficultyConfig>();
-            //}
             _difficultyConfigs[difficultyConfig.DifficultyName] = difficultyConfig;
         }
 
-        internal void Initialize(string difficultyLevel, bool logRemoteConfigValues)
+        public void OnRemoteConfigUpdated(string eventName, object sender, object data)
         {
-            Clear();
-            CurrentDifficulty = difficultyLevel;
-            Blackboard.Instance.GameDifficultyManager = this;
-            // Todo: Set default difficulties here or load from local config file
-            // Todo: Set Difficulty based on player prefs or progression
+            UpdateFromRemoteConfig(RemoteConfigConstants.difficultySettingsKey);
         }
-        //private void Awake()
-        //{
-        //    EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.GameDifficultyChanged, OnDifficultyChanged);
-        //}
-        //private void OnDestroy()
-        //{
-        //    EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.GameDifficultyChanged, OnDifficultyChanged);
-        //}
-        //private void Start()
-        //{
-        //    // Set difficulty based on player preference or progression
-        //    var selectedDifficulty = GetPlayerSelectedDifficulty();
-        //    //gameConfig.SetDifficulty(selectedDifficulty);
-        //    gameConfig.Initialize(selectedDifficulty);
-        //}
 
-        //private DifficultyLevel GetPlayerSelectedDifficulty()
-        //{
-        //    if (!_usePlayerPrefsDEBUG) return _difficultyLevel;
-        //    // This could come from player prefs, progression system, etc.
-        //    return (DifficultyLevel)PlayerPrefs.GetInt("SelectedDifficulty", 1); // Default to Medium
-        //}
-
-        //public void OnDifficultyChanged(string eventName, object sender, object data)
-        //{
-        //    int difficultyIndex = (int)data;
-        //    var difficulty = (DifficultyLevel)difficultyIndex;
-        //    gameConfig.SetDifficulty(difficulty);
-        //    PlayerPrefs.SetInt("SelectedDifficulty", difficultyIndex);
-        //}
+        public void OnDifficultyChanging(string eventName, object sender, object data)
+        {
+            string newDifficulty = data as string;
+            if (string.IsNullOrEmpty(newDifficulty))
+            {
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChangeFailed, this, CurrentDifficultyConfig);
+                return;
+            }
+            SetDifficulty(newDifficulty);
+        }
     }
 }

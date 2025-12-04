@@ -1,8 +1,5 @@
-using CrawfisSoftware.GameConfig;
-
 using System;
 
-using Unity.Services.Core;
 using Unity.Services.RemoteConfig;
 
 using UnityEngine;
@@ -11,7 +8,7 @@ namespace CrawfisSoftware.UGS
 {
     public class RemoteConfigManager : MonoBehaviour, IDisposable
     {
-        [SerializeField] private string _remoteConfigDifficultyLevel = "Hard";
+        //[SerializeField] private string _remoteConfigDifficultyLevel = "Hard";
         [SerializeField] private bool _logRemoteConfigValues = true;
 
         //private GameDifficultyManager _gameDifficultyManager;
@@ -41,10 +38,10 @@ namespace CrawfisSoftware.UGS
 
         private void OnUnityServicesInitialized(string eventName, object sender, object data)
         {
-            Initialize(_remoteConfigDifficultyLevel, _logRemoteConfigValues);
+            Initialize(_logRemoteConfigValues);
         }
 
-        public void Initialize(string difficultyLevel, bool logValues = true)
+        public void Initialize(bool logValues = true)
         {
             if (_isInitialized) return;
 
@@ -69,14 +66,19 @@ namespace CrawfisSoftware.UGS
         //    _eventConfigManager.Initialize(_logRemoteConfigValues);
         //}
 
-        private void InitializeRemoteConfig()
+        private async void InitializeRemoteConfig()
         {
             if (RemoteConfigService.Instance != null)
             {
+                //RemoteConfigService.Instance.SetEnvironmentID("initial_development");
                 RemoteConfigService.Instance.FetchCompleted += OnRemoteConfigFetched;
                 var userAttributes = CreateUserAttributes();
                 var appAttributes = CreateAppAttributes();
-                RemoteConfigService.Instance.FetchConfigs(userAttributes, appAttributes);
+                RuntimeConfig configs = await RemoteConfigService.Instance.FetchConfigsAsync(userAttributes, appAttributes);
+                foreach (var key in configs.GetKeys())
+                {
+                    Debug.Log($"Initial Remote Config Key: {key}");
+                }
             }
         }
         private UserAttributes CreateUserAttributes()
@@ -147,6 +149,10 @@ namespace CrawfisSoftware.UGS
         private void LogRemoteConfigValues()
         {
             Debug.Log("=== Remote Config Values ===");
+            foreach (var key in RemoteConfigService.Instance.appConfig.GetKeys())
+            {
+                Debug.Log($"Key: {key}");
+            }
             //_featureFlagsManager?.LogValues();
             //_gameBalanceManager?.LogValues();
             //_eventConfigManager?.LogValues();

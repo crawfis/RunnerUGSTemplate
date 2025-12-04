@@ -46,6 +46,7 @@ namespace CrawfisSoftware.UGS
         private void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
