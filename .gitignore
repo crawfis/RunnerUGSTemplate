@@ -84,3 +84,5 @@ crashlytics-build.properties
 /Assets/Sparrow
 /Assets/Asset Cleaner.meta
 /Assets/Sparrow.meta
+/SerializedBuildInfo
+/referencemap.xml
