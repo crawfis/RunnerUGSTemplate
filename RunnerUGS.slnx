@@ -4,10 +4,9 @@
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Blocks.Achievements.csproj" />
   <Project Path="Blocks.Leaderboards.csproj" />
-  <Project Path="Crawfis.Events.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Blocks.PlayerAccount.csproj" />
   <Project Path="Blocks.Leaderboards.TestScene.csproj" />
-  <Project Path="Crawfis.Events.Editor.csproj" />
   <Project Path="Blocks.Achievements.TestScene.csproj" />
   <Project Path="Blocks.PlayerAccount.TestScene.csproj" />
   <Project Path="Blocks.Common.csproj" />
