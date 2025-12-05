@@ -1,11 +1,9 @@
 ﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.TempleRun;
-using CrawfisSoftware.TempleRun.Assets.Scripts.UnityGamingServices.RemoteConfig;
 using CrawfisSoftware.TempleRun.GameConfig;
+using CrawfisSoftware.UGS.RemoteConfig;
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using Unity.Services.RemoteConfig;
 
@@ -15,9 +13,7 @@ namespace CrawfisSoftware.UGS
 {
     public class GameDifficultyManager : MonoBehaviour
     {
-        private Dictionary<string, DifficultyConfig> _difficultyConfigs = new Dictionary<string, DifficultyConfig>();
-
-        public string CurrentDifficulty { get; private set; }
+        public string CurrentDifficulty { get; private set; } = "Easy";
         public DifficultyConfig CurrentDifficultyConfig
         {
             get
@@ -36,28 +32,35 @@ namespace CrawfisSoftware.UGS
         public IEnumerable<string> AvailableDifficulties => _difficultyConfigs.Keys;
         public IEnumerable<DifficultyConfig> AvailableDifficultyConfigs => _difficultyConfigs.Values;
 
+        private Dictionary<string, DifficultyConfig> _difficultyConfigs = new Dictionary<string, DifficultyConfig>();
+        private DifficultyObserver _difficultyObserver;
+
         public void Awake()
         {
-            if (UGS_State.IsRemoteConfigUpdated)
-            {
-                UpdateFromRemoteConfig(RemoteConfigConstants.difficultySettingsKey);
-            }
-            else
-            {
-                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
-            }
+            _difficultyObserver = DifficultyObserver.Instance;
+            //if (UGS_State.IsRemoteConfigUpdated)
+            //{
+            //    UpdateFromRemoteConfig(RemoteConfigConstants.difficultySettingsKey);
+            //}
+            //else
+            //{
+            //    EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
+            //}
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultySettingsChanged, OnDifficultySettingsChanged);
+            PopulateDifficulties();
         }
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
+            //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultySettingsChanged, OnDifficultySettingsChanged);
         }
 
         public void SetDifficulty(string difficultyName)
         {
-            Debug.Log($"Attempting to set game difficulty to '{difficultyName}'");
-            if(_difficultyConfigs.ContainsKey(difficultyName))
+            Debug.Log($"Attempting to set game difficulty from {CurrentDifficulty} to {difficultyName}");
+            if (_difficultyConfigs.ContainsKey(difficultyName))
             {
                 CurrentDifficulty = difficultyName;
                 //Blackboard.Instance.GameConfig = _difficultyConfigs[difficultyName];
@@ -66,33 +69,43 @@ namespace CrawfisSoftware.UGS
             }
         }
 
-        public void UpdateFromRemoteConfig(string remoteConfigKey)
+        //public void UpdateFromRemoteConfig(string remoteConfigKey)
+        //{
+        //    try
+        //    {
+        //        Debug.Log("Attempting to update difficulty settings from remote config");
+        //        var remoteConfig = RemoteConfigService.Instance.appConfig;
+        //        var keys = remoteConfig.GetKeys();
+        //        if (RemoteConfigService.Instance.appConfig.HasKey(remoteConfigKey) == true)
+        //        {
+        //            string difficultyJson = RemoteConfigService.Instance.appConfig.GetJson(remoteConfigKey);
+        //            DifficultySettings _remoteDifficultySettings = JsonUtility.FromJson<DifficultySettings>(difficultyJson);
+        //            if (_remoteDifficultySettings != null && _remoteDifficultySettings.Configs != null)
+        //            {
+        //                Clear();
+        //                foreach (var config in _remoteDifficultySettings.Configs)
+        //                {
+        //                    AddConfig(config);
+        //                }
+        //                Debug.Log($"Remote difficulty settings added {_difficultyConfigs.Count} configs");
+        //                //SetDifficulty(CurrentDifficulty);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Debug.LogError($"Failed to update difficulty settings from remote config: {e.Message}");
+        //    }
+        //}
+        public void PopulateDifficulties()
         {
-            try
+            var difficulties = _difficultyObserver.RuntimeDifficultySettings;
+            Clear();
+            foreach (var config in difficulties)
             {
-                Debug.Log("Attempting to update difficulty settings from remote config");
-                var remoteConfig = RemoteConfigService.Instance.appConfig;
-                var keys = remoteConfig.GetKeys();
-                if (RemoteConfigService.Instance.appConfig.HasKey(remoteConfigKey) == true)
-                {
-                    string difficultyJson = RemoteConfigService.Instance.appConfig.GetJson(remoteConfigKey);
-                    DifficultySettings _remoteDifficultySettings = JsonUtility.FromJson<DifficultySettings>(difficultyJson);
-                    if(_remoteDifficultySettings != null && _remoteDifficultySettings.Configs != null)
-                    {
-                        Clear();
-                        foreach (var config in _remoteDifficultySettings.Configs)
-                        {
-                            AddConfig(config);
-                        }
-                        Debug.Log($"Remote difficulty settings added {_difficultyConfigs.Count} configs");
-                        SetDifficulty(CurrentDifficulty);
-                    }
-                }
+                AddConfig(config);
             }
-            catch (Exception e)
-            {
-                Debug.LogError($"Failed to update difficulty settings from remote config: {e.Message}");
-            }
+
         }
         public void Clear()
         {
@@ -103,10 +116,10 @@ namespace CrawfisSoftware.UGS
             _difficultyConfigs[difficultyConfig.DifficultyName] = difficultyConfig;
         }
 
-        public void OnRemoteConfigUpdated(string eventName, object sender, object data)
-        {
-            UpdateFromRemoteConfig(RemoteConfigConstants.difficultySettingsKey);
-        }
+        //public void OnRemoteConfigUpdated(string eventName, object sender, object data)
+        //{
+        //    UpdateFromRemoteConfig(RemoteConfigConstants.difficultySettingsKey);
+        //}
 
         public void OnDifficultyChanging(string eventName, object sender, object data)
         {
@@ -117,6 +130,17 @@ namespace CrawfisSoftware.UGS
                 return;
             }
             SetDifficulty(newDifficulty);
+        }
+
+        public void OnDifficultySettingsChanged(string eventName, object sender, object data)
+        {
+            var newDifficulty = data as IList<DifficultyConfig>;
+            if (newDifficulty == null)
+            {
+                throw new ArgumentException("OnDifficultySettingsChanged event data must be of type IList<DifficultyConfig>");
+            }
+            PopulateDifficulties();
+            //SetDifficulty(CurrentDifficulty);
         }
     }
 }

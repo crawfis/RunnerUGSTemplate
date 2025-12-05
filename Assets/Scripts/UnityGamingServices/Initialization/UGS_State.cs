@@ -8,17 +8,20 @@ namespace CrawfisSoftware.UGS
     internal class UGS_State : MonoBehaviour
     {
         [SerializeField] private ServicesInitialization _uGS_Services;
+
         public static UGS_State Instance { get; private set; }
 
         public static string UGS_Environment => Instance._uGS_Services.EnvironmentName;
 
         // Keep track of potentially missed events in scenes that load after UGS initialization
         public static bool IsUnityServicesInitialized { get; private set; } = false;
-        public static bool IsRemoteConfigUpdated { get; private set; } = false;
         public static bool IsCheckForExistingSession { get; private set; } = false;
         public static bool IsPlayerSigningIn { get; private set; } = false;
         public static bool IsPlayerSignedIn { get; private set; } = false;
         public static bool IsPlayerAuthenticated { get; private set; } = false;
+        public static bool IsRemoteConfigFetching { get; private set; } = false;
+        public static bool IsRemoteConfigUpdated { get; private set; } = false;
+        public static bool IsGameReady { get; private set; } = false;
 
         private void Awake()
         {
@@ -27,7 +30,7 @@ namespace CrawfisSoftware.UGS
                 DestroyImmediate(Instance);
             }
             Instance = this;
-
+            Reset();
             if (UnityServices.State == ServicesInitializationState.Initialized)
             {
                 IsUnityServicesInitialized = true;
@@ -36,31 +39,40 @@ namespace CrawfisSoftware.UGS
             {
                 EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
             }
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnRemoteConfigFetching);
+            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
         }
 
         private void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
             EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnRemoteConfigFetching);
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
+        }
+
+        private void Reset()
+        {
+            IsUnityServicesInitialized = false;
+            IsCheckForExistingSession = false;
+            IsPlayerSigningIn = false;
+            IsPlayerSignedIn = false;
+            IsPlayerAuthenticated = false;
+            IsRemoteConfigFetching = false;
+            IsRemoteConfigUpdated = false;
+            IsGameReady = false;
         }
 
         private void OnUnityServicesInitialized(string eventName, object sender, object data)
         {
             IsUnityServicesInitialized = true;
-        }
-
-        private void OnRemoteConfigUpdated(string eventName, object sender, object data)
-        {
-            IsRemoteConfigUpdated = true;
         }
 
         private void OnCheckingForExistingSession(string eventName, object sender, object data)
@@ -85,6 +97,16 @@ namespace CrawfisSoftware.UGS
             IsPlayerSignedIn = true;
             IsPlayerSigningIn = false;
             IsPlayerAuthenticated = true;
+        }
+
+        private void OnRemoteConfigFetching(string eventName, object sender, object data)
+        {
+            IsRemoteConfigFetching = true;
+        }
+
+        private void OnRemoteConfigUpdated(string eventName, object sender, object data)
+        {
+            IsRemoteConfigUpdated = true;
         }
     }
 }

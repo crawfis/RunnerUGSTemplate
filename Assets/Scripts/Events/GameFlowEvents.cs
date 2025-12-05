@@ -15,6 +15,8 @@
         GameScenesUnloading, GameScenesUnloaded,
         GameScenesLoading, GameScenesLoaded,
         GameplayNotReady, GameDifficultyChanging,
-        GameDifficultyChangeFailed
+        GameDifficultyChangeFailed,
+        DifficultySettingsChanged,
+        GameConfigured,
     }
 }

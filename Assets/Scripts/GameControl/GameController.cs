@@ -20,18 +20,31 @@ namespace CrawfisSoftware.TempleRun
         private GameInitialization _gameInitializer;
         private void Awake()
         {
-            _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
+            if (GameState.IsGameConfigured) 
+                OnGameConfigured("GameConfigured", "Self", null);
+            else
+                EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
         }
         private void UnsubscribeToEvents()
         {
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
         }
 
+        private void OnGameConfigured(string EventName, object sender, object data)
+        {
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
+        }
+
         private void OnCountdownEnded(string EventName, object sender, object data)
         {
+            if (_gameInitializer == null)
+                throw new System.ApplicationException("Countdown ended before game was even configured.");
             _ = StartCoroutine(StartGame());
         }
 

@@ -21,10 +21,11 @@ namespace CrawfisSoftware.Events
         {
             // UnityServicesInitialized is fired by Unity's ServicesInitialization component in the InitializeServices GameObject in the UGS_Boot_0_Initialization scene.
             // Since that happens before any of this is set-up, we need to handle it specially in Start()
-            { UGS_EventsEnum.UnityServicesInitialized, UGS_EventsEnum.RemoteConfigFetching },
+            { UGS_EventsEnum.UnityServicesInitialized, UGS_EventsEnum.CheckForExistingSession },
+            { UGS_EventsEnum.PlayerAuthenticated, UGS_EventsEnum.RemoteConfigFetching }, // First time and anytime the player changes.
             //{ UGS_EventsEnum.RemoteConfigFetching, UGS_EventsEnum.RemoteConfigFetched },
             //{ UGS_EventsEnum.RemoteConfigFetched, UGS_EventsEnum.RemoteConfigUpdated },
-            { UGS_EventsEnum.RemoteConfigUpdated, UGS_EventsEnum.CheckForExistingSession },
+            //{ UGS_EventsEnum.RemoteConfigUpdated, UGS_EventsEnum.CheckForExistingSession },
             //{ UGS_EventsEnum.CheckForExistingSession, UGS_EventsEnum.CheckForExistingSessionSucceeded },
             { UGS_EventsEnum.CheckForExistingSessionSucceeded, UGS_EventsEnum.PlayerAuthenticating },
             { UGS_EventsEnum.CheckForExistingSessionFailed, UGS_EventsEnum.PlayerSigningIn },

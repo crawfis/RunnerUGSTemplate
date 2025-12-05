@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CrawfisSoftware.TempleRun.Assets.Scripts.UnityGamingServices.RemoteConfig
+namespace CrawfisSoftware.UGS.RemoteConfig
 {
     internal static class RemoteConfigConstants
     {

@@ -54,6 +54,7 @@ namespace CrawfisSoftware.TempleRun
             {
                 GameConfig = difficulty;
                 Debug.Log($"Successfully set game difficulty to '{difficulty.DifficultyName}'");
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigured, this, GameConfig);
             }
         }
 

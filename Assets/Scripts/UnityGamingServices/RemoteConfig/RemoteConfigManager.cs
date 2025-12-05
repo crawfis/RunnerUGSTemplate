@@ -26,17 +26,17 @@ namespace CrawfisSoftware.UGS
         {
             //if(UnityServices.Instance != null && UnityServices.Instance.State == ServicesInitializationState.Initialized)
             //if (UnityServices.State == ServicesInitializationState.Initialized)
-            if(UGS_State.IsUnityServicesInitialized)
+            if(UGS_State.IsRemoteConfigFetching)
             {
-                OnUnityServicesInitialized("UnityServicesInitialized", this, null);
+                OnFetchRemoteConfig("RemoteConfig Fetching", this, null);
             }
             else
             {
-                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
+                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
             }
         }
 
-        private void OnUnityServicesInitialized(string eventName, object sender, object data)
+        private void OnFetchRemoteConfig(string eventName, object sender, object data)
         {
             Initialize(_logRemoteConfigValues);
         }

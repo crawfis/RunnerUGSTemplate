@@ -15,9 +15,16 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 
         private void Start()
         {
-            if(_overridePlayerPrefs)
+            string currentDifficulty;
+            if (_overridePlayerPrefs)
+            {
                 PlayerPrefs.SetString(PlayerPrefKeys.GameDifficultyKey, _overrideGameDifficultyName);
-            string currentDifficulty = PlayerPrefs.GetString(PlayerPrefKeys.GameDifficultyKey, "Easy");
+                currentDifficulty = _overrideGameDifficultyName;
+            }
+            else
+            {
+                 currentDifficulty = PlayerPrefs.GetString(PlayerPrefKeys.GameDifficultyKey, "Easy");
+            }
             EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChanging, this, currentDifficulty);
         }
     }
