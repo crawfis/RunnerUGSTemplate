@@ -114,7 +114,13 @@ namespace CrawfisSoftware.UGS.RemoteConfig
         {
             var configs = await RemoteConfigService.Instance.FetchConfigsAsync(new EmptyStruct(), new EmptyStruct());
             var difficultiesJobject = configs.config[RemoteConfigConstants.difficultySettingsKey];
-            return difficultiesJobject.ToObject<List<DifficultyConfig>>();
+            //return difficultiesJobject.ToObject<List<DifficultyConfig>>();
+            if (difficultiesJobject == null)
+            {
+                return new List<DifficultyConfig>();
+            }
+            var difficulties = difficultiesJobject.ToObject<List<DifficultyConfig>>();
+            return difficulties ?? new List<DifficultyConfig>();
         }
 
         async Task GetDifficultySettingsAsync()

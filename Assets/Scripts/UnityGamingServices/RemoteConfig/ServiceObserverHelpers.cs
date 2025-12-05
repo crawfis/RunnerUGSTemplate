@@ -16,7 +16,7 @@ namespace CrawfisSoftware.UGS
             }
         }
 
-        // Todo: This pattern is repeated in multiple places. Consider refactoring into a common utility.
+        // Todo: This pattern is repeated in the Blocks, which is behind an Assembly Definition.
         public static ServiceObserver<T> InitializeServiceObserver<T>(Action<T> onInitialized)
         {
             var serviceObserver = new ServiceObserver<T>();

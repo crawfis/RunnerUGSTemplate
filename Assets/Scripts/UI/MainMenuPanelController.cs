@@ -11,7 +11,7 @@ namespace CrawfisSoftware.UI
         public UIDocument menuUI;
         private void Awake()
         {
-            if(GameState.IsMainMenuActive)
+            if (GameState.IsMainMenuActive)
                 menuUI.rootVisualElement.visible = true;
             else
                 menuUI.rootVisualElement.visible = false;
