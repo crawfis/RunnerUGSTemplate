@@ -1,5 +1,7 @@
 ﻿//using Blocks.Achievements;
 
+using Blocks.Achievements;
+
 using CrawfisSoftware.TempleRun;
 
 using System.Collections;
@@ -10,7 +12,6 @@ using UnityEngine;
 public class DistanceBasedAchievements : MonoBehaviour
 {
     [SerializeField] private List<float> _distances;
-#if false
     private void Awake()
     {
         // Ensure the AchievementsObserver is initialized
@@ -30,13 +31,14 @@ public class DistanceBasedAchievements : MonoBehaviour
     {
         DistanceTracker _distanceTracker = Blackboard.Instance.DistanceTracker;
         int index = 0;
-        float distance = _distances[index];
-        while (index <= _distances.Count)
+        //float distance = _distances[index];
+        while (index < _distances.Count)
         {
-            if (_distanceTracker.DistanceTravelled > distance)
+            if (Blackboard.Instance.DistanceTracker.DistanceTravelled > _distances[index])
             {
+                Debug.Log($"Distance Achievement reached at {_distances[index]}");
                 index++;
-                distance = _distances[index];
+                //distance = _distances[index];
                 var ach = AchievementsObserver.Instance.RuntimeAchievementData.Achievements
                     .Find(a => a.Id == "first_achievement");
                 yield return AchievementsObserver.Instance.UnlockAchievementAsync(ach);
@@ -44,5 +46,4 @@ public class DistanceBasedAchievements : MonoBehaviour
             yield return null;
         }
     }
-#endif
 }

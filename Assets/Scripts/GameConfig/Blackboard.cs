@@ -1,5 +1,6 @@
 ﻿using CrawfisSoftware.Events;
 using CrawfisSoftware.GameConfig;
+using CrawfisSoftware.TempleRun.GameConfig;
 using CrawfisSoftware.Utility;
 
 using System;
@@ -20,7 +21,6 @@ namespace CrawfisSoftware.TempleRun
         [SerializeField] private RandomProviderFromList _randomProvider;
         public static Blackboard Instance { get; private set; }
         public System.Random MasterRandom { get { return _randomProvider.RandomGenerator; } }
-        public GameDifficultyManager GameDifficultyManager { get; set; }
         public DifficultyConfig GameConfig { get; set; }  = new DifficultyConfig();
         public DistanceTracker DistanceTracker { get; set; } = new DistanceTracker();
         public float TrackWidthOffset { get; set; } = 1f;
@@ -44,13 +44,17 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             UnsubscribeToEvents();
+            DistanceTracker = new DistanceTracker();
         }
 
         private void OnGameDifficultyChanged(string eventName, object sender, object data)
         {
-            if (GameDifficultyManager != null)
+            DifficultyConfig difficulty = data as DifficultyConfig;
+            if (difficulty != null)
             {
-                GameConfig = GameDifficultyManager.CurrentDifficultyConfig;
+                GameConfig = difficulty;
+                Debug.Log($"Successfully set game difficulty to '{difficulty.DifficultyName}'");
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigured, this, GameConfig);
             }
         }
 

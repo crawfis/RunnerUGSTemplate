@@ -116,7 +116,7 @@ namespace CrawfisSoftware.UGS
 
             dataManager.Initialize(dataManagerClient, economyManager);
             economyManager.Initialize(economyManagerClient);
-            remoteConfigManager.Initialize(_remoteConfigDifficultyLevel);
+            remoteConfigManager.Initialize();
         }
 
         /// <summary>

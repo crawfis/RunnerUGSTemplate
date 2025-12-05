@@ -14,5 +14,6 @@
         LeaderboardOpening, LeaderboardOpened, LeaderboardClosing, LeaderboardClosed,
         AchievementsOpening,AchievementsOpened,AchievementsClosing,AchievementsClosed,
         RewardAdWatching, RewardAdWatched,
+        UGS_InitializationStarted, UGS_InitializationCompleted, UGS_InitializationFailed
     }
 }

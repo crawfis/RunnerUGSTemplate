@@ -120,7 +120,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &944490713
+--- !u!1 &974278448
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,60 +128,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 944490716}
-  - component: {fileID: 944490715}
-  - component: {fileID: 944490714}
+  - component: {fileID: 974278450}
+  - component: {fileID: 974278451}
   m_Layer: 0
-  m_Name: Load_Authentication
+  m_Name: Load_Game_Init
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &944490714
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944490713}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
-  _sceneName: UGS_Boot_2_Authentication
-  _loadadditively: 1
-  _eventToListenTo: RemoteConfigUpdated
-  _delayInSeconds: 0
---- !u!114 &944490715
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944490713}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.LoadSceneAdditively
-  _sceneName: UGS_Boot_2_Authentication
---- !u!4 &944490716
+--- !u!4 &974278450
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 944490713}
+  m_GameObject: {fileID: 974278448}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &974278451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 974278448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
+  _sceneName: Game_Boot_0_Initialization
+  _loadadditively: 1
+  _eventToListenTo: RemoteConfigUpdated
+  _delayInSeconds: 0
 --- !u!1 &1354895976
 GameObject:
   m_ObjectHideFlags: 0
@@ -226,7 +212,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88cf297b0307c624dba2300f15548877, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.RemoteConfigManager
-  _remoteConfigDifficultyLevel: Hard
   _logRemoteConfigValues: 1
 --- !u!1 &1833760800
 GameObject:
@@ -265,4 +250,4 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1833760801}
-  - {fileID: 944490716}
+  - {fileID: 974278450}

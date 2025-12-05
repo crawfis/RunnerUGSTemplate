@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.TempleRun;
 
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,7 +11,7 @@ namespace CrawfisSoftware.UI
         public UIDocument menuUI;
         private void Awake()
         {
-            menuUI.rootVisualElement.visible = false;
+            menuUI.rootVisualElement.visible = GameState.IsMainMenuActive;
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameplayNotReady, StartHidePanel);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoading, StartHidePanel);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.MainMenuShowing, StartShowPanel);

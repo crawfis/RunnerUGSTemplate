@@ -1,28 +1,90 @@
-﻿namespace CrawfisSoftware.TempleRun
+﻿using CrawfisSoftware.Events;
+
+using UnityEngine;
+
+namespace CrawfisSoftware.TempleRun
 {
-    public static class GameState
+    public class GameState : MonoBehaviour
     {
+        public static GameState Instance { get; private set; }
+
+        public static bool IsMainMenuActive { get; set; } = false;
         public static bool IsGameStarted { get; set; } = false;
         public static bool IsGameOver { get; internal set; } = false;
         public static bool IsGamePaused { get; internal set; } = false;
-        public static bool IsGameConfigured { get; internal set; } = true;
-        public static bool IsUserSignedIn { get; internal set; } = false;
-        public static bool IsPlayerAlive { get; internal set; } = false;
-        public static bool IsPlayerSignedIn { get; internal set; }
-        public static bool IsUnityServicesInitialized { get; internal set; }
-        public static bool IsLoading { get; internal set; }
-        public static void Reset()
+        public static bool IsGameConfigured { get; internal set; } = false;
+
+        public  void Reset()
         {
+            IsMainMenuActive = false;
             IsGameStarted = false;
             IsGameOver = false;
             IsGamePaused = false;
-            IsGameConfigured = true;
-            IsUserSignedIn = false;
-            IsPlayerAlive = false;
-            IsPlayerSignedIn = false;
-            IsUnityServicesInitialized = false;
-            IsLoading = false;
+            IsGameConfigured = false;
 
+        }
+        private void Awake()
+        {
+            if (Instance != null)
+            {
+                DestroyImmediate(Instance);
+            }
+            Instance = this;
+            Reset();
+
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.MainMenuShowing, OnMainMenuShowing);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.MainMenuHidden, OnMainMenuHidden);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Pause, OnPause);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resume, OnResume);
+        }
+
+        private void OnDestroy()
+        {
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.MainMenuShowing, OnMainMenuShowing);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.MainMenuHidden, OnMainMenuHidden);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Pause, OnPause);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resume, OnResume);
+        }
+
+        private void OnMainMenuShowing(string eventName, object sender, object data)
+        {
+            IsMainMenuActive = true;
+        }
+        private void OnMainMenuHidden(string eventName, object sender, object data)
+        {
+            IsMainMenuActive = false;
+        }
+        private void OnGameStarted(string eventName, object sender, object data)
+        {
+            GameState.IsGameStarted = true;
+            GameState.IsGameOver = false;
+        }
+
+        private void OnGameOver(string eventName, object sender, object data)
+        {
+            GameState.IsGameOver = true;
+            GameState.IsGameStarted = false;
+        }
+
+        private void OnGameConfigured(string eventName, object sender, object data)
+        {
+            GameState.IsGameConfigured = true;
+        }
+
+        private void OnPause(string eventName, object sender, object data)
+        {
+            GameState.IsGamePaused = true;
+        }
+
+        private void OnResume(string eventName, object sender, object data)
+        {
+            GameState.IsGamePaused = false;
         }
     }
 }
