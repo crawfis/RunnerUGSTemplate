@@ -11,10 +11,7 @@ namespace CrawfisSoftware.UI
         public UIDocument menuUI;
         private void Awake()
         {
-            if (GameState.IsMainMenuActive)
-                menuUI.rootVisualElement.visible = true;
-            else
-                menuUI.rootVisualElement.visible = false;
+            menuUI.rootVisualElement.visible = GameState.IsMainMenuActive;
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameplayNotReady, StartHidePanel);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoading, StartHidePanel);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.MainMenuShowing, StartShowPanel);
