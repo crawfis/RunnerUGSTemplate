@@ -1,13 +1,11 @@
-﻿using CrawfisSoftware.Events;
-
-using GTMY.Audio;
+﻿using GTMY.Audio;
 
 using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun.Audio
 {
     [RequireComponent(typeof(AudioSource))]
-    internal class TurnFeedback : MonoBehaviour
+    internal class TurnAudioFeedback : MonoBehaviour
     {
         [SerializeField] private AudioClip _turnLeftAudioClips;
         [SerializeField] private AudioClip _turnRightAudioClips;
@@ -28,6 +26,11 @@ namespace CrawfisSoftware.TempleRun.Audio
             ISfxAudioPlayer sfxRightAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("rightTurnFeedback", rightFactory, rightClipProvider);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
         }
+        private void OnDestroy()
+        {
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, PlayLeftTurnSound);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
+        }
 
         private static void PlayLeftTurnSound(string eventName, object sender, object data)
         {
@@ -37,11 +40,6 @@ namespace CrawfisSoftware.TempleRun.Audio
         private static void PlayRightTurnSound(string eventName, object sender, object data)
         {
             AudioManagerSingleton.Instance.PlaySfx("rightTurnFeedback", 1);
-        }
-        private void OnDestroy()
-        {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, PlayLeftTurnSound);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
         }
     }
 }

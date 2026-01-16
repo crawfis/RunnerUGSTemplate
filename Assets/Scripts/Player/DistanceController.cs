@@ -26,16 +26,22 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            _initialSpeed = Blackboard.Instance.GameConfig.InitialSpeed;
-            _maxSpeed = Blackboard.Instance.GameConfig.MaxSpeed;
-            _acceleration = Blackboard.Instance.GameConfig.Acceleration;
-            _speed = _initialSpeed;
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
             //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
+        }
+
+        private void OnDestroy()
+        {
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
+            DeleteCoroutine();
         }
 
         private void OnResetSpeed(string eventName, object sender, object data)
@@ -45,6 +51,10 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnGameStarted(string eventName, object sender, object data)
         {
+            _initialSpeed = Blackboard.Instance.GameConfig.InitialSpeed;
+            _maxSpeed = Blackboard.Instance.GameConfig.MaxSpeed;
+            _acceleration = Blackboard.Instance.GameConfig.Acceleration;
+            _speed = _initialSpeed;
             float initialDistance = Blackboard.Instance.TrackWidthOffset;
             //Blackboard.Instance.DistanceTracker.UpdateDistance(initialDistance);
             _coroutine = StartCoroutine(UpdateAfterGameStart());
@@ -88,16 +98,6 @@ namespace CrawfisSoftware.TempleRun
                 }
                 yield return new WaitForEndOfFrame();
             }
-        }
-
-        private void OnDestroy()
-        {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
-            DeleteCoroutine();
         }
 
         private void DeleteCoroutine()

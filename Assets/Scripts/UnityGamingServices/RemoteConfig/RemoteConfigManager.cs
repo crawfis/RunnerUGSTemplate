@@ -32,10 +32,16 @@ namespace CrawfisSoftware.UGS
             }
             else
             {
+                EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
                 EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
             }
         }
 
+        private void OnDestroy()
+        {
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
+
+        }
         private void OnFetchRemoteConfig(string eventName, object sender, object data)
         {
             Initialize(_logRemoteConfigValues);

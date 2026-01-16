@@ -76,7 +76,7 @@ namespace CrawfisSoftware.Events
             { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStarting },
             //{ GameFlowEvents.CountdownStarting, GameFlowEvents.CountdownStarted },
             //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
-            { GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
+            //{ GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
             //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
             //{ GameFlowEvents.GameEnding, GameFlowEvents.GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
