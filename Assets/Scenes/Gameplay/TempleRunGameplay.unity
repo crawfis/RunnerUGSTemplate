@@ -370,7 +370,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.SetGameDifficulty
   _overridePlayerPrefs: 1
-  _overrideGameDifficultyName: Hard
+  _overrideGameDifficultyName: Easy
 --- !u!4 &1451360433
 Transform:
   m_ObjectHideFlags: 0

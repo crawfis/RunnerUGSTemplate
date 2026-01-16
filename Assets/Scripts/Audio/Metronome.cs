@@ -28,11 +28,6 @@ namespace CrawfisSoftware.TempleRun.Audio
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, StopMetronome);
         }
 
-        private void StopMetronome(string eventName, object sender, object eventData)
-        {
-            StopCoroutine(_metronomeCoroutine);
-        }
-
         private void OnDestroy()
         {
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, StartMetronome);
@@ -43,6 +38,11 @@ namespace CrawfisSoftware.TempleRun.Audio
         {
             // Start the metronome ticking
             _metronomeCoroutine = StartCoroutine(MetronomeTick());
+        }
+
+        private void StopMetronome(string eventName, object sender, object eventData)
+        {
+            StopCoroutine(_metronomeCoroutine);
         }
 
         private IEnumerator MetronomeTick()

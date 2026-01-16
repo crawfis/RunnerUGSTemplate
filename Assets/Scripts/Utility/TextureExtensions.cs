@@ -1,10 +1,11 @@
 using System;
+
 using UnityEngine;
 namespace CrawfisSoftware.Utilities
 {
     /// <summary>
-    /// Provides extension methods for converting between different image formats used in profile picture handling.
-    /// Base64 strings are used to efficiently store and transmit image data as text, allowing custom player
+    /// Provides extension methods for converting between different image formats.
+    /// Base64 strings are used to efficiently store and transmit image data as text, allowing for instance custom player
     /// profile pictures to be saved and synced across devices. Base64 encoding converts binary image data
     /// into ASCII text that can be safely stored in databases and JSON.
     /// 
@@ -14,6 +15,7 @@ namespace CrawfisSoftware.Utilities
     /// - Converting between Texture2D and Sprite formats
     /// - Ensuring proper texture readability and format compatibility
     /// </summary>
+    /// <remarks>Based on code from Unity from their Gem Hunter UGS asset.</remarks>
     public static class TextureExtensions
     {
         public static Texture2D ConvertBase64ToTexture2D(this string base64)
