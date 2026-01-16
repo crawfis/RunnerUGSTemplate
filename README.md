@@ -1,81 +1,45 @@
-# Endless Runner
-_(based on the design goals explained in this template: `crawfis/TempleRun1-NoArt)_
+# Endless Runner with Unity Gaming Services Template
+_Based on the design goals explained in this template: `crawfis/TempleRun1-NoArt_[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Includes:
+- Unity Building Block - Player Authentication(https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-player-account-341928)
+- Unity Building Block - Achievements (https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-achievements-341918)
+- Unity Building Block - Leaderboards (https://assetstore.unity.com/packages/essentials/tutorial-projects/unity-building-block-leaderboards-341926)
+
+_(with additional inspiration from Unity's Gem Hunter UGS sample project)_
+
 
 This is an initial project template I use in my CSE 5912: Game Design and Development Capstone course at The Ohio State University
 ## Main Goals of This Repo
-- Provide a file structure
-- Provide some basic and useful Editor scripts
-- Include some key packages, including the Event Publishing system
-- Show an example of using additive scenes
-- Show how to have a basic Bootstrap scene
-- Show an example of using events for communication and keeping your code clean
-- Show how to separate gameplay from the actual visual and audio elements
 
-It relies on three other repos:
-- `crawfis/EventsPublisher`: Event system for Unity
-- `crawfis/RandomProvider`: Unity tool to set and create random seeds and control the random process
-- `crawfis/GTMY.Audio`: Audio Manager Unity package that can use Addressables
+**All of the goals of (_`crawfis/TempleRun1-NoArt_) plus:**
+- Main menu and other screens (panels)
+- Integration of player authentication, leaderboards and achievements using the () event system.
+- Even greater separation of concerns:
+  - Build Profiles for UGS Only, Game Only and UGS + Game 
+  - Many more events
+  - Many more additive scenes
+- Remote Config support
+- Cloud Save support
+- Secure Cloud Code support
+- Ready to add Economy and Currencies
+
 ---
+## Build Profiles
+There are 3 build profiles currently for Windows.
+- Windows - This is the main or production build profile
+- Test_UGS_Windows - This profile bypasses the Temple Run game and just posts a score. useful when just working with UGS.
+- Test_GameOnly_Window - Should function just like the original TempleRun demo but with windows and some other panels (like Game Over)
+
 ## Scene Loading Overview
-When running, the **BootStrap** scene is loaded first. It additively adds two scenes:
-- `TempleRunTrackPCG`: to create the abstract track creation
-- `TempleRunGameplay`: has most of the controllers (distance, turning, and others)
-`TempleRunGameplay` once loaded will load the remaining **5 other scenes** dealing with graphics, sound, environment and audio. The **8 scenes** and their hierarchies are shown below.
+When running, the **0_BootStrap** scene is loaded first. It additively adds two scenes:
+- `UGS_Boot_0_Initialization`: to start several UGS activities
+- `Game_Boot_0_Initialization`: to start the initial game loading
 
 
-The file KnownEvents has a list of all of the events used in this simple example. There really should be several more: TurnCancelled, TurningStarted, ...
 
----
-## Scenes Loaded when running
-### BootStrap
-- Temp Camera – needed to avoid problems on Android.
-- Global
-- Blackboard – Not the best Software Engineering, but useful.
-- RandomProvider – Seed, store and provide reproducibility
-- EventsPublisher – The main event pump to learn and focus on
-- QuitController – Clean up and quit gracefully
-- GameConfig – ScriptableObject based game control
-- LoadGamePlay – Controls what scenes to load next
-- Ullnput – Unity’s Event System and UI Input Module
-### TempleRunGameplay
-- Controllers
-- GameController – Initialize your game and handle player death, etc.
-- PauseController – Handle Pause, Resume and Toggle
-- DistanceController – Temple Run distance tracker
-- TurnController – Handle Turn requests
-- CollisionController – Handle failed turns
-- DeathWatcher – Player dying and number of lives
-- AI – Automatically play / test the game
-- TeleportController – Handle a successful turn request
-- InputController – Handle the various Input Actions: Play controls and Game controls.
-- LoadVisuals – Controls what scenes to load next
-### TempleRunTrackPCG
-- PathCreation (only one should be enabled)
-- TrackManager – Random track lengths
-- VoxelTrackManager – Integer constrained track lengths
-- TrackLengthList – Track lengths from a specified set (ScriptableObject)
-- TrackController – Handles events and direction changes, preserving the overall spline of the track.
-### TempleRunVisuals
-- Character
-- Virtual Camera
-- Capsule
-### TempleRunTrackVisuals
-- TrackSpawner – A plane prefab with a script to stretch it to the track segment size.
-- VoxelSpawner – Spawn enough prefabs based on the track length.
-- StartingPlatform – A visual to see as the scene loads. Can be deleted.
-- Generated Level – Parent object for the resulting track generation
-### TempleRunGuiOverlay
-- UI – A UI Document that just shows the distance travelled
-### TempleRunEnvironment
-- Environment
-- Main Camera
-- Directional Light
-- Global Volume
-### TempleRunSfx
-- Music – One version of the music player available in the Audio package
-- Metronome – A speed-based metronome
-- TurnFeedback – Sounds to play on successful turns
-- Cleanup – Resets the singletons
+
+
 ---
 ## Game Development Tasks
 First, integrate a **main menu**. A starter package project for this that has localization support is here. Use **UI Toolkit** for everything.
