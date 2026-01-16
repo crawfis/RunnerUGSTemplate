@@ -2,6 +2,7 @@
 using CrawfisSoftware.TempleRun.GameConfig;
 using CrawfisSoftware.UGS.RemoteConfig;
 
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace CrawfisSoftware.UGS
         {
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultySettingsChanged, OnDifficultySettingsChanged);
-            PopulateDifficulties();
+
         }
         private void OnDestroy()
         {
@@ -58,9 +59,9 @@ namespace CrawfisSoftware.UGS
             }
         }
 
-        public void PopulateDifficulties()
+        public void PopulateDifficulties(IList<DifficultyConfig> difficulties)
         {
-            var difficulties = DifficultyObserver.Instance.RuntimeDifficultySettings;
+            //var difficulties = DifficultyObserver.Instance.RuntimeDifficultySettings;
             Clear();
             foreach (var config in difficulties)
             {
@@ -90,13 +91,12 @@ namespace CrawfisSoftware.UGS
 
         public void OnDifficultySettingsChanged(string eventName, object sender, object data)
         {
-            //var newDifficulty = data as IList<DifficultyConfig>;
-            //if (newDifficulty == null)
-            //{
-            //    throw new ArgumentException("OnDifficultySettingsChanged event data must be of type IList<DifficultyConfig>");
-            //}
-            PopulateDifficulties();
-            //SetDifficulty(CurrentDifficulty);
+            var difficultyConfigs = data as IList<DifficultyConfig>;
+            if (difficultyConfigs == null)
+            {
+                throw new ArgumentException("OnDifficultySettingsChanged event data must be of type IList<DifficultyConfig>");
+            }
+            PopulateDifficulties(difficultyConfigs);
         }
     }
 }

@@ -63,7 +63,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             UnsubscribeToEvents();
-            _gameInitializer.Dispose();
+            _gameInitializer?.Dispose();
         }
 
     }
