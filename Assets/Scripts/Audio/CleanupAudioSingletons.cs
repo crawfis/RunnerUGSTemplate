@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.TempleRun.Assets.Scripts.Audio
+namespace CrawfisSoftware.TempleRun.Audio
 {
     internal class CleanupAudioSingletons : MonoBehaviour
     {
