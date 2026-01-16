@@ -164,50 +164,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e9623b23077ff44f97027e6e9721da2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &538130496
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 538130497}
-  - component: {fileID: 538130498}
-  m_Layer: 0
-  m_Name: GameStateController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &538130497
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 538130496}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1807073403}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &538130498
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 538130496}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 128250370f3d6994f9b0d415d96233fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameStateController
 --- !u!1001 &630594864
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -370,7 +326,6 @@ Transform:
   m_Children:
   - {fileID: 807874757}
   - {fileID: 630594865}
-  - {fileID: 538130497}
   - {fileID: 149559974}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -403,7 +358,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a851b4bdbb936941aba87aac491e61e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.Test_SubmitLeaderboardScore
-  _leaderboardId: DailyDistance
   _minValue: 10
   _maxValue: 300
   _numberOfTimesToSubmit: 2

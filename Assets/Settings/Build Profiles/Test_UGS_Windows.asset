@@ -27,7 +27,11 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/Boot/Test/DummyGame_Boot_0_Initialization.unity
   - m_enabled: 1
+    m_path: Assets/Scenes/Boot/Game_Boot_0_Initialization.unity
+  - m_enabled: 1
     m_path: Assets/Scenes/Boot/Game_Boot_1_UI.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Boot/Game_Boot_2_Play.unity
   - m_enabled: 1
     m_path: Assets/Scenes/Boot/UGS_Boot_1_RemoteConfig.unity
   - m_enabled: 1

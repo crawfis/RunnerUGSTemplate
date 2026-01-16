@@ -435,15 +435,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1831359988}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
+  m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.LoadSceneAdditively
   _sceneName: UGS_Boot_2_Authentication
-  _loadadditively: 1
-  _eventToListenTo: UnityServicesInitialized
-  _delayInSeconds: 1
 --- !u!1 &1833760800
 GameObject:
   m_ObjectHideFlags: 0
