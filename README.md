@@ -375,7 +375,7 @@ HUD elements visible in the image:
 | Arrow keys / WASD | Turn left/right |
 | Swipe (touch) | Turn left/right |
 | Tab | Pause/Resume toggle |
-| Esc | End gameplay |
+| Esc | End gameplay |separate diagram on the game-flow and gmae play side
 
 **Hierarchy:** All TempleRun* scenes active:
 - `TempleRunGameplay` - `DistanceController`, `TurnController`
@@ -506,7 +506,7 @@ After achievements auto-close (or manual close), returns to Main Menu.
 ┌─────────────────┐                  │     │
 │   Game Over     │──Retry (future)─-┘     │
 │ Retry|Main Menu │───Main Menu───────────►│
-└────────┬────────┘        (future )       │
+└─────────────────┘        (future )       │
          │ auto                            │
          ▼                                 │
 ┌─────────────────┐                        │
@@ -691,7 +691,7 @@ After achievements auto-close, returns to Main Menu. **Sign Out** returns to Ste
 ┌─────────────────┐                        │
 │   Game Over     │                        │
 │ Retry|Main Menu │                        │
-└────────┬────────┘                        │
+└─────────────────┘                        │
          │ auto                            │
          ▼                                 │
 ┌─────────────────┐                        │
@@ -768,7 +768,7 @@ Authentication is bypassed entirely:
 - **Quit** - Exit application
 - **Sign Out** - Hidden or disabled
 
-**Hierarchy:** `Game_Boot_1_UI` scene with `MainMenu` active. No UGS scenes loaded.
+**Hierarchy:** `Game_Boot_1_UI` scene with `MainMenu` active under `UIRoot`
 
 ---
 
@@ -826,19 +826,19 @@ After Game Over, player can:
          │                                 │
          ▼                                 │
 ┌─────────────────┐                        │
-│    Gameplay     │◄───────┐               │
-│  (Temple Run)   │        │               │
-└────────┬────────┘        │               │
-         │ PlayerFailed    │               │
-         ▼                 │               │
-    ┌─────────┐           │               │
-    │ Lives?  │───Yes─────┘               │
-    └────┬────┘                           │
-         │ No                              │
-         ▼                                 │
-┌─────────────────┐                        │
-│   Game Over     │                        │
-│ Retry|Main Menu │────────────────────────┘
+│    Gameplay     │◄───────┐         ┌────┘
+│  (Temple Run)   │        │         │
+└────────┬────────┘        │         │
+         │ PlayerFailed    │         │
+         ▼                 │         │
+    ┌─────────┐            │         │
+    │ Lives?  │───Yes─────┘         │
+    └────┬────┘                      │
+         │ No                        │
+         ▼                           │
+┌─────────────────┐                  │
+│   Game Over     │                  │
+│ Retry|Main Menu │──────────────────┘
 └─────────────────┘
    (No Leaderboard)
    (No Achievements)
@@ -1279,3 +1279,125 @@ You can copy, modify, distribute, and perform the work, even for commercial purp
 - **Unity Technologies** - Building Blocks and UGS SDKs
 - **samyam** - YouTube tutorials that inspired the art-free approach
 - **CSE 5912 Capstone Students** - Ongoing refinement and feedback
+
+sequenceDiagram
+    title Game Flow + Gameplay Timeline (No UGS)
+
+    actor Player
+    participant GameFlow as Game Flow\n(EventsPublisherGameFlow)
+    participant UI as UI\n(Main Menu / HUD / Overlays)
+    participant Input as InputController
+    participant Turn as TurnController
+    participant Track as TrackManager
+    participant Distance as DistanceController
+    participant Life as PlayerLifeController
+    participant GameCtrl as GameController
+
+    %% 1. Boot → Main Menu
+    GameFlow->>GameFlow: LoadingScreenShowing
+    GameFlow->>GameFlow: LoadingScreenShown
+    GameFlow->>GameFlow: LoadingScreenHidding
+    GameFlow->>GameFlow: LoadingScreenHidden
+    GameFlow->>GameFlow: GameplayReady
+
+    GameFlow->>UI: MainMenuShowing
+    UI-->>GameFlow: MainMenuShown
+
+    %% 2. Player starts game
+    Player->>UI: Click "Play"
+    UI->>GameFlow: GameScenesLoading
+    GameFlow->>UI: MainMenuHidden
+    GameFlow->>GameFlow: GameScenesLoaded
+
+    GameFlow->>GameFlow: GameStarting
+    GameFlow->>GameFlow: CountdownStarting
+    GameFlow->>UI: Show Countdown (3..2..1)
+    GameFlow->>GameFlow: CountdownStarted
+    loop Countdown tick
+        GameFlow->>GameFlow: CountdownTick
+    end
+    GameFlow->>GameFlow: CountdownEnding
+    GameFlow->>GameFlow: CountdownEnded
+    GameFlow->>GameFlow: GameStarted
+
+    GameFlow->>GameCtrl: GameStarted
+    GameCtrl->>Distance: Start run
+    GameCtrl->>Track: Init first track segment
+
+    %% 3. Gameplay loop
+    loop Gameplay loop
+        %% Input to requested turns
+        Player->>Input: UserInitiatedEvents.\nLeftTurnRequested / RightTurnRequested
+        Input->>Turn: LeftTurnRequested / RightTurnRequested
+
+        alt Turn in valid window
+            Turn->>Turn: LeftTurnSucceeded / RightTurnSucceeded
+            Turn->>Track: TempleRunEvents.\nLeftTurnSucceeded / RightTurnSucceeded
+            Track->>Track: ActiveTrackChanging\n(CurrentSplineChanging, etc.)
+            Track->>Track: ActiveTrackChanged\n(CurrentSplineChanged,\nTrackSegmentCreated)
+            Track->>Distance: SplineSegmentCreated\n(update segment distances)
+        else Turn invalid or missed
+            Turn->>Turn: PlayerFailing
+            Turn->>Turn: PlayerFailed
+            Turn->>Life: PlayerFailed
+            Life->>Distance: Notify failure\n(update death distance)
+            Life->>Life: Decrement lives
+
+            alt Lives > 0
+                Life->>GameCtrl: PlayerFailed (continue run)
+            else Lives == 0
+                Life->>GameFlow: GameEnding
+                Life->>GameFlow: GameEnded
+            end
+        end
+
+        %% Distance tracking
+        GameCtrl->>Distance: Tick (per frame)
+        Distance->>UI: Update HUD\n(score, distance, time)
+
+        %% Optional: Pause / Resume
+        alt Player toggles pause
+            Player->>Input: PauseToggle
+            Input->>GameFlow: Pause
+            GameFlow->>GameCtrl: Pause
+            GameCtrl->>UI: Show Pause UI
+
+            Player->>Input: PauseToggle
+            Input->>GameFlow: Resume
+            GameFlow->>GameCtrl: Resume
+            GameCtrl->>UI: Hide Pause UI
+        end
+    end
+
+    %% 4. Game Ending → Game Over
+    GameFlow->>GameCtrl: GameEnding
+    GameCtrl->>Distance: Stop distance tracking
+    GameCtrl->>UI: Show Game Over
+    GameFlow->>GameFlow: GameScenesUnloading
+    GameFlow->>GameFlow: GameScenesUnloaded
+
+    GameFlow->>GameFlow: GameEnded
+    UI->>UI: Wait for player choice
+
+    alt Player chooses Retry
+        Player->>UI: Click "Retry"
+        UI->>GameFlow: GameScenesLoading
+        GameFlow->>GameFlow: GameScenesLoaded
+        GameFlow->>GameFlow: GameStarting
+        GameFlow->>GameFlow: CountdownStarting
+        note right of GameFlow: Loop back into countdown & gameplay
+    else Player chooses Main Menu
+        Player->>UI: Click "Main Menu"
+        UI->>GameFlow: GameplayNotReady
+        GameFlow->>UI: MainMenuShowing
+        UI-->>GameFlow: MainMenuShown
+    end
+
+    %% 5. Quit Flow
+    alt Player chooses Quit from Main Menu
+        Player->>UI: Click "Quit"
+        UI->>GameFlow: Quitting
+        GameFlow->>GameCtrl: Quitting
+        GameCtrl->>GameFlow: Quitted
+        GameFlow->>GameFlow: Exit application
+    end
