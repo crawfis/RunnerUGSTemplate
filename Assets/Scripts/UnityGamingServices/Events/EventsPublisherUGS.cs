@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.UGS.Events;
 
 using UnityEngine;
 

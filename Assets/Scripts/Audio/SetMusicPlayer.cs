@@ -19,8 +19,8 @@ namespace CrawfisSoftware.TempleRun.Audio
             _musicPlayer.Volume = _initialVolume;
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Pause, OnPause);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Paused, OnPause);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resumed, OnResume);
         }
 
         private void OnPause(string eventName, object sender, object data)
@@ -39,8 +39,8 @@ namespace CrawfisSoftware.TempleRun.Audio
         {
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Pause, OnPause);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Paused, OnPause);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resumed, OnResume);
         }
 
         private void OnGameStarted(string eventName, object sender, object data)

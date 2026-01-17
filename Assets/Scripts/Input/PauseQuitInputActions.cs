@@ -26,7 +26,7 @@ namespace CrawfisSoftware.TempleRun.Input
         }
         private void TEMP_GameQuit(InputAction.CallbackContext obj)
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnded, this, UnityEngine.Time.time);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEndRequested, this, UnityEngine.Time.time);
         }
 
         private void PauseResumeToggle_performed(InputAction.CallbackContext obj)

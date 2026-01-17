@@ -25,7 +25,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             {
                 currentDifficulty = PlayerPrefs.GetString(PlayerPrefKeys.GameDifficultyKey, "Easy");
             }
-            EventsPublisherGameFlow.Instance?.PublishEvent(GameFlowEvents.GameDifficultyChanging, this, currentDifficulty);
+            EventsPublisherGameFlow.Instance?.PublishEvent(GameFlowEvents.DifficultyChanging, this, currentDifficulty);
         }
     }
 }

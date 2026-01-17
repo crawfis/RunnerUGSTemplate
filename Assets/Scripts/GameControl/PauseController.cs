@@ -15,16 +15,16 @@ namespace CrawfisSoftware.GameControl
         {
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.PauseToggle, OnPauseToggle);
 
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Pause, OnPause);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Paused, OnPause);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resumed, OnResume);
         }
 
         private void OnDestroy()
         {
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.PauseToggle, OnPauseToggle);
 
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Pause, OnPause);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Paused, OnPause);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resumed, OnResume);
         }
         public void Pause()
         {
@@ -42,9 +42,9 @@ namespace CrawfisSoftware.GameControl
         public void TogglePauseResume()
         {
             if (_isPaused)
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Resume, this, UnityEngine.Time.time);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.ResumeRequested, this, UnityEngine.Time.time);
             else
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Pause, this, UnityEngine.Time.time);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.PauseRequested, this, UnityEngine.Time.time);
         }
 
         private void OnPauseToggle(string eventName, object sender, object data)

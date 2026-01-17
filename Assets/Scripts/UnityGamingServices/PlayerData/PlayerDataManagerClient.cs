@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.UGS;
+using CrawfisSoftware.UGS.Events;
 using CrawfisSoftware.Utilities;
 
 using System;

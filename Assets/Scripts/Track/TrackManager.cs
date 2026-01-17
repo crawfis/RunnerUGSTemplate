@@ -32,14 +32,14 @@ namespace CrawfisSoftware.TempleRun
         protected virtual void Awake()
         {
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             if(GameState.IsGameConfigured) OnGameConfigured("junk", null, null);
         }
 
         protected virtual void OnDestroy()
         {
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, OnTurnSucceeded);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, OnTurnSucceeded);
         }

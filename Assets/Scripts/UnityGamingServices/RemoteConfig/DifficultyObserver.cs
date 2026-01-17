@@ -128,7 +128,7 @@ namespace CrawfisSoftware.UGS.RemoteConfig
             //var difficulties = await GetAchievementsAsync(m_AuthenticationService.PlayerId);
             var difficulties = await GetDefinitions();
             RuntimeDifficultySettings = difficulties;
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsChanged, this, difficulties);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsApplied, this, difficulties);
 
         }
 

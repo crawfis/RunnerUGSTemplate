@@ -1,4 +1,4 @@
-﻿namespace CrawfisSoftware.UGS
+﻿namespace CrawfisSoftware.UGS.Events
 {
     public enum UGS_EventsEnum
     {

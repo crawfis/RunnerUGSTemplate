@@ -23,21 +23,21 @@ namespace CrawfisSoftware.TempleRun
             if (GameState.IsGameConfigured) 
                 OnGameConfigured("GameConfigured", "Self", null);
             else
-                EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+                EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
 
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
         }
         private void UnsubscribeToEvents()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
         }
 
         private void OnGameConfigured(string EventName, object sender, object data)
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
         }
 

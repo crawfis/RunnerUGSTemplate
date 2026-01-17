@@ -52,20 +52,21 @@ namespace CrawfisSoftware.TempleRun
             DifficultyConfig difficulty = data as DifficultyConfig;
             if (difficulty != null)
             {
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigApplying, this, difficulty);
                 GameConfig = difficulty;
                 Debug.Log($"Successfully set game difficulty to '{difficulty.DifficultyName}'");
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigured, this, GameConfig);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigApplied, this, GameConfig);
             }
         }
 
         private void SubscribeToEvents()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultyChanged, OnGameDifficultyChanged);
         }
 
         private void UnsubscribeToEvents()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultyChanged, OnGameDifficultyChanged);
         }
 
 #if UNITY_EDITOR

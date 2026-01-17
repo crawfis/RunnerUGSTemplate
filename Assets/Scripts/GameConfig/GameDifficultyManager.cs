@@ -34,14 +34,14 @@ namespace CrawfisSoftware.UGS
 
         public void Awake()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultySettingsChanged, OnDifficultySettingsChanged);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultyChanging, OnDifficultyChanging);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultySettingsApplied, OnDifficultySettingsChanged);
 
         }
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameDifficultyChanging, OnDifficultyChanging);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultySettingsChanged, OnDifficultySettingsChanged);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultyChanging, OnDifficultyChanging);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultySettingsApplied, OnDifficultySettingsChanged);
         }
 
         public void SetDifficulty(string difficultyName)
@@ -51,7 +51,7 @@ namespace CrawfisSoftware.UGS
             {
                 CurrentDifficulty = difficultyName;
                 //Blackboard.Instance.GameConfig = _difficultyConfigs[difficultyName];
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChanged, this, _difficultyConfigs[CurrentDifficulty]);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultyChanged, this, _difficultyConfigs[CurrentDifficulty]);
             }
             else
             {
@@ -83,7 +83,7 @@ namespace CrawfisSoftware.UGS
             string newDifficulty = data as string;
             if (string.IsNullOrEmpty(newDifficulty))
             {
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameDifficultyChangeFailed, this, CurrentDifficultyConfig);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultyChangeFailed, this, CurrentDifficultyConfig);
                 return;
             }
             SetDifficulty(newDifficulty);
