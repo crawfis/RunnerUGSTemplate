@@ -395,6 +395,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1232898493}
   - component: {fileID: 1232898492}
+  - component: {fileID: 1232898494}
   m_Layer: 0
   m_Name: LoadGameConfig
   m_TagString: Untagged
@@ -429,6 +430,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1232898494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1232898491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ac1e045f5be5fd4db4b893303d3e558, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.LoadDefaultGameConfigs
+  _gameConfig: {fileID: 11400000, guid: 2e12c54a4b139d94589098af2528c64e, type: 2}
+  _difficultyLevel: Easy
 --- !u!1 &1352712540
 GameObject:
   m_ObjectHideFlags: 0

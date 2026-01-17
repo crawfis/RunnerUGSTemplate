@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57ff8ae5ba5cc314e97305de17d5023c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.SetGameDifficulty
-  _overridePlayerPrefs: 1
+  _overridePlayerPrefs: 0
   _overrideGameDifficultyName: Easy
 --- !u!4 &1451360433
 Transform:
