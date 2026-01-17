@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 149559974}
   - component: {fileID: 149559975}
   m_Layer: 0
-  m_Name: EventsPublisher_TempleRun
+  m_Name: EventsPublisher
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

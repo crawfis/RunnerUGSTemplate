@@ -484,7 +484,7 @@ GameObject:
   - component: {fileID: 1852488106}
   - component: {fileID: 1852488107}
   m_Layer: 0
-  m_Name: EventsPublisher
+  m_Name: UGS EventsPublisher
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -32,7 +32,8 @@ A Unity project template demonstrating **event-driven architecture** for integra
 
 ## Overview
 
-This template is used in **CSE 5912: Game Design and Development Capstone** at The Ohio State University. It provides student teams with a working endless runner that demonstrates:
+This template is used in **CSE 5912: Game Design and Development Capstone** at The Ohio State University. It provides student teams with scaffolding for event-based flow and control of 
+various Unity Gaming Services (UGS) and a simple infinite-runner game that demonstrates:
 
 - **Decoupled event-driven communication** via the EventsPublisher package
 - **UGS Building Blocks** (Authentication, Leaderboards, Achievements) wired through events
@@ -40,7 +41,8 @@ This template is used in **CSE 5912: Game Design and Development Capstone** at T
 - **Separation of gameplay logic from visuals/audio**
 - **Multiple build profiles** for testing UGS and gameplay independently
 
-The gameplay itself is a Temple Run-style endless runner where the core mechanic is a timed teleportation (not a true turn) that snaps the player to a new path segment when triggered within a valid distance window.
+The gameplay itself is a Temple Run-style endless runner where the core mechanic is a timed teleportation (not a true turn) that snaps the player to a new path segment 
+when triggered within a valid distance window.
 
 ---
 
@@ -84,36 +86,40 @@ The gameplay itself is a Temple Run-style endless runner where the core mechanic
 ### High-Level Design
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                              BOOT LAYER                                  │
-│  ┌─────────────────┐                                                     │
-│  │  0_BootStrap    │ ─────► Loads UGS_Boot + Game_Boot additively        │
-│  └─────────────────┘                                                     │
-└──────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│                              BOOT LAYER                                                   │
+│  ┌───────────────────────────────────────┐                                                │
+│  │  0_BootStrap                          │ ─────► Loads UGS_Boot + Game_Boot additively   │
+│  │  - Game Flow Event Publishing         │                                                │
+│  │  - User Initiated Event Publishing    │                                                │
+│  └───────────────────────────────────────┘                                                │
+└───────────────────────────────────────────────────────────────────────────────────────────┘
                     │                                │
                     ▼                                ▼
-┌────────────────────────────────┐  ┌────────────────────────────────────┐
-│         UGS LAYER              │  │           GAME LAYER               │
-│  ┌──────────────────────────┐  │  │  ┌──────────────────────────────┐  │
-│  │ UGS_Boot_0_Initialization│  │  │  │ Game_Boot_0_Initialization   │  │
-│  │ - UGS Services Init      │  │  │  │ - GameConfig loading         │  │
-│  │ - Authentication Flow    │  │  │  │ - RandomProvider setup       │  │
-│  │ - Event Publishing       │  │  │  │ - Scene orchestration        │  │
-│  └──────────────────────────┘  │  │  └──────────────────────────────┘  │
-│              │                 │  │              │                     │
-│              ▼                 │  │              ▼                     │
-│  ┌──────────────────────────┐  │  │  ┌──────────────────────────────┐  │
-│  │ Building Blocks:         │  │  │  │ Gameplay Scenes:             │  │
-│  │ - Authentication         │  │  │  │ - TempleRunGameplay          │  │
-│  │ - Remote Config          │  │  │  │ - TempleRunTrackPCG          │  │
-│  │ - Leaderboards           │  │  │  │ - TempleRunVisuals           │  │
-│  │ - Achievements           │  │  │  │ - TempleRunGuiOverlay        │  │
-│  └──────────────────────────┘  │  │  │ - TempleRunEnvironment       │  │
-└────────────────────────────────┘  │  │ - TempleRunSfx               │  │
-                                    │  └──────────────────────────────┘  │
-                                    └────────────────────────────────────┘
-                    │                                │
-                    └────────────────┬───────────────┘
+┌─────────────────────────────────┐  ┌───────────────────────────────────────┐
+│         UGS LAYER               │  │           GAME LAYER                  │
+│  ┌───────────────────────────┐  │  │  ┌─────────────────────────────────┐  │
+│  │ UGS_Boot_0_Initialization │  │  │  │ Game_Boot_0_Initialization      │  │
+│  │ - UGS Services Init       │  │  │  │ - GameConfig loading            │  │
+│  │ - Authentication Flow     │  │  │  │ - RandomProvider setup          │  │
+│  │ - UGS Event Publishing    │  │  │  │ - TempleRun Event Publishing    │  │
+│  │ - UGS Scene orchestration │  │  │  │ - TempleRun Scene orchestration │  │
+│  │                           │  │  │  │ - Blackboard                    │  │
+│  └───────────────────────────┘  │  │  └─────────────────────────────────┘  │
+│                │                │  │                 │                     │
+│                ▼                │  │                 ▼                     │
+│  ┌──────────────────────────┐   │  │  ┌──────────────────────────────┐     │
+│  │ Building Blocks:         │   │  │  │ Gameplay Scenes:             │     │
+│  │ - Authentication         │   │  │  │ - TempleRunGameplay          │     │
+│  │ - Remote Config          │   │  │  │ - TempleRunTrackPCG          │     │
+│  │ - Leaderboards           │   │  │  │ - TempleRunVisuals           │     │
+│  │ - Achievements           │   │  │  │ - TempleRunGuiOverlay        │     │
+│  └──────────────────────────┘   │  │  │ - TempleRunEnvironment       │     │
+└─────────────────────────────────┘  │  │ - TempleRunSfx               │     │
+                    │                │  └──────────────────────────────┘     │
+                    │                └───────────────────────────────────────┘
+                    │                                 │
+                    └────────────────┬────────────────┘
                                      ▼
                     ┌────────────────────────────────┐
                     │      EventsPublisher           │
@@ -170,7 +176,7 @@ Verify: Check `Assets/CloudCode/GeneratedModulesBindings` folder exists.
 CrawfisSoftware → Play Scene 0 Always (toggle ON)
 ```
 
-> ⚠️ This setting does not persist between Unity sessions. Re-enable after restarting Unity.
+> ⚠️ This setting may not persist between Unity sessions. Re-enable after restarting Unity.
 
 ### 5. Enable Event Logging (Optional)
 
@@ -351,6 +357,18 @@ Active gameplay with Temple Run mechanics:
 - **Distance Tracking** - Score based on total distance traveled
 - **Lives System** - Configurable number of lives (default: 2)
 
+The screenshot above shows a typical production run with all gameplay and UGS-related scenes loaded additively:
+
+- `UGS_Boot_1_RemoteConfig`, `UGS_Boot_2_Authentication`, `UGS_Boot_3_Achievements`, `UGS_Boot_4_Leaderboards`
+- `AchievementNotifications` and `Achievements` (for in-run notifications and post-run panel)
+- Core Temple Run scenes: `TempleRunGameplay`, `TempleRunTrackPCG`, `TempleRunPlayerVisuals`, `TempleRunGuiOverlay`, `TempleRunEnvironment`, `TempleRunSfx`
+
+HUD elements visible in the image:
+- **Score (top-left):** `Score: 000000` – total distance-based score
+- **Run Distance (center):** e.g., `118m` – current run distance in meters
+- **Run Timer (top-right):** `00:00` – elapsed run time
+- **Toast Panel (bottom-right):** shows instant achievement notifications (e.g., **FooBar 1**) while the run continues
+
 **Controls:**
 | Input | Action |
 |-------|--------|
@@ -470,25 +488,25 @@ After achievements auto-close (or manual close), returns to Main Menu.
          ▼                                 │
 ┌─────────────────┐                        │
 │   Countdown     │                        │
-│   3... 2... 1   │                        │
-└────────┬────────┘                        │
-         │                                 │
-         ▼                                 │
-┌─────────────────┐                        │
-│    Gameplay     │◄───────┐               │
-│  (Temple Run)   │        │               │
-└────────┬────────┘        │               │
-         │ PlayerFailed    │               │
-         ▼                 │               │
-    ┌─────────┐           │               │
-    │ Lives?  │───Yes─────┘               │
-    └────┬────┘                           │
-         │ No                              │
-         ▼                                 │
-┌─────────────────┐                        │
-│   Game Over     │                        │
-│ Retry|Main Menu │───Retry───────────────►│
-└────────┬────────┘        (restart)       │
+│   3... 2... 1   │ ◄────────────────┐     │
+└────────┬────────┘                  │     │
+         │                           │     │
+         ▼                           │     │
+┌─────────────────┐                  │     │
+│    Gameplay     │◄───────┐         │     │
+│  (Temple Run)   │        │         │     │
+└────────┬────────┘        │         │     │
+         │ PlayerFailed    │         │     │
+         ▼                 │         │     │
+    ┌─────────┐            │         │     │
+    │ Lives?  │───Yes───-──┘         │     │
+    └────┬────┘                      │     │
+         │ No                        │     │
+         ▼                           │     │
+┌─────────────────┐                  │     │
+│   Game Over     │──Retry (future)─-┘     │
+│ Retry|Main Menu │───Main Menu───────────►│
+└────────┬────────┘        (future )       │
          │ auto                            │
          ▼                                 │
 ┌─────────────────┐                        │
@@ -518,7 +536,7 @@ The **Test_UGS_Windows** profile bypasses actual gameplay to focus on UGS integr
 | Gameplay | Full Temple Run | **DummyGame** (instant random score) |
 | Entry Scene | `0_BootStrap` | `0_BootStrap_UGS_Only` |
 | Game Scenes | TempleRun* loaded | **Not loaded** |
-| Retry/Main Menu | Functional | Placeholder (not wired) |
+| Retry/Main Menu | Placeholder (not wired) | Placeholder (not wired) |
 | Use Case | Production | UGS integration testing |
 
 ### Test_UGS_Windows Scene List
