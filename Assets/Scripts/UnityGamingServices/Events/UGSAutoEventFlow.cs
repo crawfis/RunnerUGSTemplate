@@ -44,12 +44,13 @@ namespace CrawfisSoftware.UGS.Events
 
             //{ UGS_EventsEnum.LeaderboardOpening, UGS_EventsEnum.LeaderboardOpened }, // Published by LeaderboardController
             //{ UGS_EventsEnum.LeaderboardOpened, UGS_EventsEnum.LeaderboardClosing },
-            //{ UGS_EventsEnum.LeaderboardClosing, UGS_EventsEnum.LeaderboardClosed },
-            { UGS_EventsEnum.LeaderboardClosed, UGS_EventsEnum.AchievementsOpening },
+            { UGS_EventsEnum.LeaderboardClosing, UGS_EventsEnum.LeaderboardClosed },
+            { UGS_EventsEnum.LeaderboardClosed, UGS_EventsEnum.AchievementsOpenRequested },
 
+            { UGS_EventsEnum.AchievementsOpenRequested, UGS_EventsEnum.AchievementsOpening },
             //{ UGS_EventsEnum.AchievementsOpening, UGS_EventsEnum.AchievementsOpened },
-            //{ UGS_EventsEnum.AchievementsOpened, UGS_EventsEnum.AchievementsClosing },
-            //{ UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
+            { UGS_EventsEnum.AchievementsCloseRequested, UGS_EventsEnum.AchievementsClosing },
+            { UGS_EventsEnum.AchievementsClosing, UGS_EventsEnum.AchievementsClosed },
             { UGS_EventsEnum.AchievementsClosed, UGS_EventsEnum.RewardAdWatching },
 
             { UGS_EventsEnum.RewardAdWatching, UGS_EventsEnum.RewardAdWatched },

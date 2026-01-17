@@ -11,8 +11,8 @@
         PlayerSigningOut, PlayerSignedOut, PlayerSignInFailed, PlayerSessionExpired,
         CheckForExistingSession, CheckForExistingSessionFailed, CheckForExistingSessionSucceeded,
         ScoreUpdating, ScoreUpdated, ScoreFailedToUpdate,
-        LeaderboardOpening, LeaderboardOpened, LeaderboardClosing, LeaderboardClosed,
-        AchievementsOpening,AchievementsOpened,AchievementsClosing,AchievementsClosed,
+        LeaderboardOpening, LeaderboardOpened, LeaderboardCloseRequested, LeaderboardClosing, LeaderboardClosed,
+        AchievementsOpenRequested, AchievementsOpening, AchievementsOpened, AchievementsCloseRequested, AchievementsClosing, AchievementsClosed,
         RewardAdWatching, RewardAdWatched,
         UGS_InitializationStarted, UGS_InitializationCompleted, UGS_InitializationFailed
     }
