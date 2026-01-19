@@ -16,9 +16,10 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | Purpose | Path |
 |---------|------|
 | Entry Scene | `Assets/Scenes/Boot/0_BootStrap` |
-| Game Event Enums | `Assets/Scripts/Events/GameFlowEvents.cs`, `TempleRunEvents.cs`, `UserInitiatedEvents.cs`, , Assets/Scripts/UnityGamingServices/Events/UGS_EventsEnum.cs |
-| Event Publishers | `Assets/Scripts/Events/EventsPublisher*.cs`, Assets/Scripts/UnityGamingServices/Events/EventsPublisherUGS.cs |
-| Auto-Event Flow | `Assets/Scripts/Events/GameFlowAutoEventFlow.cs` |
+| Game Event Enums | `Assets/Scripts/Events/GameFlowEvents.cs`, `TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
+| UGS Event Enums | `Assets/Scripts/UnityGamingServices/Events/UGS_EventsEnum.cs` |
+| Event Publishers | `Assets/Scripts/Events/EventsPublisher*.cs`, `Assets/Scripts/UnityGamingServices/Events/EventsPublisherUGS.cs` |
+| Auto-Event Flow | `Assets/Scripts/Events/GameFlowAutoEventFlow.cs`, `TempleRunAutoEventFlow.cs` |
 | Game State | `Assets/Scripts/GameConfig/Blackboard.cs` |
 
 ## Architecture Overview
@@ -26,10 +27,10 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 Unity 6 endless runner demonstrating **event-driven architecture** with Unity Gaming Services.
 
 **Four Event Domains:**
-- `GameFlowEvents` - Application lifecycle (loading, menus, game sessions, pause/resume)
-- `TempleRunEvents` - Gameplay-specific (turns, player failure, track changes)
-- `UserInitiatedEvents` - Input events (turn requests, pause toggle)
-- `UGS_EventsEnum` - Unity Gaming Services events (leaderboards, achievements, cloud code)
+- `GameFlowEvents` - Application lifecycle (loading screens, menus, game sessions, pause/resume, config/difficulty, save/load, quit)
+- `TempleRunEvents` - Gameplay-specific (player lifecycle, countdown, turns, slides, jumps, lane changes, collisions, coins, power-ups, track/spline generation, teleportation)
+- `UserInitiatedEvents` - Raw input events (turn requests, pause toggle)
+- `UGS_EventsEnum` - Unity Gaming Services events (initialization, authentication, remote config, leaderboards, achievements, rewarded ads)
 
 **Four Singleton Publishers:**
 - `EventsPublisherGameFlow.Instance`
@@ -94,63 +95,73 @@ EventsPublisherTempleRun.Instance.PublishEvent(
 
 ### Auto-Event Flow Pattern
 
-Events auto-chain through dictionary mappings in `GameFlowAutoEventFlow.cs`:
+Events auto-chain through dictionary mappings in `GameFlowAutoEventFlow.cs` and `TempleRunAutoEventFlow.cs`:
 
 ```csharp
+// In GameFlowAutoEventFlow.cs - GameFlow domain auto-chains
 _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
 {
     { GameFlowEvents.GameStartRequested, GameFlowEvents.GameStarting },
-    { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStartRequested },
     { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
+    { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowRequested },
+    { GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloadRequested },
     // ... more mappings
 };
 ```
 
-When `GameScenesLoaded` fires, it automatically triggers `GameStartRequested` → `GameStarting` → `CountdownStartRequested`.
+When `GameScenesLoaded` fires, it automatically triggers `GameStartRequested` → `GameStarting`.
+
+Note: Countdown events (`CountdownStartRequested`, `CountdownTick`, etc.) are now in `TempleRunEvents` since they are gameplay-specific.
 
 ### Adding New Events
 
-**Step 1: Add to appropriate enum**
+**Step 1: Determine the correct domain**
+- `GameFlowEvents` - For app/session lifecycle (loading, menus, pause, config, quit)
+- `TempleRunEvents` - For gameplay mechanics (player actions, countdown, track, collisions)
+- `UserInitiatedEvents` - For raw input events
+- `UGS_EventsEnum` - For UGS service callbacks
+
+**Step 2: Add to appropriate enum with a unique value**
 
 ```csharp
-// In Assets/Scripts/Events/GameFlowEvents.cs
+// Example: Adding to GameFlowEvents.cs (values grouped by category)
 public enum GameFlowEvents
 {
     // ... existing events ...
-    MyFeatureRequested = 200,
-    MyFeatureStarting = 201,
-    MyFeatureStarted = 202,
+    // ---------- My New Feature ----------
+    MyFeatureRequested = 130,
+    MyFeatureStarting = 131,
+    MyFeatureStarted = 132,
+    MyFeatureFailed = 133,
 }
 ```
 
-**Step 2: (Optional) Add auto-chaining**
+**Step 3: (Optional) Add auto-chaining in the appropriate flow class**
 
 ```csharp
-// In GameFlowAutoEventFlow.cs
-_autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
-{
-    // ... existing mappings ...
-    { GameFlowEvents.MyFeatureRequested, GameFlowEvents.MyFeatureStarting },
-};
+// In GameFlowAutoEventFlow.cs or TempleRunAutoEventFlow.cs
+{ GameFlowEvents.MyFeatureRequested, GameFlowEvents.MyFeatureStarting },
 ```
 
-**Step 3: Subscribe and publish as needed**
+**Step 4: Subscribe and publish as needed**
 
 ### Event Naming Conventions
 - `*Requested` - User or system initiated a request
-- `*Starting` / `*ing` - Action is beginning (async)
-- `*Started` / `*ed` - Action completed
+- `*Starting` / `*ing` - Action is beginning (async operation in progress)
+- `*Started` / `*ed` - Action completed successfully
 - `*Failed` - Action failed
+- `*Cancelled` - Action was cancelled
 
 ## Coding Conventions
 
 ### Namespaces
 ```
-CrawfisSoftware.Events           - Event system core
-CrawfisSoftware.TempleRun        - Gameplay logic
-CrawfisSoftware.TempleRun.Events - Gameplay auto-event flows
+CrawfisSoftware.Events           - Event system core (GameFlowEvents, UserInitiatedEvents, publishers)
+CrawfisSoftware.TempleRun        - Gameplay logic (TempleRunEvents enum)
+CrawfisSoftware.TempleRun.Events - Gameplay auto-event flows (TempleRunAutoEventFlow)
 CrawfisSoftware.UI               - UI controllers
 CrawfisSoftware.UGS              - Unity Gaming Services integration
+CrawfisSoftware.UGS.Events       - UGS events (UGS_EventsEnum, EventsPublisherUGS)
 CrawfisSoftware.GameConfig       - Global constants
 CrawfisSoftware.SceneManagement  - Scene loading utilities
 ```
@@ -183,7 +194,9 @@ internal class MyController : MonoBehaviour
 | Category | Files |
 |----------|-------|
 | Event Enums | `Assets/Scripts/Events/GameFlowEvents.cs`, `TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
+| UGS Event Enums | `Assets/Scripts/UnityGamingServices/Events/UGS_EventsEnum.cs` |
 | Event Publishers | `Assets/Scripts/Events/EventsPublisherGameFlow.cs`, `EventsPublisherTempleRun.cs`, `EventsPublisherUserInitiated.cs` |
+| UGS Publisher | `Assets/Scripts/UnityGamingServices/Events/EventsPublisherUGS.cs` |
 | Auto-Event Flow | `Assets/Scripts/Events/GameFlowAutoEventFlow.cs`, `TempleRunAutoEventFlow.cs`, `AutoEventFlowBase.cs` |
 | Game State | `Assets/Scripts/GameConfig/Blackboard.cs`, `GameConstants.cs`, `DifficultyConfig.cs` |
 | Example Subscribers | `Assets/Scripts/Player/TurnController.cs`, `DeathWatcher.cs`, `PlayerLifeController.cs` |

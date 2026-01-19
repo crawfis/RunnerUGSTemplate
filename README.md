@@ -397,9 +397,9 @@ When the player fails (collision, missed turn, falls):
 
 **Events:**
 ```
-PlayerFailed → PlayerFailed.Handler → Check Lives
-                                      ├── Lives > 0: Continue
-                                      └── Lives = 0: PlayerDied
+PlayerFailRequested → PlayerFailing → PlayerFailed → Check Lives
+                                                     ├── Lives > 0: PlayerRevived
+                                                     └── Lives = 0: PlayerDeathRequested → PlayerDying → PlayerDied
 ```
 
 ---
@@ -991,32 +991,51 @@ During play, you can:
 - Select an event and click "Publish Event" to manually trigger it
 - Test game flow without playing (e.g., trigger `PlayerDied` from menu)
 
-### Core Gameplay Events
+### GameFlow Events (Application Lifecycle)
 
-| Event | Publisher | Subscribers |
+| Event | Publisher | Description |
 |-------|-----------|-------------|
-| `GameStarting` | GameController | Multiple systems |
-| `GameStarted` | GameController | DeathWatcher, DistanceController, TrackManager |
-| `GameOver` | GameController | DeathWatcher, DistanceController |
-| `Pause` | PauseController | GameController |
-| `Resume` | PauseController | GameController |
-| `Quitting` | QuitController | All systems (cleanup) |
-| `Quitted` | QuitController | Application exit |
-| `ActiveTrackChanged` | TrackManager | DeathWatcher, GUIController, TurnController |
-| `LeftTurnRequested` | InputController | TurnController |
-| `RightTurnRequested` | InputController | TurnController |
-| `LeftTurnSucceeded` | TurnController | TrackManager |
-| `RightTurnSucceeded` | TurnController | TrackManager |
-| `PlayerFailed` | TurnController | DistanceController, PlayerLifeController |
-| `PlayerDied` | PlayerLifeController | GameController |
+| `LoadingScreenShowRequested/Showing/Shown` | Various | Loading screen visibility |
+| `MainMenuShowRequested/Showing/Shown` | Various | Main menu visibility |
+| `GameStartRequested/Starting/Started` | GameController | Game session lifecycle |
+| `GameEndRequested/Ending/Ended` | GameController | Game session end |
+| `GameScenesLoadRequested/Loading/Loaded` | SceneLoader | Scene loading |
+| `PauseRequested/Pausing/Paused` | PauseController | Game pause |
+| `ResumeRequested/Resuming/Resumed` | PauseController | Game resume |
+| `QuitRequested/Quitting/QuitCompleted` | QuitController | Application exit |
 
-### UGS Events
+### TempleRun Events (Gameplay)
+
+| Event | Publisher | Description |
+|-------|-----------|-------------|
+| `PlayerFailRequested/Failing/Failed` | CollisionController | Player hit obstacle |
+| `PlayerDeathRequested/Dying/Died` | PlayerLifeController | Player lost all lives |
+| `CountdownStartRequested/Starting/Tick/Ended` | CountdownController | Pre-game countdown |
+| `TurnLeftRequested/Starting/Completed` | TurnController | Left turn mechanics |
+| `TurnRightRequested/Starting/Completed` | TurnController | Right turn mechanics |
+| `ActiveTrackChangeRequested/Changing/Changed` | TrackManager | Track segment changes |
+| `CoinCollectRequested/Collecting/Collected` | CollectibleController | Coin collection |
+| `PowerUpActivateRequested/Activating/Activated` | PowerUpController | Power-up usage |
+
+### UserInitiated Events (Input)
+
+| Event | Publisher | Description |
+|-------|-----------|-------------|
+| `LeftTurnRequested` | InputController | User pressed left |
+| `RightTurnRequested` | InputController | User pressed right |
+| `PauseToggle` | InputController | User toggled pause |
+
+### UGS Events (Services)
 
 | Event | Description |
 |-------|-------------|
-| `PlayerSignedIn` | Authentication completed successfully |
-| `LeaderboardScoreSubmitted` | Score posted to leaderboard |
-| `AchievementUnlocked` | Achievement completed |
+| `UnityServicesInitialized/InitializationFailed` | UGS core initialization |
+| `PlayerSigningIn/SignedIn/SignInFailed` | Authentication status |
+| `PlayerAuthenticated/SessionExpired` | Session management |
+| `RemoteConfigFetching/Fetched/Failed` | Remote config status |
+| `ScoreUpdating/Updated/FailedToUpdate` | Leaderboard submission |
+| `LeaderboardOpening/Opened/Closed` | Leaderboard UI |
+| `AchievementUnlocked/Claimed/ProgressUpdated` | Achievement status |
 
 ---
 
@@ -1149,7 +1168,11 @@ void OnTriggerEnter(Collider col) {
 
 // ✅ GOOD: Event-driven
 void OnTriggerEnter(Collider col) {
-    EventsPublisher.Publish(KnownEvents.PlayerFailed);  // Decoupled
+    EventsPublisherTempleRun.Instance.PublishEvent(
+        TempleRunEvents.PlayerFailRequested,
+        this,
+        null
+    );  // Decoupled
 }
 ```
 
@@ -1192,19 +1215,60 @@ Be aware of hidden dependencies:
 
 ### Adding New Events
 
-1. Define in `KnownEvents.cs`:
+1. **Determine the correct domain** and add to the appropriate enum:
+   - `GameFlowEvents` - App lifecycle (loading, menus, pause, config, quit)
+   - `TempleRunEvents` - Gameplay (player, countdown, turns, track, collisions)
+   - `UserInitiatedEvents` - Raw input
+   - `UGS_EventsEnum` - UGS service callbacks
+
+2. **Add to the enum** with a unique value:
 ```csharp
-public static readonly string MyEvent = "MyEvent";
+// In GameFlowEvents.cs or TempleRunEvents.cs
+public enum GameFlowEvents
+{
+    // ... existing events ...
+    MyFeatureRequested = 130,
+    MyFeatureStarting = 131,
+    MyFeatureStarted = 132,
+}
 ```
 
-2. Publish:
+3. **Publish** using the typed publisher:
 ```csharp
-EventsPublisher.Publish(KnownEvents.MyEvent, payload);
+EventsPublisherGameFlow.Instance.PublishEvent(
+    GameFlowEvents.MyFeatureStarted,
+    this,
+    optionalData
+);
 ```
 
-3. Subscribe:
+4. **Subscribe** in Awake() and **unsubscribe** in OnDestroy():
 ```csharp
-EventsPublisher.Subscribe(KnownEvents.MyEvent, OnMyEvent);
+private void Awake()
+{
+    EventsPublisherGameFlow.Instance.SubscribeToEvent(
+        GameFlowEvents.MyFeatureStarted,
+        OnMyFeatureStarted
+    );
+}
+
+private void OnDestroy()
+{
+    EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+        GameFlowEvents.MyFeatureStarted,
+        OnMyFeatureStarted
+    );
+}
+
+private void OnMyFeatureStarted(string eventName, object sender, object data)
+{
+    // Handle the event
+}
+```
+
+5. **(Optional) Add auto-chaining** in `GameFlowAutoEventFlow.cs` or `TempleRunAutoEventFlow.cs`:
+```csharp
+{ GameFlowEvents.MyFeatureRequested, GameFlowEvents.MyFeatureStarting },
 ```
 
 ### Adding New UGS Services
