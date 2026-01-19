@@ -71,7 +71,10 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
 /ProjectSettings/ProjectVersion.txt
+/ProjectSettings/ProjectSettings.asset
+
 /ProjectSettings/Packages/com.unity.dedicated-server/MultiplayerRolesSettings.asset
 /Assets/CloudCode/BlocksAdminModule~/Project/bin/Release/net6.0
 /Assets/CloudCode/BlocksAdminModule~/Project/obj
