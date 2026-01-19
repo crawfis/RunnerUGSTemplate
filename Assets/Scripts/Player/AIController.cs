@@ -23,10 +23,10 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
         }
 
-        private void OnGameStarted(string EventName, object arg1, object arg2)
+        private void OnTempleRunStarted(string eventName, object sender, object data)
         {
             _gameStarted = true;
         }
@@ -47,7 +47,7 @@ namespace CrawfisSoftware.TempleRun
         }
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
         }
     }
 }

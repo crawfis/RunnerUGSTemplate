@@ -15,8 +15,25 @@ namespace CrawfisSoftware.TempleRun.Events
     {
         [SerializeField] private Dictionary<TempleRunEvents, TempleRunEvents> _autoTempleRun2TempleRunEvents = new Dictionary<TempleRunEvents, TempleRunEvents>()
         {
-            // Add TempleRun-internal auto chains here when needed.
-            // Example (commented): { TempleRunEvents.PlayerPause, TempleRunEvents.PlayerPaused },
+            // ================================================================================
+            // PAUSE / RESUME BRIDGES (mirror GameFlowAutoEventFlow)
+            // ================================================================================
+            { TempleRunEvents.PlayerPauseRequested, TempleRunEvents.PlayerPausing },
+            { TempleRunEvents.PlayerPausing, TempleRunEvents.PlayerPaused },
+            { TempleRunEvents.PlayerResumeRequested, TempleRunEvents.PlayerResuming },
+            { TempleRunEvents.PlayerResuming, TempleRunEvents.PlayerResumed },
+
+            // ================================================================================
+            // COUNTDOWN BRIDGE (mirror GameFlowAutoEventFlow)
+            // ================================================================================
+            { TempleRunEvents.CountdownStartRequested, TempleRunEvents.CountdownStarting },
+            // CountdownStarting -> CountdownTick(s) -> CountdownEnding -> CountdownEnded: published elsewhere
+
+            // ================================================================================
+            // GAME START BRIDGE
+            // ================================================================================
+            { TempleRunEvents.TempleRunStartRequested, TempleRunEvents.TempleRunStarting },
+            { TempleRunEvents.TempleRunStarting, TempleRunEvents.TempleRunStarted },
         };
 
         protected virtual void Awake()

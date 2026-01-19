@@ -85,7 +85,7 @@ namespace CrawfisSoftware.UGS.Events
             //{ GameFlowEvents.GameStarting, GameFlowEvents.CountdownStartRequested },
             //{ GameFlowEvents.CountdownStartRequested, GameFlowEvents.CountdownStarting },
             //{ GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
-            { GameFlowEvents.GameStarting, GameFlowEvents.GameStarted },
+            //{ GameFlowEvents.GameStarting, GameFlowEvents.GameStarted },
 
             // Immediately end (UGS-only testing)
             //{ GameFlowEvents.GameStarted, GameFlowEvents.GameEndRequested },

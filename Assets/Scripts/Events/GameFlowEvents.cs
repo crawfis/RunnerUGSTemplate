@@ -63,15 +63,6 @@
         Resuming = 64,
         Resumed = 65,
 
-        // ---------- Countdown ----------
-        CountdownStartRequested = 70,
-        CountdownStarting = 71,
-        CountdownStarted = 72,
-        CountdownTick = 73,
-        CountdownEnding = 74,
-        CountdownEnded = 75,
-        CountdownCancelled = 76,
-
         // ---------- Config / Difficulty ----------
         GameConfigChangeRequested = 80,
         GameConfigApplying = 81,

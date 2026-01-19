@@ -37,9 +37,9 @@ namespace CrawfisSoftware.TempleRun
         public void TogglePauseResume()
         {
             if (_isPaused)
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.ResumeRequested, this, UnityEngine.Time.time);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResumeRequested, this, UnityEngine.Time.time);
             else
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.PauseRequested, this, UnityEngine.Time.time);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerPauseRequested, this, UnityEngine.Time.time);
         }
 
         private void OnPause(string eventName, object sender, object data)

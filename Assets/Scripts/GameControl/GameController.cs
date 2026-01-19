@@ -15,35 +15,23 @@ namespace CrawfisSoftware.TempleRun
     ///    Publishes: GameStarted
     ///    Publishes: GameOver
     /// </summary>
+    [RequireComponent(typeof(GameConfigInitializer))]
     internal class GameController : MonoBehaviour
     {
-        private GameInitialization _gameInitializer;
         private void Awake()
         {
-            if (GameState.IsGameConfigured) 
-                OnGameConfigured("GameConfigured", "Self", null);
-            else
-                EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
-
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.CountdownEnded, OnCountdownEnded);
         }
         private void UnsubscribeToEvents()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnPlayerDied);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.CountdownEnded, OnCountdownEnded);
-        }
-
-        private void OnGameConfigured(string EventName, object sender, object data)
-        {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
-            _gameInitializer = new GameInitialization(Blackboard.Instance.GameConfig.NumberOfLives);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.CountdownEnded, OnCountdownEnded);
         }
 
         private void OnCountdownEnded(string EventName, object sender, object data)
         {
-            if (_gameInitializer == null)
+            if (!GameState.IsGameConfigured)
                 throw new System.ApplicationException("Countdown ended before game was even configured.");
             _ = StartCoroutine(StartGame());
         }
@@ -63,7 +51,6 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             UnsubscribeToEvents();
-            _gameInitializer?.Dispose();
         }
 
     }

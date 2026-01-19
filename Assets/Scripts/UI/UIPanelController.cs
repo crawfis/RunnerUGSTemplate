@@ -121,12 +121,12 @@ namespace CrawfisSoftware.TempleRun.UI
                 if (t_seconds != last_reported_second)
                 {
                     last_reported_second = t_seconds;
-                    EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownTick, this, t_seconds);
+                    EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownTick, this, t_seconds);
                 }
             }
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownEnding, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownEnding, this, null);
             SetActive(countDownUI, false);
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownEnded, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownEnded, this, null);
         }
 
         public void ShowGameOver()

@@ -23,6 +23,20 @@
         //PlayerPause = PlayerPaused, // Legacy naming
         //PlayerResume = PlayerResumed, // Legacy naming
 
+        // ---------- Countdown ----------
+        CountdownStartRequested = 30,
+        CountdownStarting = 31,
+        CountdownStarted = 32,
+        CountdownTick = 33,
+        CountdownEnding = 34,
+        CountdownEnded = 35,
+        CountdownCancelled = 36,
+
+        // ---------- Game start lifecycle (TempleRun domain) ----------
+        TempleRunStartRequested = 38,
+        TempleRunStarting = 39,
+        TempleRunStarted = 40,
+
         // ---------- Player movement: turning ----------
         TurnLeftRequested = 40,
         TurnLeftStarting = 41,

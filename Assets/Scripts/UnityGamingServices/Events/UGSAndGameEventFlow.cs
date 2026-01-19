@@ -77,11 +77,7 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
             //{ GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStarting },
-            { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStarting },
-            //{ GameFlowEvents.CountdownStarting, GameFlowEvents.CountdownStarted },
-            //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
-            //{ GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
-            //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
+            //{ GameFlowEvents.GameStarting, GameFlowEvents.GameStarted },
             //{ GameFlowEvents.GameEnding, GameFlowEvents.GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
             //{ GameFlowEvents.GameEnded, GameFlowEvents.GameScenesUnloading },

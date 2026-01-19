@@ -120,12 +120,6 @@ namespace CrawfisSoftware.Events
             // GameEnding -> GameEnded: Published after scenes unloaded
 
             // ================================================================================
-            // COUNTDOWN BRIDGE
-            // ================================================================================
-            { GameFlowEvents.CountdownStartRequested, GameFlowEvents.CountdownStarting },
-            // CountdownStarting -> CountdownTick(s) -> CountdownEnding -> CountdownEnded: Published by CountdownController
-
-            // ================================================================================
             // SCENE LOADING BRIDGES
             // ================================================================================
             { GameFlowEvents.GameScenesLoadRequested, GameFlowEvents.GameScenesLoading },
@@ -172,10 +166,8 @@ namespace CrawfisSoftware.Events
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowRequested },
 
             // --- Play button -> Game Start ---
-            // After scenes finish loading, start the game
+            // After scenes finish loading, start the game (TempleRun countdown lives in TempleRun domain)
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
-            // After game start request, begin countdown
-            { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStartRequested },
 
             // --- Player Death -> Game End ---
             // After game ends, unload gameplay scenes

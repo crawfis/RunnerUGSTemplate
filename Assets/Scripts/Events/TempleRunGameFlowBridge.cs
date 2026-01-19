@@ -14,6 +14,9 @@ namespace CrawfisSoftware.Events
             // Example: bridge Temple Run failures into the GameFlow end sequence
             //{ TempleRunEvents.PlayerFailed, GameFlowEvents.GameEndRequested },
             //{ TempleRunEvents.PlayerDied, GameFlowEvents.GameEndRequested },
+
+            // TempleRun paused -> request GameFlow pause (for menus/UI)
+            { TempleRunEvents.PlayerPaused, GameFlowEvents.PauseRequested },
         };
 
         [SerializeField] private Dictionary<GameFlowEvents, TempleRunEvents> _autoGameFlow2TempleRunEvents = new Dictionary<GameFlowEvents, TempleRunEvents>()
@@ -21,6 +24,12 @@ namespace CrawfisSoftware.Events
             // Example: drive Temple Run pause/resume hooks from GameFlow
             //{ GameFlowEvents.PauseRequested, TempleRunEvents.PlayerPause },
             //{ GameFlowEvents.ResumeRequested, TempleRunEvents.PlayerResume },
+
+            // Bridge start: when the broader game signals started, fire TempleRun start requested
+            { GameFlowEvents.GameStarted, TempleRunEvents.TempleRunStartRequested },
+
+            // GameFlow resumed -> request TempleRun resume (e.g., after menus)
+            { GameFlowEvents.Resumed, TempleRunEvents.PlayerResumeRequested },
         };
 
         protected virtual void Awake()

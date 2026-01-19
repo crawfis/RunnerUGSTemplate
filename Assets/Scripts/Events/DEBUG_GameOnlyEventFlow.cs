@@ -42,16 +42,10 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.MainMenuShown, GameFlowEvents.GameScenesLoadRequested },
             //{ GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
 
-            // --- Start -> Countdown ---
+            // --- Start -> Game start (no GameFlow countdown; handled in TempleRun domain)
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
             { GameFlowEvents.GameStartRequested, GameFlowEvents.GameStarting },
-
-            { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStartRequested },
-            { GameFlowEvents.CountdownStartRequested, GameFlowEvents.CountdownStarting },
-            //{ GameFlowEvents.CountdownStarting, GameFlowEvents.CountdownStarted },           // fired by Countdown controller
-            //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },               // fired repeatedly
-            //{ GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },               // fired by Countdown controller
-            { GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
+            //{ GameFlowEvents.GameStarting, GameFlowEvents.GameStarted },
 
             // --- End -> Unload -> Loop ---
             //{ GameFlowEvents.GameEndRequested, GameFlowEvents.GameEnding },
