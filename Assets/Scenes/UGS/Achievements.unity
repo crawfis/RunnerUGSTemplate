@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e55dc4bd72bfd0d43ba0441becf5105c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.CloseSceneOnEvent
-  _eventToSubscribeTo: 31
+  _eventToSubscribeTo: AchievementsClosed
   _unsubscribeOnEvent: 1
 --- !u!114 &557542970
 MonoBehaviour:
@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Utility.TimedEvent
   _delayInSeconds: 5
-  _eventName: AchievementsClosing
+  _eventName: AchievementsCloseRequested
   _useRealtime: 1
 --- !u!4 &557542971
 Transform:

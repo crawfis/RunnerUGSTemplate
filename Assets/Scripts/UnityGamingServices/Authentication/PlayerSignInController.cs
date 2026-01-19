@@ -1,5 +1,7 @@
 using Blocks.PlayerAccount;
 
+using CrawfisSoftware.UGS.Events;
+
 using UnityEngine;
 using UnityEngine.UIElements;
 

@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using CrawfisSoftware.UGS.Events;
+
+using System.Threading.Tasks;
 
 using Unity.Services.Authentication;
 using Unity.Services.Core;

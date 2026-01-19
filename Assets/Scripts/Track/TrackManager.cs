@@ -32,16 +32,16 @@ namespace CrawfisSoftware.TempleRun
         protected virtual void Awake()
         {
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             if(GameState.IsGameConfigured) OnGameConfigured("junk", null, null);
         }
 
         protected virtual void OnDestroy()
         {
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
         }
 
         private void OnGameConfigured(string eventName, object sender, object data)
@@ -70,8 +70,8 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.RightTurnSucceeded, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
         }
 
         protected virtual void CreateInitialTrack()

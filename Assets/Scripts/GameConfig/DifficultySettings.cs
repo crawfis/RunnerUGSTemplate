@@ -18,7 +18,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             }
             set { 
                 _configs = value;
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsChanged, this, _configs);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsApplied, this, _configs);
             }
         }
     }

@@ -1,5 +1,7 @@
 using Blocks.Achievements.UI;
 
+using CrawfisSoftware.UGS.Events;
+
 using System.Linq;
 
 using UnityEngine;

@@ -35,7 +35,7 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TeleportStarted, this, (_teleportDuration, data));
             yield return new WaitForSecondsRealtime(_teleportDuration);
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TeleportEnded, this, data);
-            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResume, this, data);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResumed, this, data);
         }
     }
 }

@@ -34,19 +34,6 @@ namespace CrawfisSoftware.TempleRun.UI
 
             Go(UIState.Loading);
 
-            //if (UnityServices.State == ServicesInitializationState.Initialized)
-            //{
-            //    StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
-            //}
-            //else
-            //{
-            //    StartCoroutine(ShowLoadingRoutine(GameConstants.DefaultLoadingDisplayTime));
-            //    EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityInitialized);
-            //}
-            //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
-            //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
-            //EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
-
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarting, OnGameStarting);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
@@ -55,34 +42,12 @@ namespace CrawfisSoftware.TempleRun.UI
 
         }
 
-        //private void OnFeedbackClosed(string eventName, object sender, object data)
-        //{
-        //    Go(UIState.Menu);
-        //}
-
-        //private void OnPlayerSignOut(string eventName, object sender, object data)
-        //{
-        //    _isSignedIn = false;
-        //    Go(UIState.None);
-        //}
-
         private void OnDestroy()
         {
-            //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityInitialized);
-            //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
-            //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
-            //EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosed, OnFeedbackClosed);
-
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarting, OnGameStarting);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
         }
-
-        //private void OnPlayerAuthenticated(string eventName, object sender, object data)
-        //{
-        //    _isSignedIn = true;
-        //    StartCoroutine(ShowMenuDelayed(1f));
-        //}
 
         private void OnGameStarting(string eventName, object sender, object data)
         {
@@ -156,12 +121,12 @@ namespace CrawfisSoftware.TempleRun.UI
                 if (t_seconds != last_reported_second)
                 {
                     last_reported_second = t_seconds;
-                    EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownTick, this, t_seconds);
+                    EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownTick, this, t_seconds);
                 }
             }
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownEnding, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownEnding, this, null);
             SetActive(countDownUI, false);
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.CountdownEnded, this, null);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownEnded, this, null);
         }
 
         public void ShowGameOver()

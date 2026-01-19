@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 200580836}
   - component: {fileID: 200580835}
+  - component: {fileID: 200580837}
   m_Layer: 0
   m_Name: AutoClose
   m_TagString: Untagged
@@ -148,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e55dc4bd72bfd0d43ba0441becf5105c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.CloseSceneOnEvent
-  _eventToSubscribeTo: 27
+  _eventToSubscribeTo: LeaderboardClosed
   _unsubscribeOnEvent: 1
 --- !u!4 &200580836
 Transform:
@@ -165,6 +166,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &200580837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200580833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a4a3acd166bf184a982b8d8d3fb4df1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Utility.TimedEvent
+  _delayInSeconds: 5
+  _eventName: LeaderboardCloseRequested
+  _useRealtime: 1
 --- !u!1001 &1707870260
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,4 +1,6 @@
-﻿using Unity.Services.Core;
+﻿using CrawfisSoftware.UGS.Events;
+
+using Unity.Services.Core;
 using Unity.Services.Core.Components;
 
 using UnityEngine;
@@ -11,7 +13,7 @@ namespace CrawfisSoftware.UGS
 
         public static UGS_State Instance { get; private set; }
 
-        public static string UGS_Environment => Instance._uGS_Services.EnvironmentName;
+        public static string UGS_Environment => Instance._uGS_Services?.EnvironmentName;
 
         // Keep track of potentially missed events in scenes that load after UGS initialization
         public static bool IsUnityServicesInitialized { get; private set; } = false;

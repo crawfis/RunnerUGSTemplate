@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.UGS;
+using CrawfisSoftware.UGS.Events;
 
 using System;
 using System.Collections;
@@ -10,6 +11,9 @@ using UnityEngine;
 
 namespace CrawfisSoftware.Events
 {
+    // Ignore this file. It will be deleted before release.
+    // This has been refactored into smaller components for better modularity.
+    // See: AutoEventFlowBase, GameFlowAutoEventFlow, UGSAutoEventFlow, etc.
     internal class UGSAndGameEventFlow : MonoBehaviour
     {
         [SerializeField] private float _delayBetweenEvents = 0f;
@@ -51,7 +55,7 @@ namespace CrawfisSoftware.Events
         {
             { UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady },
             { UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady },
-            { UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHidding },
+            { UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHiding },
         };
 
         protected Dictionary<GameFlowEvents, UGS_EventsEnum> _autoGameFlow2UGSEvents = new Dictionary<GameFlowEvents, UGS_EventsEnum>()
@@ -73,11 +77,7 @@ namespace CrawfisSoftware.Events
             //{ GameFlowEvents.GameScenesLoading, GameFlowEvents.MainMenuHidden }, // => Press Play, Hide Menu
             //{ GameFlowEvents.MainMenuHidden, GameFlowEvents.GameScenesLoaded },
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStarting },
-            { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStarting },
-            //{ GameFlowEvents.CountdownStarting, GameFlowEvents.CountdownStarted },
-            //{ GameFlowEvents.CountdownStarted, GameFlowEvents.CountdownTick },
-            //{ GameFlowEvents.CountdownEnding, GameFlowEvents.CountdownEnded },
-            //{ GameFlowEvents.CountdownEnded, GameFlowEvents.GameStarted },
+            //{ GameFlowEvents.GameStarting, GameFlowEvents.GameStarted },
             //{ GameFlowEvents.GameEnding, GameFlowEvents.GameFlowEvents.GameEnded },
             //{ GameFlowEvents.GameScenesUnloading, GameFlowEvents.GameScenesUnloaded },
             //{ GameFlowEvents.GameEnded, GameFlowEvents.GameScenesUnloading },
@@ -104,7 +104,7 @@ namespace CrawfisSoftware.Events
 
         protected virtual void Start()
         {
-            if(UnityServices.State == ServicesInitializationState.Initialized)
+            if (UnityServices.State == ServicesInitializationState.Initialized)
             {
                 DelayedFire(0, UGS_EventsEnum.UnityServicesInitialized.ToString(), this, null);
             }

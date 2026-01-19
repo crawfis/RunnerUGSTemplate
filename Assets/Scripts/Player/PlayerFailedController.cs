@@ -32,7 +32,7 @@ namespace CrawfisSoftware.TempleRun
         }
         private IEnumerator DeathDelay()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerPause, this, UnityEngine.Time.time);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerPaused, this, UnityEngine.Time.time);
             yield return new WaitForSecondsRealtime(GameConstants.ResumeDelay);
         }
 

@@ -17,19 +17,19 @@ namespace CrawfisSoftware.TempleRun.Audio
             var leftFactory = new AudioFactoryPooled(this, this.gameObject);
             //AudioFactoryRegistry.Instance.RegisterAudioFactory("TurnLeftPooledAudio", leftFactory);
             ISfxAudioPlayer sfxAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("leftTurnFeedback", leftFactory, leftClipProvider);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, PlayLeftTurnSound);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnLeftCompleted, PlayLeftTurnSound);
 
             var rightClipProvider = new AudioClipProvider(new System.Random());
             rightClipProvider.AddClip(_turnRightAudioClips);
             var rightFactory = new AudioFactoryPooled(this, this.gameObject);
             //AudioFactoryRegistry.Instance.RegisterAudioFactory("TurnRightPooledAudio", rightFactory);
             ISfxAudioPlayer sfxRightAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("rightTurnFeedback", rightFactory, rightClipProvider);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnRightCompleted, PlayRightTurnSound);
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.LeftTurnSucceeded, PlayLeftTurnSound);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.RightTurnSucceeded, PlayRightTurnSound);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnLeftCompleted, PlayLeftTurnSound);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnRightCompleted, PlayRightTurnSound);
         }
 
         private static void PlayLeftTurnSound(string eventName, object sender, object data)

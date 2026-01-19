@@ -36,9 +36,9 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.MainMenuHidden, OnMainMenuHidden);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Pause, OnPause);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Paused, OnPause);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resumed, OnResume);
         }
 
         private void OnDestroy()
@@ -47,9 +47,9 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.MainMenuHidden, OnMainMenuHidden);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigured, OnGameConfigured);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Pause, OnPause);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resume, OnResume);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Paused, OnPause);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resumed, OnResume);
         }
 
         private void OnMainMenuShowing(string eventName, object sender, object data)

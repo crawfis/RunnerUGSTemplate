@@ -129,7 +129,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 252218540}
-  - component: {fileID: 252218539}
+  - component: {fileID: 252218542}
+  - component: {fileID: 252218541}
   m_Layer: 0
   m_Name: AutoEvents
   m_TagString: Untagged
@@ -137,19 +138,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &252218539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 252218538}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82a26bdedbe83b14cbef8657acd42368, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Events.UGSAndGameEventFlow
-  _delayBetweenEvents: -1
 --- !u!4 &252218540
 Transform:
   m_ObjectHideFlags: 0
@@ -165,6 +153,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1833760801}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &252218541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252218538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fa673960db178046bdac9318408f98c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.Events.UGSGameFlowBridge
+  _delayBetweenEvents: 0
+--- !u!114 &252218542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 252218538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4037d0af7d0f0e4a8326f8968ec06d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.Events.UGSAutoEventFlow
+  _delayBetweenEvents: 0
 --- !u!1 &939187129
 GameObject:
   m_ObjectHideFlags: 0

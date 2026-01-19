@@ -28,7 +28,7 @@ namespace CrawfisSoftware.UI
 
         private void OnQuitButtonClicked()
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.Quitting, "Main Menu", null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.QuitRequested, "Main Menu", null);
         }
 
         private void OnSignOutButtonClicked()
@@ -40,7 +40,7 @@ namespace CrawfisSoftware.UI
 
         private void OnStartGameButtonClicked()
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameScenesLoading, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameScenesLoadRequested, this, null);
         }
     }
 }

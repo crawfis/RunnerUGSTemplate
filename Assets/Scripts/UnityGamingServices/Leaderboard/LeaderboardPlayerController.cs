@@ -3,6 +3,7 @@
 using Blocks.Leaderboards;
 
 using CrawfisSoftware.Events;
+using CrawfisSoftware.UGS.Events;
 
 using System;
 using System.Threading.Tasks;

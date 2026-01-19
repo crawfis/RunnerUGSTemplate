@@ -23,14 +23,14 @@ namespace CrawfisSoftware.TempleRun
             }
             Instance = this;
 
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerPause, OnPlayerPause);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerResume, OnPlayerResume);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerPaused, OnPlayerPause);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerResumed, OnPlayerResume);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerPause, OnPlayerPause);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerResume, OnPlayerResume);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerPaused, OnPlayerPause);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerResumed, OnPlayerResume);
         }
 
         private void OnPlayerPause(string eventName, object sender, object data)
