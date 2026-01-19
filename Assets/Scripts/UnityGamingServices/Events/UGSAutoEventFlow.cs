@@ -9,6 +9,44 @@ using UnityEngine;
 
 namespace CrawfisSoftware.UGS.Events
 {
+    /// <summary>
+    /// Auto-chains UGS events. Entries marked with [AUTO] are active; others are published by controllers.
+    ///
+    /// ========================================================================================
+    /// UGS EVENT FLOW TIMELINE (from actual event trace)
+    /// ========================================================================================
+    ///
+    /// --- BOOT / INITIALIZATION ---
+    /// [AUTO] UnityServicesInitialized -> CheckForExistingSession
+    /// [Published] CheckForExistingSessionSucceeded (or CheckForExistingSessionFailed)
+    /// [AUTO] CheckForExistingSessionSucceeded -> PlayerAuthenticating
+    /// [AUTO] CheckForExistingSessionFailed -> PlayerSigningIn (show sign-in UI)
+    /// [Published] PlayerAuthenticated (by auth controller)
+    /// [BRIDGE->GameFlow] PlayerAuthenticated -> GameplayReady
+    /// [AUTO] PlayerAuthenticated -> RemoteConfigFetching
+    /// [Published] RemoteConfigFetched -> RemoteConfigUpdated
+    /// [BRIDGE->GameFlow] RemoteConfigUpdated -> LoadingScreenHideRequested
+    ///
+    /// --- SIGN IN/OUT FLOW ---
+    /// [AUTO] PlayerSignedIn -> PlayerAuthenticating
+    /// [AUTO] PlayerSignedOut -> PlayerSigningIn (loop back)
+    /// [AUTO] PlayerSignInFailed -> PlayerSigningIn (retry)
+    ///
+    /// --- POST-GAME: LEADERBOARD ---
+    /// [BRIDGE: GameFlow->UGS] GameEnded -> LeaderboardOpening
+    /// [AUTO] LeaderboardCloseRequested -> LeaderboardClosing -> LeaderboardClosed
+    /// [AUTO] LeaderboardClosed -> AchievementsOpenRequested
+    ///
+    /// --- POST-GAME: ACHIEVEMENTS ---
+    /// [AUTO] AchievementsOpenRequested -> AchievementsOpening
+    /// [Published] AchievementClaimRequested -> AchievementClaiming -> AchievementClaimed
+    /// [AUTO] AchievementsCloseRequested -> AchievementsClosing -> AchievementsClosed
+    /// [AUTO] AchievementsClosed -> RewardAdWatching -> RewardAdWatched
+    /// [AUTO] RewardAdWatched -> PlayerAuthenticating (loop back to main menu)
+    ///
+    /// ========================================================================================
+    /// </summary>
+
     internal class UGSAutoEventFlow : AutoEventFlowBase
     {
         [SerializeField] private Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()

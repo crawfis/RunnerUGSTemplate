@@ -5,63 +5,182 @@ using UnityEngine;
 
 namespace CrawfisSoftware.Events
 {
+    /// <summary>
+    /// Auto-chains GameFlow events. Entries marked with [AUTO] are active; others are published by controllers.
+    ///
+    /// ========================================================================================
+    /// COMPLETE GAME FLOW TIMELINE (from actual event trace)
+    /// ========================================================================================
+    ///
+    /// --- BOOT / INITIALIZATION (driven by UGS, see UGSAutoEventFlow + UGSGameFlowBridge) ---
+    /// [UGS] UnityServicesInitialized
+    /// [UGS] CheckForExistingSession -> CheckForExistingSessionSucceeded
+    /// [UGS] PlayerAuthenticating -> PlayerAuthenticated
+    /// [BRIDGE: UGS->GameFlow] PlayerAuthenticated -> GameplayReady
+    /// [AUTO] GameplayReady -> MainMenuShowRequested
+    /// [UGS] RemoteConfigFetching -> RemoteConfigFetched -> RemoteConfigUpdated
+    /// [BRIDGE: UGS->GameFlow] RemoteConfigUpdated -> LoadingScreenHideRequested
+    /// [AUTO] MainMenuShowRequested -> MainMenuShowing
+    /// [AUTO] LoadingScreenHideRequested -> LoadingScreenHiding
+    /// [Published] DifficultySettingsApplied
+    /// [AUTO] DifficultyChangeRequested -> DifficultyChanging
+    /// [Published] DifficultyChanged
+    /// [Published] LoadingScreenShown -> LoadingScreenHidden
+    /// [Published] MainMenuShown
+    ///
+    /// --- SIGN OUT / SIGN IN LOOP ---
+    /// [UGS] PlayerSigningOut -> PlayerSignedOut
+    /// [BRIDGE: UGS->GameFlow] PlayerSignedOut -> GameplayNotReady
+    /// [Published] MainMenuHidden
+    /// [UGS] PlayerSigningIn -> PlayerSignedIn -> PlayerAuthenticating -> PlayerAuthenticated
+    /// [BRIDGE: UGS->GameFlow] PlayerAuthenticated -> GameplayReady
+    /// [AUTO] GameplayReady -> MainMenuShowRequested -> MainMenuShowing
+    /// [Published] MainMenuShown
+    ///
+    /// --- GAME START (user clicks Play) ---
+    /// [Published] GameScenesLoadRequested
+    /// [AUTO] GameScenesLoadRequested -> GameScenesLoading
+    /// [Published] MainMenuHidden
+    /// [Published] DifficultyChanging -> DifficultyChanged
+    /// [Published] GameConfigApplying -> GameConfigApplied
+    /// [Published] GameScenesLoaded
+    /// [AUTO] GameScenesLoaded -> GameStartRequested
+    /// [AUTO] GameStartRequested -> GameStarting
+    /// [AUTO] GameStarting -> CountdownStartRequested
+    /// [AUTO] CountdownStartRequested -> CountdownStarting
+    ///
+    /// --- COUNTDOWN ---
+    /// [Published] CountdownTick (repeats)
+    /// [Published] CountdownEnding
+    /// [Published] CountdownEnded
+    /// [Published] GameStarted
+    ///
+    /// --- GAMEPLAY LOOP (see TempleRunAutoEventFlow for gameplay events) ---
+    /// [TempleRun] LeftTurnRequested/RightTurnRequested -> LeftTurnSucceeded/RightTurnSucceeded
+    /// [TempleRun] TrackSegmentCreated, SplineSegmentCreated
+    /// [TempleRun] ActiveTrackChanging -> CurrentSplineChanging -> TeleportStarted -> TeleportEnded -> CurrentSplineChanged
+    /// [TempleRun] PlayerFailing -> PlayerPause ... PlayerResume
+    /// [TempleRun] PlayerDied
+    ///
+    /// --- GAME END (triggered by PlayerDied in controller) ---
+    /// [Published] GameEnding
+    /// [AUTO] GameEnding -> GameScenesUnloadRequested
+    /// [BRIDGE: GameFlow->UGS] GameEnding -> ScoreUpdating
+    /// [AUTO] GameScenesUnloadRequested -> GameScenesUnloading
+    /// [UGS] ScoreUpdated
+    /// [TempleRun] PlayerResume
+    /// [Published] GameScenesUnloaded
+    /// [Published] GameEnded
+    /// [BRIDGE: GameFlow->UGS] GameEnded -> LeaderboardOpening
+    ///
+    /// --- POST-GAME UGS UI LOOP (see UGSAutoEventFlow) ---
+    /// [UGS] LeaderboardOpening -> LeaderboardOpened
+    /// [UGS] LeaderboardCloseRequested -> LeaderboardClosing -> LeaderboardClosed
+    /// [UGS] AchievementsOpenRequested -> AchievementsOpening
+    /// [UGS] AchievementsCloseRequested -> AchievementsClosing -> AchievementsClosed
+    /// [UGS] RewardAdWatching -> RewardAdWatched
+    /// [UGS] PlayerAuthenticating -> PlayerAuthenticated (loop back)
+    /// [BRIDGE: UGS->GameFlow] PlayerAuthenticated -> GameplayReady
+    /// [AUTO] GameplayReady -> MainMenuShowRequested -> MainMenuShowing
+    /// [Published] MainMenuShown
+    ///
+    /// --- QUIT ---
+    /// [Published] QuitRequested
+    /// [Published] Quitting
+    /// [Published] Quitted
+    ///
+    /// ========================================================================================
+    /// </summary>
     internal class GameFlowAutoEventFlow : AutoEventFlowBase
     {
         [SerializeField] private Dictionary<GameFlowEvents, GameFlowEvents> _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
         {
-            // Loading Screen bridges
+            // ================================================================================
+            // LOADING SCREEN BRIDGES
+            // ================================================================================
             { GameFlowEvents.LoadingScreenShowRequested, GameFlowEvents.LoadingScreenShowing },
             { GameFlowEvents.LoadingScreenHideRequested, GameFlowEvents.LoadingScreenHiding },
+            // LoadingScreenShowing -> LoadingScreenShown: Published by LoadingScreenController
+            // LoadingScreenHiding -> LoadingScreenHidden: Published by LoadingScreenController
 
-            // Main Menu bridges
+            // ================================================================================
+            // MAIN MENU BRIDGES
+            // ================================================================================
             { GameFlowEvents.MainMenuShowRequested, GameFlowEvents.MainMenuShowing },
             { GameFlowEvents.MainMenuHideRequested, GameFlowEvents.MainMenuHiding },
-            //{ GameFlowEvents.MainMenuHiding, GameFlowEvents.MainMenuHidden },
+            // MainMenuShowing -> MainMenuShown: Published by MainMenuPanelController
+            // MainMenuHiding -> MainMenuHidden: Published by MainMenuPanelController
 
-            // Session bridges
+            // ================================================================================
+            // GAME SESSION BRIDGES
+            // ================================================================================
             { GameFlowEvents.GameStartRequested, GameFlowEvents.GameStarting },
-            //{ GameFlowEvents.GameEndRequested, GameFlowEvents.GameEnding }, // Keep data-rich GameEnding published by controller
+            // GameEndRequested -> GameEnding: Published by GameOverController (carries score data)
+            // GameStarting -> GameStarted: Published after countdown ends
+            // GameEnding -> GameEnded: Published after scenes unloaded
 
-            // Countdown bridge
+            // ================================================================================
+            // COUNTDOWN BRIDGE
+            // ================================================================================
             { GameFlowEvents.CountdownStartRequested, GameFlowEvents.CountdownStarting },
+            // CountdownStarting -> CountdownTick(s) -> CountdownEnding -> CountdownEnded: Published by CountdownController
 
-            // Scene bridges
+            // ================================================================================
+            // SCENE LOADING BRIDGES
+            // ================================================================================
             { GameFlowEvents.GameScenesLoadRequested, GameFlowEvents.GameScenesLoading },
             { GameFlowEvents.GameScenesUnloadRequested, GameFlowEvents.GameScenesUnloading },
+            // GameScenesLoading -> GameScenesLoaded: Published by scene loader
+            // GameScenesUnloading -> GameScenesUnloaded: Published by scene unloader
 
-            // Config / Difficulty bridges
+            // ================================================================================
+            // CONFIG / DIFFICULTY BRIDGES
+            // ================================================================================
             { GameFlowEvents.GameConfigChangeRequested, GameFlowEvents.GameConfigApplying },
             { GameFlowEvents.DifficultyChangeRequested, GameFlowEvents.DifficultyChanging },
+            // GameConfigApplying -> GameConfigApplied: Published by config system
+            // DifficultyChanging -> DifficultyChanged: Published by difficulty system
+            // DifficultySettingsApplied: Published when RemoteConfig updates difficulty
 
-            // Save / Load bridges (optional)
+            // ================================================================================
+            // PAUSE / RESUME BRIDGES
+            // ================================================================================
+            { GameFlowEvents.PauseRequested, GameFlowEvents.Pausing },
+            { GameFlowEvents.Pausing, GameFlowEvents.Paused },
+            { GameFlowEvents.ResumeRequested, GameFlowEvents.Resuming },
+            { GameFlowEvents.Resuming, GameFlowEvents.Resumed },
+
+            // ================================================================================
+            // SAVE / LOAD BRIDGES (optional, not currently active)
+            // ================================================================================
             //{ GameFlowEvents.SaveLoadRequested, GameFlowEvents.SaveLoading },
             //{ GameFlowEvents.SaveLoading, GameFlowEvents.SaveLoaded },
             //{ GameFlowEvents.SaveRequested, GameFlowEvents.Saving },
             //{ GameFlowEvents.Saving, GameFlowEvents.Saved },
 
-            // Quit bridge
-            { GameFlowEvents.QuitRequested, GameFlowEvents.Quitting },
+            // ================================================================================
+            // QUIT BRIDGE (optional, currently published directly)
+            // ================================================================================
+            //{ GameFlowEvents.QuitRequested, GameFlowEvents.Quitting },
 
-            // Pause/Resume auto chains (publish PauseRequested/ResumeRequested from input)
-            { GameFlowEvents.PauseRequested, GameFlowEvents.Pausing },
-            { GameFlowEvents.Pausing, GameFlowEvents.Paused },
+            // ================================================================================
+            // FLOW ORCHESTRATION (cross-phase auto-chains)
+            // ================================================================================
 
-            { GameFlowEvents.ResumeRequested, GameFlowEvents.Resuming },
-            { GameFlowEvents.Resuming, GameFlowEvents.Resumed },
-
-            // ========================================================================================
-            // NORMAL FULL GAME TIMELINE (documented here, only some entries are auto-fired)
-            // ========================================================================================
-
-            // --- Ready gate -> Main Menu ---
+            // --- Boot -> Main Menu ---
+            // After authentication completes, UGSGameFlowBridge fires GameplayReady
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowRequested },
 
-            // --- Start -> Countdown -> Gameplay ---
+            // --- Play button -> Game Start ---
+            // After scenes finish loading, start the game
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
+            // After game start request, begin countdown
             { GameFlowEvents.GameStarting, GameFlowEvents.CountdownStartRequested },
 
-            // --- End -> Unload -> Return to menu ---
+            // --- Player Death -> Game End ---
+            // After game ends, unload gameplay scenes
             { GameFlowEvents.GameEnding, GameFlowEvents.GameScenesUnloadRequested },
+            // After unload, UGSGameFlowBridge triggers LeaderboardOpening via GameEnded
         };
 
         protected virtual void Awake()

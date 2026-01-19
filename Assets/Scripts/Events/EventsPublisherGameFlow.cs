@@ -1,6 +1,4 @@
-﻿using CrawfisSoftware.Events;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CrawfisSoftware.Events
 {

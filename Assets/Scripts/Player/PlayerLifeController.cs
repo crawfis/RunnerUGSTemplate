@@ -30,7 +30,7 @@ namespace CrawfisSoftware.TempleRun
                 float score = Blackboard.Instance.DistanceTracker.DistanceTravelled;
                 //EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerDied, this, _playerID);
                 EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerDied, this, score);
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResume, this, UnityEngine.Time.time);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResumed, this, UnityEngine.Time.time);
             }
         }
 

@@ -3,17 +3,27 @@
     public enum UGS_EventsEnum
     {
         None,
+        // --- Initialization ---
         UnityServicesInitialized, UnityServicesInitializationFailed,
-        RemoteConfigFetching, RemoteConfigFetched, RemoteConfigFetchFailed, RemoteConfigUpdated, RemoteConfigFailed,
+        UGS_InitializationStarted, UGS_InitializationCompleted, UGS_InitializationFailed,
+        CheckForExistingSession, CheckForExistingSessionFailed, CheckForExistingSessionSucceeded,
+        // --- Authentication ---
+        PlayerResumedFromExpiredToken, PlayerSigningIn, PlayerSignedIn, PlayerAuthenticating, PlayerAuthenticated,
+        PlayerSigningOut, PlayerSignedOut, PlayerSignInFailed, PlayerSessionExpired,
         UserAccountDeleted,
         GameManagerInstantiated,
-        PlayerResumedFromExpiredToken, PlayerSigningIn, PlayerSignedIn, PlayerAuthenticating, PlayerAuthenticated, 
-        PlayerSigningOut, PlayerSignedOut, PlayerSignInFailed, PlayerSessionExpired,
-        CheckForExistingSession, CheckForExistingSessionFailed, CheckForExistingSessionSucceeded,
+        // --- Remote Config ---
+        RemoteConfigFetching, RemoteConfigFetched, RemoteConfigFetchFailed, RemoteConfigUpdated, RemoteConfigFailed,
+        // --- Leaderboards ---
         ScoreUpdating, ScoreUpdated, ScoreFailedToUpdate,
         LeaderboardOpening, LeaderboardOpened, LeaderboardCloseRequested, LeaderboardClosing, LeaderboardClosed,
-        AchievementsOpenRequested, AchievementsOpening, AchievementsOpened, AchievementsCloseRequested, AchievementsClosing, AchievementsClosed,
+        // --- Achievements ---
+        AchievementsOpenRequested, AchievementsOpening, AchievementsOpened,
+        AchievementsCloseRequested, AchievementsClosing, AchievementsClosed,
+        AchievementClaimRequested, AchievementClaiming, AchievementClaimed, AchievementClaimFailed,
+        AchievementUnlocked, AchievementProgressUpdated,
+        // --- Rewarded Ads ---
         RewardAdWatching, RewardAdWatched,
-        UGS_InitializationStarted, UGS_InitializationCompleted, UGS_InitializationFailed
+        RewardAdFailedToShow, RewardAdClosedWithoutReward,
     }
 }

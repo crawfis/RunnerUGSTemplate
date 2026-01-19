@@ -26,9 +26,9 @@ namespace CrawfisSoftware.TempleRun
         private Direction _nextTrackDirection;
         private readonly Dictionary<Direction, TempleRunEvents> _turnMapping = new()
         {
-            [Direction.Left] = TempleRunEvents.LeftTurnSucceeded,
-            [Direction.Right] = TempleRunEvents.RightTurnSucceeded,
-            [Direction.Both] = TempleRunEvents.RightTurnSucceeded
+            [Direction.Left] = TempleRunEvents.TurnLeftCompleted,
+            [Direction.Right] = TempleRunEvents.TurnRightCompleted,
+            [Direction.Both] = TempleRunEvents.TurnRightCompleted
         };
 
         public void ForceTurn()
@@ -56,7 +56,7 @@ namespace CrawfisSoftware.TempleRun
         {
             if (_nextTrackDirection != Direction.Right)
             {
-                OnTurnRequested(sender, data, TempleRunEvents.LeftTurnSucceeded);
+                OnTurnRequested(sender, data, TempleRunEvents.TurnLeftCompleted);
             }
         }
 
@@ -64,7 +64,7 @@ namespace CrawfisSoftware.TempleRun
         {
             if (_nextTrackDirection != Direction.Left)
             {
-                OnTurnRequested(sender, data, TempleRunEvents.RightTurnSucceeded);
+                OnTurnRequested(sender, data, TempleRunEvents.TurnRightCompleted);
             }
         }
 

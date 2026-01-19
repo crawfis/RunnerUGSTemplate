@@ -7,6 +7,18 @@ using UnityEngine;
 
 namespace CrawfisSoftware.UGS.Events
 {
+    /// <summary>
+    /// Bridges UGS events to/from GameFlow events. This class connects the two event domains.
+    ///
+    /// --- BOOT: UGS to GameFlow ---
+    /// [BRIDGE] PlayerAuthenticated -> GameplayReady
+    /// [BRIDGE] RemoteConfigUpdated -> LoadingScreenHideRequested
+    /// [BRIDGE] PlayerSignedOut -> GameplayNotReady
+    ///
+    /// --- GAME END: GameFlow to UGS ---
+    /// [BRIDGE] GameEnding -> ScoreUpdating
+    /// [BRIDGE] GameEnded -> LeaderboardOpening
+    /// </summary>
     internal class UGSGameFlowBridge : AutoEventFlowBase
     {
         [SerializeField] private Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
