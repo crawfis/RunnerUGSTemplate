@@ -142,6 +142,8 @@ when triggered within a valid distance window.
 
 ## Getting Started
 
+Looking for a full click-by-click setup of Unity Gaming Services for this template? See the walkthrough in [`docs/ConfigureUnityGamingServicesand-RunnerUGSTemplate.md`](docs/ConfigureUnityGamingServicesand-RunnerUGSTemplate.md).
+
 ### Prerequisites
 
 - **Unity 6000.0.x** or later (Unity 6)

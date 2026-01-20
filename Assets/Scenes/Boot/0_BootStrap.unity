@@ -728,7 +728,7 @@ GameObject:
   - component: {fileID: 1400460402}
   - component: {fileID: 1400460403}
   m_Layer: 0
-  m_Name: Quitted
+  m_Name: CloseApplication
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -856,10 +856,10 @@ SceneRoots:
   - {fileID: 1351158186}
   - {fileID: 811702130}
   - {fileID: 28231001}
+  - {fileID: 974278450}
   - {fileID: 1139485621}
   - {fileID: 1234304535}
   - {fileID: 2009761374}
-  - {fileID: 974278450}
   - {fileID: 731898516}
   - {fileID: 1333641298}
   - {fileID: 1400460402}

@@ -4,7 +4,7 @@ using System.Collections;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.TempleRun
+namespace CrawfisSoftware.UGS.Leaderboard.Test
 {
     public class Test_SubmitLeaderboardScore : MonoBehaviour
     {
@@ -19,6 +19,10 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
         }
 
+        private void OnDestroy()
+        {
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+        }
         private void OnGameStarted(string eventName, object sender, object data)
         {
             StartCoroutine(SubmitScoresCoroutine());
@@ -30,13 +34,13 @@ namespace CrawfisSoftware.TempleRun
             for (int i = 0; i < _numberOfTimesToSubmit; i++)
             {
                 float randomScore = UnityEngine.Random.Range((int)_minValue, (int)_maxValue + 1);
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, randomScore);
+                EventsPublisherUGS.Instance.PublishEvent(Events.UGS_EventsEnum.ScoreUpdating, this, randomScore);
                 yield return new WaitForSeconds(_delayBetweenSubmissionsInSeconds);
             }
             if(_endGameAfterSubmissions)
             {
                 Debug.Log("All scores submitted. Ending game.");
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnded, this, null);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, null);
             }
         }
     }
