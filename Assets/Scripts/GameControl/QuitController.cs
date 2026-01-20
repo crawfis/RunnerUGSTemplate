@@ -12,7 +12,7 @@ namespace CrawfisSoftware.TempleRun
     ///    Dependency: EventsPublisherTempleRun
     ///    Subscribes: GameOver - Currently it quits the application.
     /// </summary>
-    public class GameQuittedController : MonoBehaviour
+    public class QuitController : MonoBehaviour
     {
         private void Start()
         {

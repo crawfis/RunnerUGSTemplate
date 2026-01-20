@@ -23,9 +23,9 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/Boot/Test/0_BootStrap_UGS_Only.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Test/UGS_Boot_0_Test_Init_UGS_Only.unity
-  - m_enabled: 1
     m_path: Assets/Scenes/Boot/Test/DummyGame_Boot_0_Initialization.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Boot/UGS_Boot_0_Initialization.unity
   - m_enabled: 1
     m_path: Assets/Scenes/Boot/Game_Boot_0_Initialization.unity
   - m_enabled: 1
