@@ -1,7 +1,7 @@
 ﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Blocks.Achievements.Editor.csproj" />
   <Project Path="Unity.Services.CloudCode.GeneratedBindings.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Blocks.Achievements.csproj" />
   <Project Path="Blocks.Leaderboards.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
