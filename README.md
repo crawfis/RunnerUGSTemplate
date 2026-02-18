@@ -210,7 +210,7 @@ CrawfisSoftware → Events → Event Logging Enabled
 
 ### 9. Run the Game
 
-Open `Assets/Scenes/Boot/0_BootStrap` and enter Play Mode.
+Open `Assets/GameFlow/Scenes/Boot/0_BootStrap` and enter Play Mode.
 
 ---
 
@@ -227,19 +227,19 @@ Three build profiles support isolated development and testing:
 ### Test_UGS_Windows Scene List
 
 ```
- 0  Scenes/Boot/Test/0_BootStrap_UGS_Only          ◄── Entry point
- 1  Scenes/Boot/Test/UGS_Boot_0_Test_Init_UGS_Only ◄── UGS init
- 2  Scenes/Boot/Test/DummyGame_Boot_0_Initialization ◄── Dummy game
- 3  Scenes/Boot/Game_Boot_0_Initialization
- 4  Scenes/Boot/Game_Boot_1_UI
- 5  Scenes/Boot/Game_Boot_2_Play
- 6  Scenes/Boot/UGS_Boot_1_RemoteConfig
- 7  Scenes/Boot/UGS_Boot_2_Authentication
- 8  Scenes/Boot/UGS_Boot_3_Achievements
- 9  Scenes/Boot/UGS_Boot_4_Leaderboards
-10  Scenes/UGS/AchievementNotifications
-11  Scenes/UGS/Achievements
-12  Scenes/UGS/Leaderboards
+ 0  _Common/Test/Scenes/0_BootStrap_UGS_Only          ◄── Entry point
+ 1  _Common/Test/Scenes/UGS_Boot_0_Test_Init_UGS_Only ◄── UGS init
+ 2  _Common/Test/Scenes/DummyGame_Boot_0_Initialization ◄── Dummy game
+ 3  GameFlow/Scenes/Boot/Game_Boot_0_Initialization
+ 4  GameFlow/Scenes/Boot/Game_Boot_1_UI
+ 5  GameFlow/Scenes/Boot/Game_Boot_2_Play
+ 6  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig
+ 7  UGS/Scenes/Boot/UGS_Boot_2_Authentication
+ 8  UGS/Scenes/Boot/UGS_Boot_3_Achievements
+ 9  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards
+10  UGS/Scenes/UGS/AchievementNotifications
+11  UGS/Scenes/UGS/Achievements
+12  UGS/Scenes/UGS/Leaderboards
 ```
 
 ### Switching Profiles
@@ -275,24 +275,24 @@ The **Windows** profile is the full production build with UGS integration and ac
 ### Windows Scene List
 
 ```
- 0  Scenes/Boot/0_BootStrap                      ◄── Entry point
- 1  Scenes/Boot/Game_Boot_0_Initialization       ◄── Game config, RandomProvider
- 2  Scenes/Boot/Game_Boot_1_UI                   ◄── Main Menu, HUD, Overlays
- 3  Scenes/Boot/Game_Boot_2_Play                 ◄── Gameplay scene loader
- 4  Scenes/Boot/UGS_Boot_0_Initialization        ◄── UGS services init
- 5  Scenes/Boot/UGS_Boot_1_RemoteConfig          ◄── Remote Config
- 6  Scenes/Boot/UGS_Boot_2_Authentication        ◄── Player sign-in
- 7  Scenes/Boot/UGS_Boot_3_Achievements          ◄── Achievements system
- 8  Scenes/Boot/UGS_Boot_4_Leaderboards          ◄── Leaderboards system
- 9  Scenes/UGS/AchievementNotifications          ◄── In-game achievement toasts
-10  Scenes/UGS/Achievements                      ◄── Achievements UI panel
-11  Scenes/UGS/Leaderboards                      ◄── Leaderboards UI panel
-12  Scenes/Game/TempleRunGameplay                ◄── Core gameplay model
-13  Scenes/Game/TempleRunTrackPCG                ◄── Procedural track generation
-14  Scenes/Game/TempleRunVisuals                 ◄── Visual representation
-15  Scenes/Game/TempleRunGuiOverlay              ◄── Gameplay HUD
-16  Scenes/Game/TempleRunEnvironment             ◄── Skybox, lighting
-17  Scenes/Game/TempleRunSfx                     ◄── Sound effects
+ 0  GameFlow/Scenes/Boot/0_BootStrap                      ◄── Entry point
+ 1  GameFlow/Scenes/Boot/Game_Boot_0_Initialization       ◄── Game config, RandomProvider
+ 2  GameFlow/Scenes/Boot/Game_Boot_1_UI                   ◄── Main Menu, HUD, Overlays
+ 3  GameFlow/Scenes/Boot/Game_Boot_2_Play                 ◄── Gameplay scene loader
+ 4  UGS/Scenes/Boot/UGS_Boot_0_Initialization             ◄── UGS services init
+ 5  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig               ◄── Remote Config
+ 6  UGS/Scenes/Boot/UGS_Boot_2_Authentication             ◄── Player sign-in
+ 7  UGS/Scenes/Boot/UGS_Boot_3_Achievements               ◄── Achievements system
+ 8  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards               ◄── Leaderboards system
+ 9  UGS/Scenes/UGS/AchievementNotifications               ◄── In-game achievement toasts
+10  UGS/Scenes/UGS/Achievements                           ◄── Achievements UI panel
+11  UGS/Scenes/UGS/Leaderboards                           ◄── Leaderboards UI panel
+12  TempleRun/Scenes/Gameplay/TempleRunGameplay           ◄── Core gameplay model
+13  TempleRun/Scenes/Gameplay/TempleRunTrackPCG           ◄── Procedural track generation
+14  TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals      ◄── Visual representation
+15  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay         ◄── Gameplay HUD
+16  TempleRun/Scenes/Gameplay/TempleRunEnvironment        ◄── Skybox, lighting
+17  TempleRun/Scenes/Gameplay/TempleRunSfx                ◄── Sound effects
 ```
 
 ---
@@ -544,19 +544,19 @@ The **Test_UGS_Windows** profile bypasses actual gameplay to focus on UGS integr
 ### Test_UGS_Windows Scene List
 
 ```
- 0  Scenes/Boot/Test/0_BootStrap_UGS_Only          ◄── Entry point
- 1  Scenes/Boot/Test/UGS_Boot_0_Test_Init_UGS_Only ◄── UGS init
- 2  Scenes/Boot/Test/DummyGame_Boot_0_Initialization ◄── Dummy game
- 3  Scenes/Boot/Game_Boot_0_Initialization
- 4  Scenes/Boot/Game_Boot_1_UI
- 5  Scenes/Boot/Game_Boot_2_Play
- 6  Scenes/Boot/UGS_Boot_1_RemoteConfig
- 7  Scenes/Boot/UGS_Boot_2_Authentication
- 8  Scenes/Boot/UGS_Boot_3_Achievements
- 9  Scenes/Boot/UGS_Boot_4_Leaderboards
-10  Scenes/UGS/AchievementNotifications
-11  Scenes/UGS/Achievements
-12  Scenes/UGS/Leaderboards
+ 0  _Common/Test/Scenes/0_BootStrap_UGS_Only          ◄── Entry point
+ 1  _Common/Test/Scenes/UGS_Boot_0_Test_Init_UGS_Only ◄── UGS init
+ 2  _Common/Test/Scenes/DummyGame_Boot_0_Initialization ◄── Dummy game
+ 3  GameFlow/Scenes/Boot/Game_Boot_0_Initialization
+ 4  GameFlow/Scenes/Boot/Game_Boot_1_UI
+ 5  GameFlow/Scenes/Boot/Game_Boot_2_Play
+ 6  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig
+ 7  UGS/Scenes/Boot/UGS_Boot_2_Authentication
+ 8  UGS/Scenes/Boot/UGS_Boot_3_Achievements
+ 9  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards
+10  UGS/Scenes/UGS/AchievementNotifications
+11  UGS/Scenes/UGS/Achievements
+12  UGS/Scenes/UGS/Leaderboards
 ```
 
 ---
@@ -858,49 +858,105 @@ After Game Over, player can:
 
 ## Project Structure
 
+The codebase is organized into **four primary domains** with clear separation of concerns:
+
 ```
 RunnerUGSTemplate/
 ├── Assets/
-│   ├── Blocks/                     # Unity Building Blocks
-│   │   ├── Achievements/           # Achievement definitions, prefabs, scripts
-│   │   ├── Common/                 # Shared UGS utilities
-│   │   ├── Leaderboards/           # Leaderboard config, clients, UI
-│   │   └── PlayerAccount/          # Authentication UI and logic
+│   ├── _Common/                          # Shared infrastructure
+│   │   ├── Events/                       # AutoEventFlowBase (base class for all auto-flows)
+│   │   ├── Test/                         # Test utilities and test boot scenes
+│   │   │   └── Scenes/                   # Test-only boot scenes
+│   │   └── Utility/                      # Logger, EventLoggerDump, DebugLog
 │   │
-│   ├── Scenes/
-│   │   ├── Boot/
-│   │   │   ├── 0_BootStrap                    # Production entry
-│   │   │   ├── Test/
-│   │   │   │   ├── 0_BootStrap_UGS_Only       # UGS test entry
-│   │   │   │   ├── UGS_Boot_0_Test_Init_UGS_Only
-│   │   │   │   └── DummyGame_Boot_0_Initialization
-│   │   │   ├── Game_Boot_0_Initialization
-│   │   │   ├── Game_Boot_1_UI
-│   │   │   ├── Game_Boot_2_Play
-│   │   │   ├── UGS_Boot_1_RemoteConfig
-│   │   │   ├── UGS_Boot_2_Authentication
-│   │   │   ├── UGS_Boot_3_Achievements
-│   │   │   └── UGS_Boot_4_Leaderboards
-│   │   ├── UGS/
-│   │   │   ├── Achievements
-│   │   │   ├── AchievementNotifications
-│   │   │   └── Leaderboards
-│   │   └── Game/                   # Gameplay scenes (TempleRun*)
+│   ├── GameFlow/                         # Application lifecycle domain
+│   │   ├── Scripts/
+│   │   │   ├── Events/                   # GameFlowEvents, EventsPublisherGameFlow, GameFlowAutoEventFlow
+│   │   │   │                             # TempleRunGameFlowBridge (bridges TempleRun ↔ GameFlow)
+│   │   │   ├── Config/                   # Blackboard, GameConstants, GameState, PlayerPrefKeys
+│   │   │   ├── GameControl/              # GameController, PauseController, QuitController, etc.
+│   │   │   ├── UI/                       # UIPanelController, MainMenuPanelController
+│   │   │   └── SceneManagement/          # LoadSceneAfterGameControlEvent, FireEventAfterSceneLoads
+│   │   ├── Scenes/
+│   │   │   └── Boot/                     # 0_BootStrap, Game_Boot_0_Initialization, Game_Boot_1_UI, Game_Boot_2_Play
+│   │   ├── Audio/                        # UI sound effects
+│   │   └── UI Toolkit/                   # UXML, USS for GameFlow UI
 │   │
-│   ├── Scripts/
-│   │   ├── Controllers/            # Game flow controllers
-│   │   ├── Events/                 # Event definitions (KnownEvents)
-│   │   └── UGS/                    # UGS event adapters
+│   ├── TempleRun/                        # Gameplay domain
+│   │   ├── Scripts/
+│   │   │   ├── Events/                   # TempleRunEvents, EventsPublisherTempleRun, TempleRunAutoEventFlow
+│   │   │   │                             # UserInitiatedEvents, EventsPublisherUserInitiated
+│   │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, DifficultySettings
+│   │   │   ├── Player/                   # TurnController, DeathWatcher, PlayerLifeController
+│   │   │   ├── Track/                    # TrackManager, SplineCreator2D, DistanceTracker, Direction
+│   │   │   ├── TrackVisuals/             # PrefabSpawner (SimplePlane, Voxels)
+│   │   │   ├── Input/                    # MovementInputActions, SwipeDetectorActions, PauseQuitInputActions
+│   │   │   └── Audio/                    # TurnAudioFeedback, Metronome, SetMusicPlayer
+│   │   ├── Scenes/
+│   │   │   └── Gameplay/                 # TempleRunGameplay, TempleRunPlayerVisuals, TempleRunEnvironment
+│   │   │                                 # TempleRunTrackPCG, TempleRunTrackVisuals, TempleRunGuiOverlay, TempleRunSfx
+│   │   ├── Graphics/                     # Models, Textures, Materials, Shaders, VFX, Animations
+│   │   ├── Audio/                        # Gameplay music and SFX
+│   │   ├── Prefabs/                      # Gameplay prefabs
+│   │   ├── Scriptables/                  # ScriptableObjects for TempleRun
+│   │   └── UI Toolkit/                   # UXML, USS for gameplay UI
 │   │
-│   ├── CloudCode/
+│   ├── UGS/                              # Unity Gaming Services domain
+│   │   ├── Scripts/
+│   │   │   ├── Events/                   # UGS_EventsEnum, EventsPublisherUGS, UGSAutoEventFlow
+│   │   │   │                             # UGSGameFlowBridge (bridges UGS → GameFlow)
+│   │   │   ├── Initialization/           # GameManagerUGS, PlayerAuthenticationManager, UGS_State
+│   │   │   ├── Authentication/           # PlayerSignInController
+│   │   │   ├── RemoteConfig/             # RemoteConfigManager, GameBalance, FeatureFlags, DifficultyObserver
+│   │   │   ├── Leaderboard/              # LeaderboardController, LeaderboardPlayerController
+│   │   │   ├── Achievements/             # AchievementsPrefab, DistanceBasedAchievements
+│   │   │   ├── Economy/                  # PlayerEconomyManager, PlayerEconomyManagerClient
+│   │   │   ├── PlayerData/               # PlayerDataManager, PlayerDataManagerClient
+│   │   │   └── Managers/                 # (Reserved for future managers)
+│   │   ├── Scenes/
+│   │   │   ├── Boot/                     # UGS_Boot_0_Initialization, UGS_Boot_1_RemoteConfig
+│   │   │   │                             # UGS_Boot_2_Authentication, UGS_Boot_3_Achievements, UGS_Boot_4_Leaderboards
+│   │   │   ├── Test/                     # Test-specific UGS scenes
+│   │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards (UI scenes)
+│   │   ├── CloudCode/
+│   │   │   └── TempleRunUGSCloud~/       # .NET 6.0 Cloud Code project (30+ cloud functions)
+│   │   ├── Editor/                       # RemoteConfig editor data
+│   │   └── Prefabs/                      # UGS-related prefabs
+│   │
+│   ├── Blocks/                           # Unity Building Blocks (legacy - gradually being migrated to UGS/)
+│   │   ├── Achievements/                 # Achievement definitions, prefabs, scripts
+│   │   ├── Common/                       # Shared UGS utilities
+│   │   ├── Leaderboards/                 # Leaderboard config, clients, UI
+│   │   └── PlayerAccount/                # Authentication UI and logic
+│   │
+│   ├── CloudCode/                        # Cloud Code generated bindings (top-level for Unity)
 │   │   └── GeneratedModulesBindings/
 │   │
-│   └── UI/                         # UI Toolkit assets (UXML, USS)
+│   └── [Other Assets]/                   # Audio, Graphics, Input, Materials, Prefabs, Resources, Settings, ThirdParty
 │
 ├── Packages/
 │   └── manifest.json
 │
 └── ProjectSettings/
+```
+
+### Domain Responsibilities
+
+- **_Common**: Shared base classes and utilities used across all domains
+- **GameFlow**: Application lifecycle - boot, initialization, menus, pause, quit, scene management
+- **TempleRun**: Gameplay mechanics - player movement, track generation, input, audio, visuals
+- **UGS**: Unity Gaming Services - authentication, leaderboards, achievements, remote config, cloud code
+
+### Event Flow Architecture
+
+```
+USER INPUT (UserInitiatedEvents in TempleRun)
+    ↓
+TEMPLERUN GAMEPLAY (TempleRunEvents)
+    ↓ (via TempleRunGameFlowBridge in GameFlow)
+GAMEFLOW SESSION (GameFlowEvents)
+    ↓ (via UGSGameFlowBridge in UGS)
+UGS SERVICES (UGS_EventsEnum)
 ```
 
 ---
