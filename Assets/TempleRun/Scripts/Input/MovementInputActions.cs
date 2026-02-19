@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.TempleRun.Input;
+using CrawfisSoftware.TempleRun.Input;
 using CrawfisSoftware.Events;
 
 using System.Collections;
@@ -8,6 +8,12 @@ using UnityEngine.InputSystem;
 
 namespace CrawfisSoftware.TempleRun
 {
+    /// <summary>
+    /// Maps Unity Input System actions to UserInitiatedEvents.
+    ///    Dependencies: Blackboard, LaneConfig, JumpConfig
+    ///    Publishes: UserInitiatedEvents.LeftTurnRequested, RightTurnRequested,
+    ///               LeftLaneChangeRequested, RightLaneChangeRequested, JumpRequested
+    /// </summary>
     public class MovementInputActions : MonoBehaviour
     {
         [SerializeField] private LeftRightJumpSlide _inputAsset;
@@ -16,6 +22,9 @@ namespace CrawfisSoftware.TempleRun
         private LeftRightJumpSlide _inputActions;
         private InputAction _leftAction;
         private InputAction _rightAction;
+        private InputAction _laneLeftAction;
+        private InputAction _laneRightAction;
+        private InputAction _jumpAction;
 
         private void OnEnable()
         {
@@ -28,7 +37,33 @@ namespace CrawfisSoftware.TempleRun
             _rightAction = _inputActions.Player.Right;
             _rightAction.Enable();
             _rightAction.performed += RightAction_performed;
+
+            // Lane change bindings — uses FindAction so it gracefully handles
+            // the case where LaneLeft/LaneRight haven't been added to the
+            // .inputactions asset yet (returns null, no-op).
+            _laneLeftAction = _inputActions.asset.FindAction("Player/LaneLeft");
+            if (_laneLeftAction != null)
+            {
+                _laneLeftAction.Enable();
+                _laneLeftAction.performed += LaneLeftAction_performed;
+            }
+            _laneRightAction = _inputActions.asset.FindAction("Player/LaneRight");
+            if (_laneRightAction != null)
+            {
+                _laneRightAction.Enable();
+                _laneRightAction.performed += LaneRightAction_performed;
+            }
+
+            // Jump binding — uses FindAction so it gracefully handles
+            // the case where Jump hasn't been added to the .inputactions asset yet.
+            _jumpAction = _inputActions.asset.FindAction("Player/Jump");
+            if (_jumpAction != null)
+            {
+                _jumpAction.Enable();
+                _jumpAction.performed += JumpAction_performed;
+            }
         }
+
         private void OnDisable()
         {
             _inputActions.Disable();
@@ -37,7 +72,23 @@ namespace CrawfisSoftware.TempleRun
             _rightAction.Disable();
             _rightAction.performed -= RightAction_performed;
 
+            if (_laneLeftAction != null)
+            {
+                _laneLeftAction.Disable();
+                _laneLeftAction.performed -= LaneLeftAction_performed;
+            }
+            if (_laneRightAction != null)
+            {
+                _laneRightAction.Disable();
+                _laneRightAction.performed -= LaneRightAction_performed;
+            }
+            if (_jumpAction != null)
+            {
+                _jumpAction.Disable();
+                _jumpAction.performed -= JumpAction_performed;
+            }
         }
+
         private void OnDestroy()
         {
             if (_inputActions != null)
@@ -45,6 +96,7 @@ namespace CrawfisSoftware.TempleRun
                 _inputActions.Dispose();
             }
         }
+
         private void LeftAction_performed(InputAction.CallbackContext obj)
         {
             _leftAction.Disable();
@@ -59,9 +111,48 @@ namespace CrawfisSoftware.TempleRun
             StartCoroutine(EnableAfterDelay(_rightAction));
         }
 
+        private void LaneLeftAction_performed(InputAction.CallbackContext obj)
+        {
+            _laneLeftAction.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.LeftLaneChangeRequested, this, PlayerNumber);
+            StartCoroutine(EnableLaneAfterDelay(_laneLeftAction));
+        }
+
+        private void LaneRightAction_performed(InputAction.CallbackContext obj)
+        {
+            _laneRightAction.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.RightLaneChangeRequested, this, PlayerNumber);
+            StartCoroutine(EnableLaneAfterDelay(_laneRightAction));
+        }
+
+        private void JumpAction_performed(InputAction.CallbackContext obj)
+        {
+            _jumpAction.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.JumpRequested, this, PlayerNumber);
+            StartCoroutine(EnableJumpAfterDelay(_jumpAction));
+        }
+
         private IEnumerator EnableAfterDelay(InputAction actionToEnable)
         {
             yield return new WaitForSeconds(Blackboard.Instance.GameConfig.InputCoolDownForTurns);
+            actionToEnable.Enable();
+        }
+
+        private IEnumerator EnableLaneAfterDelay(InputAction actionToEnable)
+        {
+            float cooldown = Blackboard.Instance.LaneConfig != null
+                ? Blackboard.Instance.LaneConfig.LaneChangeCooldown
+                : 0.3f;
+            yield return new WaitForSeconds(cooldown);
+            actionToEnable.Enable();
+        }
+
+        private IEnumerator EnableJumpAfterDelay(InputAction actionToEnable)
+        {
+            float cooldown = Blackboard.Instance.JumpConfig != null
+                ? Blackboard.Instance.JumpConfig.JumpCooldown
+                : 0.6f;
+            yield return new WaitForSeconds(cooldown);
             actionToEnable.Enable();
         }
     }

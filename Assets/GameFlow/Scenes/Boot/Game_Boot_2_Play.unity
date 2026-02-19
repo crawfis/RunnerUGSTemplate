@@ -280,6 +280,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _randomProvider: {fileID: 630594866}
+  _laneConfig: {fileID: 11400000, guid: 0a571e4122923674f9dea535c5953b4e, type: 2}
+  _jumpConfig: {fileID: 11400000, guid: 054adedd7f2d441468d0ad02b25ef425, type: 2}
 --- !u!4 &807874757
 Transform:
   m_ObjectHideFlags: 0

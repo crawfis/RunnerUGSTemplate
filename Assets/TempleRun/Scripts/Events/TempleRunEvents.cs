@@ -38,12 +38,12 @@
         TempleRunStarted = 40,
 
         // ---------- Player movement: turning ----------
-        TurnLeftRequested = 40,
-        TurnLeftStarting = 41,
-        TurnLeftCompleted = 42,
-        TurnRightRequested = 43,
-        TurnRightStarting = 44,
-        TurnRightCompleted = 45,
+        TurnLeftRequested = 50,
+        TurnLeftStarting = 51,
+        TurnLeftCompleted = 52,
+        TurnRightRequested = 53,
+        TurnRightStarting = 54,
+        TurnRightCompleted = 55,
         //LeftTurnSucceeded = TurnLeftCompleted, // Legacy naming
         //RightTurnSucceeded = TurnRightCompleted, // Legacy naming
 
@@ -70,6 +70,8 @@
         LaneChangeRightRequested = 103,
         LaneChangingRight = 104,
         LaneChangedRight = 105,
+        LaneChangeLeftFailed = 106,
+        LaneChangeRightFailed = 107,
 
         // ---------- Player hazards / collisions ----------
         ObstacleHit = 120,

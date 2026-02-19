@@ -4,6 +4,9 @@
     {
         LeftTurnRequested,
         RightTurnRequested,
-        PauseToggle
+        PauseToggle,
+        LeftLaneChangeRequested,
+        RightLaneChangeRequested,
+        JumpRequested,
     }
 }

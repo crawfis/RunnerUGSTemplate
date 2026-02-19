@@ -34,6 +34,26 @@ namespace CrawfisSoftware.TempleRun.Events
             // ================================================================================
             { TempleRunEvents.TempleRunStartRequested, TempleRunEvents.TempleRunStarting },
             { TempleRunEvents.TempleRunStarting, TempleRunEvents.TempleRunStarted },
+
+            // ================================================================================
+            // LANE CHANGE AUTO-CHAINS
+            // ================================================================================
+            { TempleRunEvents.LaneChangeLeftRequested, TempleRunEvents.LaneChangingLeft },
+            { TempleRunEvents.LaneChangeRightRequested, TempleRunEvents.LaneChangingRight },
+            // LaneChangingLeft -> LaneChangedLeft: Published by LaneOffsetController (after lerp completes)
+            // LaneChangingRight -> LaneChangedRight: Published by LaneOffsetController (after lerp completes)
+
+            // ================================================================================
+            // JUMP AUTO-CHAINS
+            // ================================================================================
+            { TempleRunEvents.JumpRequested, TempleRunEvents.JumpStarting },
+            // JumpStarting -> JumpStarted: Published by JumpArcController (at arc apex)
+            // JumpStarted -> JumpLanded: Published by JumpArcController (when arc completes)
+
+            // ================================================================================
+            // OBSTACLE AUTO-CHAINS
+            // ================================================================================
+            { TempleRunEvents.ObstacleHit, TempleRunEvents.PlayerFailing },
         };
 
         protected virtual void Awake()

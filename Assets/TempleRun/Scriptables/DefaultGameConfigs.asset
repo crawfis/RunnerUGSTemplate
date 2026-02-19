@@ -15,16 +15,16 @@ MonoBehaviour:
   DifficultyConfigs:
   - DifficultyName: Easy
     InitialSpeed: 5
-    MaxSpeed: 50
-    Acceleration: 3
+    MaxSpeed: 7
+    Acceleration: 0.2
     StartRunway: 12
-    MinTrackLength: 12
-    MaxTrackLength: 24
+    MinTrackLength: 24
+    MaxTrackLength: 48
     SafePreTurnDistance: 6
     SafePostTurnDistance: 0.3
     InputCoolDownForTurns: 0.1
     NumberOfLives: 2
-    ObstacleSpawnRate: 0
+    ObstacleSpawnRate: 1
     PowerUpSpawnRate: 0
     ScoreMultiplier: 0
     EnableAdvancedObstacles: 0

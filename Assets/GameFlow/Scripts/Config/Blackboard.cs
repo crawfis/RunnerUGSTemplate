@@ -19,6 +19,8 @@ namespace CrawfisSoftware.TempleRun
     public class Blackboard : MonoBehaviour
     {
         [SerializeField] private RandomProviderFromList _randomProvider;
+        [SerializeField] private LaneConfig _laneConfig;
+        [SerializeField] private JumpConfig _jumpConfig;
         public static Blackboard Instance { get; private set; }
         public System.Random MasterRandom { get { return _randomProvider.RandomGenerator; } }
         public DifficultyConfig GameConfig { get; set; }  = new DifficultyConfig();
@@ -26,6 +28,15 @@ namespace CrawfisSoftware.TempleRun
         public float TrackWidthOffset { get; set; } = 1f;
         public float TileLength { get; set; } = 4f;
         public float CurrentSpeed { get; set; }
+
+        // ---------- Lane State ----------
+        public LaneConfig LaneConfig { get => _laneConfig; set => _laneConfig = value; }
+        public int CurrentLane { get; set; } = 0;            // -1=left, 0=center, 1=right (for 3 lanes)
+        public float LateralLaneOffset { get; set; } = 0f;   // Smooth lateral offset in world units
+
+        // ---------- Jump State ----------
+        public JumpConfig JumpConfig { get => _jumpConfig; set => _jumpConfig = value; }
+        public float JumpHeightOffset { get; set; } = 0f;    // Current Y offset during jump arc
 
         private void Awake()
         {

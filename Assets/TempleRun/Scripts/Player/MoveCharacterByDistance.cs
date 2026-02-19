@@ -3,7 +3,7 @@
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Moves the player along the current spline.
+    /// Moves the player along the current spline with lateral lane offset and jump height.
     ///    Dependencies: Blackboard, DistanceTracker, EventsPublisherTempleRun
     ///    Subscribes: CurrentSplineChanged
     /// </summary>
@@ -30,7 +30,10 @@ namespace CrawfisSoftware.TempleRun
             _currentDirection = (point2 - point1).normalized;
             _lastAnchorPoint = point1;
             _lastAnchorDistance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
-            _objectToMove.localPosition = new Vector3(point1.x, _yPosition, point1.z);
+            float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset;
+            Vector3 basePos = new Vector3(point1.x, yPos, point1.z);
+            basePos += GetLateralOffset();
+            _objectToMove.localPosition = basePos;
             SetRotation(_currentDirection);
         }
 
@@ -46,8 +49,24 @@ namespace CrawfisSoftware.TempleRun
             if (distance - _currentDistance < 0.001f) return;
 
             Vector3 newPosition = _lastAnchorPoint + (distance - _lastAnchorDistance) * _currentDirection;
-            _objectToMove.localPosition = new Vector3(newPosition.x, _yPosition, newPosition.z);
+            float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset;
+            newPosition = new Vector3(newPosition.x, yPos, newPosition.z);
+            newPosition += GetLateralOffset();
+            _objectToMove.localPosition = newPosition;
             _currentDistance = distance;
+        }
+
+        /// <summary>
+        /// Computes the lateral offset perpendicular to the current movement direction.
+        /// Positive LateralLaneOffset shifts right, negative shifts left (from the player's perspective).
+        /// </summary>
+        private Vector3 GetLateralOffset()
+        {
+            float laneOffset = Blackboard.Instance.LateralLaneOffset;
+            if (Mathf.Abs(laneOffset) < 0.001f) return Vector3.zero;
+
+            Vector3 perpendicular = Vector3.Cross(_currentDirection, Vector3.up).normalized;
+            return laneOffset * perpendicular;
         }
 
         private void OnDestroy()
