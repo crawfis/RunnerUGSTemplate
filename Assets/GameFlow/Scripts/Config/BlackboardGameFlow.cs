@@ -56,14 +56,26 @@ namespace CrawfisSoftware.GameFlow
             }
         }
 
+        private void OnDifficultySettingsApplied(string eventName, object sender, object data)
+        {
+            // When RemoteConfig difficulty settings are fetched, apply the first one as the default config
+            var difficultyConfigs = data as System.Collections.Generic.IList<DifficultyConfig>;
+            if (difficultyConfigs != null && difficultyConfigs.Count > 0)
+            {
+                OnGameDifficultyChanged(eventName, sender, difficultyConfigs[0]);
+            }
+        }
+
         private void SubscribeToEvents()
         {
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultySettingsApplied, OnDifficultySettingsApplied);
         }
 
         private void UnsubscribeToEvents()
         {
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultySettingsApplied, OnDifficultySettingsApplied);
         }
 
 #if UNITY_EDITOR
