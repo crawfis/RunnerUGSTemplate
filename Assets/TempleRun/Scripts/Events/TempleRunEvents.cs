@@ -34,10 +34,13 @@
         CountdownEnded = 35,
         CountdownCancelled = 36,
 
-        // ---------- Game start lifecycle (TempleRun domain) ----------
+        // ---------- Game lifecycle (TempleRun domain) ----------
         TempleRunStartRequested = 38,
         TempleRunStarting = 39,
         TempleRunStarted = 40,
+        TempleRunEndRequested = 41,
+        TempleRunEnding = 42,
+        TempleRunEnded = 43,
 
         // ---------- Player movement: turning ----------
         TurnLeftRequested = 50,
