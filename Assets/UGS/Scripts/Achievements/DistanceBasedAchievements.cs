@@ -63,12 +63,12 @@ namespace CrawfisSoftware.UGS.Achievements
                 Debug.Log($"Distance Achievement reached at {_distances[_nextAchievementIndex]}");
                 var ach = AchievementsObserver.Instance.RuntimeAchievementData.Achievements
                     .Find(a => a.Id == "first_achievement");
-                StartCoroutine(UnlockAchievementAsync(ach));
+                StartCoroutine(UnlockAchievementAsync(ach.Id));
                 _nextAchievementIndex++;
             }
         }
 
-        private IEnumerator UnlockAchievementAsync(object achievement)
+        private IEnumerator UnlockAchievementAsync(string achievement)
         {
             if (achievement != null)
             {

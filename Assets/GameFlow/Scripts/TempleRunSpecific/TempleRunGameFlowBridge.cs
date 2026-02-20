@@ -1,6 +1,7 @@
 using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 using CrawfisSoftware.TempleRun;
+using CrawfisSoftware.UGS;
 using CrawfisSoftware.UGS.Events;
 
 using System;
