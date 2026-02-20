@@ -24,9 +24,9 @@ namespace CrawfisSoftware.TempleRun.Events
             // Player died -> game ending (absorbed from GameController)
             { TempleRunEvents.PlayerDied, GameFlowEvents.GameEnding },
 
-            // Difficulty: TempleRun publishes, GameFlow's GameDifficultyManager processes
+            // Difficulty: Only legacy TempleRun events map to GameFlow
+            // (GameDifficultyManager now handles new DifficultyChanging/Changed events directly)
             { TempleRunEvents.TempleRunDifficultySettingsApplied, GameFlowEvents.DifficultySettingsApplied },
-            { TempleRunEvents.TempleRunDifficultyChanging, GameFlowEvents.DifficultyChanging },
             { TempleRunEvents.TempleRunDifficultyChangeRequested, GameFlowEvents.DifficultyChangeRequested },
         };
 
@@ -46,12 +46,8 @@ namespace CrawfisSoftware.TempleRun.Events
             { GameFlowEvents.GameConfigApplied, TempleRunEvents.TempleRunConfigApplied },
             { GameFlowEvents.GameScenesLoaded, TempleRunEvents.TempleRunScenesReady },
 
-            // Difficulty: GameFlow events map to TempleRun events
-            // GameFlow difficulty changes flow to TempleRun for processing
-            { GameFlowEvents.DifficultyChanged, TempleRunEvents.DifficultyChanged },
-            { GameFlowEvents.DifficultyChangeFailed, TempleRunEvents.DifficultyChangeFailed },
-            { GameFlowEvents.DifficultyChanging, TempleRunEvents.DifficultyChanging },
-            { GameFlowEvents.DifficultySettingsApplied, TempleRunEvents.DifficultySettingsApplied },
+            // Difficulty: Only legacy events to avoid circular loops
+            // (New DifficultyChanging/Changed events are handled by GameDifficultyManager subscriptions directly)
         };
 
         protected virtual void Awake()
