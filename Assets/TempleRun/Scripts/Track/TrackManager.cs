@@ -1,4 +1,4 @@
-using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow;
 
 using System.Collections.Generic;
 
@@ -31,15 +31,15 @@ namespace CrawfisSoftware.TempleRun
 
         protected virtual void Awake()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunScenesReady, OnGameStarting);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
             if(GameState.IsGameConfigured) OnGameConfigured("junk", null, null);
         }
 
         protected virtual void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameScenesLoaded, OnGameStarting);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunScenesReady, OnGameStarting);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
         }

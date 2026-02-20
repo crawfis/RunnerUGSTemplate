@@ -1,4 +1,4 @@
-﻿namespace CrawfisSoftware.TempleRun
+﻿namespace CrawfisSoftware.TempleRun.GameConfig
 {
     internal static class PlayerPrefKeys
     {

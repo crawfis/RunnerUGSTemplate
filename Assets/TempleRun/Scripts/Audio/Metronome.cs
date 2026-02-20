@@ -1,6 +1,4 @@
-﻿using CrawfisSoftware.Events;
-
-using GTMY.Audio;
+﻿using GTMY.Audio;
 
 using System.Collections;
 
@@ -24,14 +22,14 @@ namespace CrawfisSoftware.TempleRun.Audio
             //AudioFactoryRegistry.Instance.RegisterAudioFactory("TurnLeftPooledAudio", leftFactory);
             ISfxAudioPlayer sfxAudioPlayer = SfxAudioPlayerFactory.Instance.CreateSfxAudioPlayer("Metronome", leftFactory, leftClipProvider);
 
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, StartMetronome);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, StopMetronome);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, StartMetronome);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, StopMetronome);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, StartMetronome);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, StopMetronome);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, StartMetronome);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, StopMetronome);
         }
 
         private void StartMetronome(string eventName, object sender, object eventData)

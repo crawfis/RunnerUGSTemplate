@@ -239,6 +239,11 @@ private readonly Dictionary<...> _mapping = ...; // readonly: underscore prefix
 internal class MyController : MonoBehaviour
 ```
 
+### Transform Conventions
+- **Prefer `transform.localPosition`** over `transform.position` when reading or writing positions
+- **Prefer `transform.localRotation`** over `transform.rotation` when reading or writing rotations
+- **When setting parent**, use `transform.SetParent(parent, worldPositionStays: false)` to avoid adjusting position
+
 ### MonoBehaviour Lifecycle
 - `Awake()` - Subscriptions and initialization
 - `OnDestroy()` - Cleanup and unsubscriptions
@@ -262,7 +267,7 @@ internal class MyController : MonoBehaviour
 | Event Publishers | `Assets/TempleRun/Scripts/Events/EventsPublisherTempleRun.cs`, `EventsPublisherUserInitiated.cs` |
 | Auto-Event Flow | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs` |
 | Config | `Assets/TempleRun/Scripts/Config/TempleRunGameConfig.cs`, `DifficultyConfig.cs` |
-| Player Controllers | `Assets/TempleRun/Scripts/Player/TurnController.cs`, `DeathWatcher.cs`, `PlayerLifeController.cs` |
+| Player Controllers | `Assets/TempleRun/Scripts/Player/TurnController.cs`, `TurnCollisionDetector.cs`, `PlayerLifeController.cs` |
 | Track Generation | `Assets/TempleRun/Scripts/Track/TrackManager.cs`, `SplineCreator2D.cs` |
 | Input | `Assets/TempleRun/Scripts/Input/MovementInputActions.cs`, `SwipeDetectorActions.cs` |
 | **UGS Domain** | |
@@ -386,7 +391,7 @@ Assets/
 │   │   ├── Events/                   # TempleRunEvents, EventsPublisherTempleRun, TempleRunAutoEventFlow
 │   │   │                             # UserInitiatedEvents, EventsPublisherUserInitiated
 │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, DifficultySettings
-│   │   ├── Player/                   # TurnController, DeathWatcher, PlayerLifeController
+│   │   ├── Player/                   # TurnController, TurnCollisionDetector, PlayerLifeController
 │   │   ├── Track/                    # TrackManager, SplineCreator2D, DistanceTracker
 │   │   ├── TrackVisuals/             # PrefabSpawner (SimplePlane, Voxels)
 │   │   ├── Input/                    # MovementInputActions, SwipeDetectorActions

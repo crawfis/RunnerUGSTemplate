@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Events;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CrawfisSoftware.GameControl
+namespace CrawfisSoftware.GameFlow.GameControl
 {
     public class UnloadNonActiveScenes : MonoBehaviour
     {

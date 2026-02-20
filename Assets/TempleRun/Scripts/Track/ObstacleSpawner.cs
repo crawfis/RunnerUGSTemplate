@@ -36,10 +36,13 @@ namespace CrawfisSoftware.TempleRun
 
         [Header("Obstacle Dimensions")]
         [Tooltip("Height of obstacle colliders (Y-axis). Should be less than jump clearance height.")]
-        [SerializeField] private float _obstacleHeight = 1.5f;
+        [SerializeField] private float _obstacleHeight = 0.5f;
 
         [Tooltip("Depth of obstacle colliders (Z-axis along track).")]
         [SerializeField] private float _obstacleDepth = 0.5f;
+
+        [Tooltip("Initial height the obstacle should be placed.")]
+        [SerializeField] private float _platformHeight = 1.5f;
 
         private Transform _parentTransform;
         private readonly Dictionary<int, List<GameObject>> _obstaclesBySegment = new();
@@ -97,7 +100,7 @@ namespace CrawfisSoftware.TempleRun
             // Pick a random position along the usable portion of the segment
             float spawnT = (float)_random.NextDouble();
             float distanceAlongSegment = _minDistanceFromSegmentStart + spawnT * usableLength;
-            Vector3 spawnPosition = point1 + unitDirection * distanceAlongSegment;
+            Vector3 spawnPosition = point1 + unitDirection * distanceAlongSegment + _platformHeight * Vector3.up;
 
             // Determine obstacle type
             bool isFullWidth = (float)_random.NextDouble() < _fullWidthProbability;

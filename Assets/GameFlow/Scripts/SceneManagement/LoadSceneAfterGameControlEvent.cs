@@ -9,7 +9,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CrawfisSoftware.SceneManagement
+namespace CrawfisSoftware.GameFlow.SceneManagement
 {
     class LoadSceneAfterGameControlEvent : MonoBehaviour
     {

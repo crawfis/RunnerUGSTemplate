@@ -1,9 +1,8 @@
 using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Events;
 
 using System;
 using System.Collections.Generic;
-
-using UnityEngine;
 
 namespace CrawfisSoftware.UGS.Events
 {
@@ -21,16 +20,19 @@ namespace CrawfisSoftware.UGS.Events
     /// </summary>
     internal class UGSGameFlowBridge : AutoEventFlowBase
     {
-        [SerializeField] private Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
+        private Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
         {
             { UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady },
             { UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady },
 
             // Remote config update requests the loading screen to hide; flow auto-fires LoadingScreenHiding.
             { UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHideRequested },
+
+            // Difficulty settings fetched from remote config
+            { UGS_EventsEnum.DifficultySettingsFetched, GameFlowEvents.DifficultySettingsApplied },
         };
 
-        [SerializeField] private Dictionary<GameFlowEvents, UGS_EventsEnum> _autoGameFlow2UGSEvents = new Dictionary<GameFlowEvents, UGS_EventsEnum>()
+        private Dictionary<GameFlowEvents, UGS_EventsEnum> _autoGameFlow2UGSEvents = new Dictionary<GameFlowEvents, UGS_EventsEnum>()
         {
             { GameFlowEvents.GameEnding, UGS_EventsEnum.ScoreUpdating },
             { GameFlowEvents.GameEnded, UGS_EventsEnum.LeaderboardOpening },

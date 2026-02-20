@@ -1,8 +1,9 @@
 ﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Events;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.TempleRun
+namespace CrawfisSoftware.GameFlow
 {
     public class GameState : MonoBehaviour
     {

@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.GameConfig;
+﻿using CrawfisSoftware.UGS.GameConfig;
 using CrawfisSoftware.UGS.Events;
 
 using System.Collections;
@@ -76,7 +76,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
         private IEnumerator CloseLeaderboardAfterDelay()
         {
             yield return new WaitUntil(() => !_isUpdating);
-            yield return new WaitForSeconds(GameConstants.LeaderboardDisplayTime);
+            yield return new WaitForSeconds(UGSConstants.LeaderboardDisplayTime);
             EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.LeaderboardClosing, "Leaderboard Controller", LeaderboardId);
         }
     }

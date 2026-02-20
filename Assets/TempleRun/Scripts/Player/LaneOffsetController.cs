@@ -9,14 +9,15 @@ namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Smoothly interpolates the lateral lane offset when lane change events fire.
-    /// Writes to Blackboard.LateralLaneOffset each frame during the lerp, then
+    /// Writes to LaneChangeController.LateralLaneOffset each frame during the lerp, then
     /// publishes the completion event when done.
-    ///    Dependencies: Blackboard, LaneConfig
+    ///    Dependencies: Blackboard, LaneConfig, LaneChangeController
     ///    Subscribes: TempleRunEvents.LaneChangingLeft, LaneChangingRight
     ///    Publishes: TempleRunEvents.LaneChangedLeft, LaneChangedRight
     /// </summary>
     internal class LaneOffsetController : MonoBehaviour
     {
+        [SerializeField] private LaneChangeController _laneChangeController;
         private Coroutine _lerpCoroutine;
 
         private void Start()
@@ -57,7 +58,7 @@ namespace CrawfisSoftware.TempleRun
         private IEnumerator LerpToOffset(float targetOffset, TempleRunEvents completionEvent, object data)
         {
             LaneConfig config = Blackboard.Instance.LaneConfig;
-            float startOffset = Blackboard.Instance.LateralLaneOffset;
+            float startOffset = _laneChangeController.LateralLaneOffset;
             float duration = config.LaneChangeDuration;
             float elapsed = 0f;
 
@@ -66,12 +67,12 @@ namespace CrawfisSoftware.TempleRun
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
                 float curvedT = config.LaneChangeCurve.Evaluate(t);
-                Blackboard.Instance.LateralLaneOffset = Mathf.Lerp(startOffset, targetOffset, curvedT);
+                _laneChangeController.LateralLaneOffset = Mathf.Lerp(startOffset, targetOffset, curvedT);
                 yield return null;
             }
 
             // Snap to exact target
-            Blackboard.Instance.LateralLaneOffset = targetOffset;
+            _laneChangeController.LateralLaneOffset = targetOffset;
             _lerpCoroutine = null;
 
             EventsPublisherTempleRun.Instance.PublishEvent(completionEvent, this, data);

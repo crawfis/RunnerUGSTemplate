@@ -1,9 +1,13 @@
-﻿using CrawfisSoftware.Events;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun.GameConfig
 {
+    /// <summary>
+    /// Loads default difficulty configurations and requests the default difficulty.
+    ///    Dependencies: TempleRunGameConfig (ScriptableObject)
+    ///    Publishes: TempleRunEvents.TempleRunDifficultySettingsApplied
+    ///    Publishes: TempleRunEvents.TempleRunDifficultyChangeRequested
+    /// </summary>
     internal class LoadDefaultGameConfigs : MonoBehaviour
     {
         [SerializeField] private TempleRunGameConfig _gameConfig;
@@ -11,8 +15,10 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 
         private void Start()
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsApplied, this, _gameConfig.DifficultyConfigs);
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultyChangeRequested, this, _difficultyLevel);
+            EventsPublisherTempleRun.Instance.PublishEvent(
+                TempleRunEvents.TempleRunDifficultySettingsApplied, this, _gameConfig.DifficultyConfigs);
+            EventsPublisherTempleRun.Instance.PublishEvent(
+                TempleRunEvents.TempleRunDifficultyChangeRequested, this, _difficultyLevel);
         }
     }
 }

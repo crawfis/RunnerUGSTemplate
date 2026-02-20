@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.GameConfig;
+﻿using CrawfisSoftware.GameFlow.GameConfig;
 
 using System.Collections;
 
@@ -7,47 +7,42 @@ using UnityEngine;
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Simple behavior for failure. In this case, pauses the game, advances to the next track and then resumes.
-    ///    Dependency: TrackManager, EventsPublisherTempleRun
-    ///    Subscribes: PlayerFailed - pauses game for a fixed time and then resumes.
-    ///    Publishes: Pause and Resume
+    /// Simple behavior for failure. In this case, pauses the game for a fixed time and then resumes.
+    ///    Dependencies: GameConstants, EventsPublisherTempleRun
+    ///    Subscribes: TempleRunEvents.PlayerFailingAtTurn
+    ///    Subscribes: TempleRunEvents.PlayerFailingAtObstacle
+    ///    Publishes: TempleRunEvents.PlayerPaused (pause the game)
+    ///    Publishes: TempleRunEvents.PlayerResumeRequested (resume after delay)
     /// </summary>
     internal class PlayerFailedController : MonoBehaviour
     {
-        //[SerializeField] private TrackManagerAbstract _trackManager;
-        [SerializeField] private TurnController _turnController;
         private Coroutine _pauseCoroutine;
-        private Coroutine _advanceTrackCoroutine;
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailing, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailingAtTurn, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailingAtObstacle, OnPlayerFailing);
         }
 
         private void OnPlayerFailing(string eventName, object sender, object data)
         {
+            // Guard: ignore if already paused (e.g., turn failure + obstacle hit in same frame)
+            if (_pauseCoroutine != null) return;
             _pauseCoroutine = StartCoroutine(DeathDelay());
-            // Note: This starts immediately and runs in parallel with the above coroutine.
-            _advanceTrackCoroutine = StartCoroutine(AdvanceAfterFailure());
         }
         private IEnumerator DeathDelay()
         {
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerPaused, this, UnityEngine.Time.time);
             yield return new WaitForSecondsRealtime(GameConstants.ResumeDelay);
-        }
-
-        private IEnumerator AdvanceAfterFailure()
-        {
-            // Wait until pause is almost over before advancing the player to the next track segment.
-            yield return new WaitForSecondsRealtime(GameConstants.DelayAfterFailureBeforeAutoTurning);
-            //_trackManager.AdvanceToNextSegment();
-            _turnController.ForceTurn();
+            _pauseCoroutine = null;
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResumeRequested, this, UnityEngine.Time.time);
         }
 
         private void OnDestroy()
         {
             StopAllCoroutines(); // Saved them so could call individually instead.
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailingAtTurn, OnPlayerFailing);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailingAtObstacle, OnPlayerFailing);
         }
     }
 }

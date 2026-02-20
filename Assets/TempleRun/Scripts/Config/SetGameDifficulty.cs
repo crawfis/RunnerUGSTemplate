@@ -1,6 +1,4 @@
-﻿using CrawfisSoftware.Events;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun.GameConfig
 {
@@ -25,7 +23,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             {
                 currentDifficulty = PlayerPrefs.GetString(PlayerPrefKeys.GameDifficultyKey, "Easy");
             }
-            EventsPublisherGameFlow.Instance?.PublishEvent(GameFlowEvents.DifficultyChanging, this, currentDifficulty);
+            EventsPublisherTempleRun.Instance?.PublishEvent(TempleRunEvents.TempleRunDifficultyChanging, this, currentDifficulty);
         }
     }
 }

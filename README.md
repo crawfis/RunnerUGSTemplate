@@ -887,7 +887,7 @@ RunnerUGSTemplate/
 │   │   │   ├── Events/                   # TempleRunEvents, EventsPublisherTempleRun, TempleRunAutoEventFlow
 │   │   │   │                             # UserInitiatedEvents, EventsPublisherUserInitiated
 │   │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, DifficultySettings
-│   │   │   ├── Player/                   # TurnController, DeathWatcher, PlayerLifeController
+│   │   │   ├── Player/                   # TurnController, TurnCollisionDetector, PlayerLifeController
 │   │   │   ├── Track/                    # TrackManager, SplineCreator2D, DistanceTracker, Direction
 │   │   │   ├── TrackVisuals/             # PrefabSpawner (SimplePlane, Voxels)
 │   │   │   ├── Input/                    # MovementInputActions, SwipeDetectorActions, PauseQuitInputActions

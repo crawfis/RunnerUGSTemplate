@@ -3,6 +3,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// Note: CrawfisSoftware.Events import needed for EventsPublisherUserInitiated
+
 namespace CrawfisSoftware.TempleRun.Input
 {
     internal class PauseQuitInputActions : MonoBehaviour
@@ -26,7 +28,7 @@ namespace CrawfisSoftware.TempleRun.Input
         }
         private void TEMP_GameQuit(InputAction.CallbackContext obj)
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEndRequested, this, UnityEngine.Time.time);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.QuitRequested, this, UnityEngine.Time.time);
         }
 
         private void PauseResumeToggle_performed(InputAction.CallbackContext obj)

@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using CrawfisSoftware.Events;
 
-namespace CrawfisSoftware.Events
+using UnityEngine;
+
+namespace CrawfisSoftware.GameFlow.Events
 {
     [DefaultExecutionOrder(-10000)]
     /// <summary>

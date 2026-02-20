@@ -8,5 +8,6 @@
         LeftLaneChangeRequested,
         RightLaneChangeRequested,
         JumpRequested,
+        QuitRequested,
     }
 }

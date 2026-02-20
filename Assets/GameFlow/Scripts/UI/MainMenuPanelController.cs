@@ -1,10 +1,9 @@
-﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.TempleRun;
+﻿using CrawfisSoftware.GameFlow.Events;
 
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace CrawfisSoftware.UI
+namespace CrawfisSoftware.GameFlow.UI
 {
     class MainMenuPanelController : MonoBehaviour
     {

@@ -1,13 +1,13 @@
-﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.TempleRun.GameConfig;
-using CrawfisSoftware.UGS.RemoteConfig;
+﻿//using CrawfisSoftware.GameFlow.Events;
+
+using CrawfisSoftware.GameFlow.Events;
 
 using System;
 using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.UGS
+namespace CrawfisSoftware.TempleRun.GameConfig
 {
     public class GameDifficultyManager : MonoBehaviour
     {

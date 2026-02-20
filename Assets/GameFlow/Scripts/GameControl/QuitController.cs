@@ -1,11 +1,12 @@
 ﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.GameConfig;
+using CrawfisSoftware.GameFlow.Events;
+using CrawfisSoftware.GameFlow.GameConfig;
 
 using System.Collections;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.TempleRun
+namespace CrawfisSoftware.GameFlow
 {
     /// <summary>
     /// Handles quitting.

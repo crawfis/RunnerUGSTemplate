@@ -12,6 +12,8 @@
         PlayerReviveRequested = 6,
         PlayerReviving = 7,
         PlayerRevived = 8,
+        PlayerFailingAtTurn = 12,
+        PlayerFailingAtObstacle = 13,
 
         // ---------- Player pause / resume ----------
         PlayerPauseRequested = 20,
@@ -126,5 +128,16 @@
         TeleportEndRequested = 283,
         TeleportEnding = 284,
         TeleportEnded = 285,
+
+        // ---------- Bridged from GameFlow ----------
+        TempleRunConfigApplied = 300,
+        TempleRunScenesReady = 302,
+
+        // ---------- Difficulty (bridged to/from GameFlow) ----------
+        TempleRunDifficultySettingsApplied = 310,
+        TempleRunDifficultyChanging = 312,
+        TempleRunDifficultyChanged = 314,
+        TempleRunDifficultyChangeFailed = 316,
+        TempleRunDifficultyChangeRequested = 318,
     }
 }

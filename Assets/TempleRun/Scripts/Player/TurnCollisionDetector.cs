@@ -1,20 +1,18 @@
-﻿using CrawfisSoftware.Events;
-
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Compares the distance from DistanceTracker and compares it to the current track length. Fires the PlayerFailed event if the
-    /// distance is greater than (or equal) the active track distance.
+    /// Compares the distance from DistanceTracker to the current track segment length.
+    /// Fires PlayerFailingAtTurn when the player exceeds the segment distance without turning.
     ///    Dependencies: Blackboard, DistanceTracker, EventsPublisherTempleRun
-    ///    Subscribes: ActiveTrackChanging - increased the active track length
-    ///    Subscribes: GameStarted - useful if there is a delay between when the tracks are sent and the player has control.
-    ///    Subscribes: GameEnded - useful if multiple players and we need to stop the checking.
-    ///    Publishes: PlayerFailed event. Data is the current player distance.
+    ///    Subscribes: TempleRunEvents.ActiveTrackChanging — increases the active track length
+    ///    Subscribes: TempleRunEvents.TempleRunStarted — begins distance checking
+    ///    Subscribes: TempleRunEvents.PlayerDied — stops distance checking
+    ///    Publishes: TempleRunEvents.PlayerFailingAtTurn — Data is the current player distance (float).
     /// </summary>
-    /// <remarks> For local multi-player we may need a player ID. Would be good to include this in the event data.</remarks>
-    internal class DeathWatcher : MonoBehaviour
+    /// <remarks>For local multi-player we may need a player ID. Would be good to include this in the event data.</remarks>
+    internal class TurnCollisionDetector : MonoBehaviour
     {
 
         private float _currentSegmentDistance = 0f;
@@ -24,8 +22,8 @@ namespace CrawfisSoftware.TempleRun
         private void Awake()
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnGameEnding);
         }
 
         private void Update()
@@ -34,16 +32,16 @@ namespace CrawfisSoftware.TempleRun
             if (_isRunning && _gameStarted && distance >= _currentSegmentDistance)
             {
                 _isRunning = false;
-                Debug.Log(string.Format("Player Died at Distance: {0}", (int)_currentSegmentDistance));
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerFailing, this, distance);
+                Debug.Log(string.Format("Player failed turn at distance: {0}", (int)_currentSegmentDistance));
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerFailingAtTurn, this, distance);
             }
         }
 
         private void OnDestroy()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameEnding);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnGameEnding);
         }
 
         private void OnTrackChanging(string eventName, object sender, object data)

@@ -6,10 +6,9 @@ using Unity.Services.Core;
 using Unity.Services.RemoteConfig;
 
 using CrawfisSoftware.TempleRun.GameConfig;
+using CrawfisSoftware.UGS.Events;
 
 using System.Collections.Generic;
-
-using CrawfisSoftware.Events;
 
 
 #if UNITY_EDITOR
@@ -128,7 +127,7 @@ namespace CrawfisSoftware.UGS.RemoteConfig
             //var difficulties = await GetAchievementsAsync(m_AuthenticationService.PlayerId);
             var difficulties = await GetDefinitions();
             RuntimeDifficultySettings = difficulties;
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsApplied, this, difficulties);
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.DifficultySettingsFetched, this, difficulties);
 
         }
 

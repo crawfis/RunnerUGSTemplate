@@ -1,6 +1,4 @@
-﻿using CrawfisSoftware.Events;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
@@ -40,7 +38,7 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TrackSegmentCreated, OnTrackCreated);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportEnded, OnTrackChanged);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
         }
 
         private void OnDestroy()
@@ -48,12 +46,12 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TrackSegmentCreated, OnTrackCreated);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportEnded, OnTrackChanged);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
         }
 
         private void OnGameStarted(string eventName, object sender, object data)
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
             Debug.Log("GameStarted in SplineCreator2D");
         }
 

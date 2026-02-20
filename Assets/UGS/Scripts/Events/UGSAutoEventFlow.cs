@@ -5,8 +5,6 @@ using System.Collections.Generic;
 
 using Unity.Services.Core;
 
-using UnityEngine;
-
 namespace CrawfisSoftware.UGS.Events
 {
     /// <summary>
@@ -49,7 +47,7 @@ namespace CrawfisSoftware.UGS.Events
 
     internal class UGSAutoEventFlow : AutoEventFlowBase
     {
-        [SerializeField] private Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
+        private Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
         {
             // --- Initialization / boot ---
             //{ UGS_EventsEnum.UGS_InitializationStarted, UGS_EventsEnum.UGS_InitializationCompleted },

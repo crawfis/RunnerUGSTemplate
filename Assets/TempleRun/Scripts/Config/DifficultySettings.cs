@@ -1,10 +1,12 @@
-﻿using CrawfisSoftware.Events;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CrawfisSoftware.TempleRun.GameConfig
 {
+    /// <summary>
+    /// Serializable data container for difficulty configurations.
+    ///    Publishes: TempleRunEvents.TempleRunDifficultySettingsApplied (when Configs setter is invoked)
+    /// </summary>
     [Serializable]
     public class DifficultySettings
     {
@@ -16,9 +18,10 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             {
                 return _configs;
             }
-            set { 
+            set {
                 _configs = value;
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.DifficultySettingsApplied, this, _configs);
+                EventsPublisherTempleRun.Instance.PublishEvent(
+                    TempleRunEvents.TempleRunDifficultySettingsApplied, this, _configs);
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.TempleRun;
+﻿using CrawfisSoftware.GameFlow.Events;
 
 using Unity.Services.Authentication;
 using Unity.Services.Authentication.PlayerAccounts;
@@ -7,7 +6,7 @@ using Unity.Services.Authentication.PlayerAccounts;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace CrawfisSoftware.UI
+namespace CrawfisSoftware.GameFlow.UI
 {
     class MainMenuController : MonoBehaviour
     {

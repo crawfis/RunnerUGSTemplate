@@ -14,6 +14,7 @@
         GameManagerInstantiated,
         // --- Remote Config ---
         RemoteConfigFetching, RemoteConfigFetched, RemoteConfigFetchFailed, RemoteConfigUpdated, RemoteConfigFailed,
+        DifficultySettingsFetched,
         // --- Leaderboards ---
         ScoreUpdating, ScoreUpdated, ScoreFailedToUpdate,
         LeaderboardOpening, LeaderboardOpened, LeaderboardCloseRequested, LeaderboardClosing, LeaderboardClosed,

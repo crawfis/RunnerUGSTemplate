@@ -1,9 +1,8 @@
-﻿using CrawfisSoftware.TempleRun;
-using CrawfisSoftware.Events;
+﻿using CrawfisSoftware.Events;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.GameControl
+namespace CrawfisSoftware.TempleRun
 {
     public class PauseController : MonoBehaviour
     {

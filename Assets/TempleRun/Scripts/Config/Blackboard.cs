@@ -1,10 +1,5 @@
-﻿using CrawfisSoftware.Events;
-using CrawfisSoftware.GameConfig;
-using CrawfisSoftware.TempleRun.GameConfig;
+﻿using CrawfisSoftware.TempleRun.GameConfig;
 using CrawfisSoftware.Utility;
-
-using System;
-
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -14,13 +9,17 @@ using UnityEngine;
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Space for "global" variables using a singleton.
+    /// TempleRun-domain singleton holding gameplay state.
+    ///    Dependencies: None
+    ///    Subscribes: TempleRunEvents.TempleRunConfigApplied (bridged from GameFlow)
+    ///    Subscribes: TempleRunEvents.TempleRunDifficultyChanged (bridged from GameFlow)
     /// </summary>
     public class Blackboard : MonoBehaviour
     {
         [SerializeField] private RandomProviderFromList _randomProvider;
         [SerializeField] private LaneConfig _laneConfig;
         [SerializeField] private JumpConfig _jumpConfig;
+        [SerializeField] private LaneChangeController _laneChangeController;
         public static Blackboard Instance { get; private set; }
         public System.Random MasterRandom { get { return _randomProvider.RandomGenerator; } }
         public DifficultyConfig GameConfig { get; set; }  = new DifficultyConfig();
@@ -31,8 +30,7 @@ namespace CrawfisSoftware.TempleRun
 
         // ---------- Lane State ----------
         public LaneConfig LaneConfig { get => _laneConfig; set => _laneConfig = value; }
-        public int CurrentLane { get; set; } = 0;            // -1=left, 0=center, 1=right (for 3 lanes)
-        public float LateralLaneOffset { get; set; } = 0f;   // Smooth lateral offset in world units
+        public LaneChangeController LaneChangeController { get => _laneChangeController; set => _laneChangeController = value; }
 
         // ---------- Jump State ----------
         public JumpConfig JumpConfig { get => _jumpConfig; set => _jumpConfig = value; }
@@ -58,26 +56,30 @@ namespace CrawfisSoftware.TempleRun
             DistanceTracker = new DistanceTracker();
         }
 
-        private void OnGameDifficultyChanged(string eventName, object sender, object data)
+        private void OnConfigApplied(string eventName, object sender, object data)
         {
             DifficultyConfig difficulty = data as DifficultyConfig;
             if (difficulty != null)
             {
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigApplying, this, difficulty);
                 GameConfig = difficulty;
-                Debug.Log($"Successfully set game difficulty to '{difficulty.DifficultyName}'");
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameConfigApplied, this, GameConfig);
+                Debug.Log($"Blackboard: GameConfig set to '{difficulty.DifficultyName}'");
             }
         }
 
         private void SubscribeToEvents()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.DifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+                TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+                TempleRunEvents.TempleRunDifficultyChanged, OnConfigApplied);
         }
 
         private void UnsubscribeToEvents()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.DifficultyChanged, OnGameDifficultyChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+                TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+                TempleRunEvents.TempleRunDifficultyChanged, OnConfigApplied);
         }
 
 #if UNITY_EDITOR

@@ -4,7 +4,7 @@ namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Moves the player along the current spline with lateral lane offset and jump height.
-    ///    Dependencies: Blackboard, DistanceTracker, EventsPublisherTempleRun
+    ///    Dependencies: Blackboard, DistanceTracker, LaneChangeController, EventsPublisherTempleRun
     ///    Subscribes: CurrentSplineChanged
     /// </summary>
     public class MoveCharacterByDistance : MonoBehaviour
@@ -62,7 +62,11 @@ namespace CrawfisSoftware.TempleRun
         /// </summary>
         private Vector3 GetLateralOffset()
         {
-            float laneOffset = Blackboard.Instance.LateralLaneOffset;
+            var laneChangeController = Blackboard.Instance.LaneChangeController;
+            if (laneChangeController == null)
+                return Vector3.zero;
+
+            float laneOffset = laneChangeController.LateralLaneOffset;
             if (Mathf.Abs(laneOffset) < 0.001f) return Vector3.zero;
 
             Vector3 perpendicular = Vector3.Cross(_currentDirection, Vector3.up).normalized;

@@ -53,7 +53,7 @@ namespace CrawfisSoftware.TempleRun.Events
             // ================================================================================
             // OBSTACLE AUTO-CHAINS
             // ================================================================================
-            { TempleRunEvents.ObstacleHit, TempleRunEvents.PlayerFailing },
+            { TempleRunEvents.ObstacleHit, TempleRunEvents.PlayerFailingAtObstacle },
         };
 
         protected virtual void Awake()

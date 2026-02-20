@@ -1,9 +1,11 @@
+using CrawfisSoftware.Events;
+
 using System;
 using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.Events
+namespace CrawfisSoftware.GameFlow.Events
 {
     /// <summary>
     /// Auto-chains GameFlow events. Entries marked with [AUTO] are active; others are published by controllers.

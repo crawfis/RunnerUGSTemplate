@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CrawfisSoftware.SceneManagement
+namespace CrawfisSoftware.GameFlow.SceneManagement
 {
     public class FireEventAfterSceneLoads : MonoBehaviour
     {

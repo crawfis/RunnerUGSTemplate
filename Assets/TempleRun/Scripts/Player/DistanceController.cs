@@ -1,6 +1,4 @@
-﻿using CrawfisSoftware.Events;
-
-using System.Collections;
+﻿using System.Collections;
 
 using UnityEngine;
 
@@ -27,8 +25,8 @@ namespace CrawfisSoftware.TempleRun
         private void Awake()
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnGameOver);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
             //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
@@ -37,8 +35,8 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailing, OnResetSpeed);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameEnding, OnGameOver);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnGameOver);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
             DeleteCoroutine();

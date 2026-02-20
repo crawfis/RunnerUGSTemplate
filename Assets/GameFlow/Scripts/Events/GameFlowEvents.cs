@@ -1,4 +1,4 @@
-﻿namespace CrawfisSoftware.Events
+﻿namespace CrawfisSoftware.GameFlow.Events
 {
     public enum GameFlowEvents
     {

@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace CrawfisSoftware.SceneManagement
+namespace CrawfisSoftware.GameFlow.SceneManagement
 {
     class FireEventWhenSceneCloses : MonoBehaviour
     {
