@@ -23,6 +23,7 @@
         AchievementsCloseRequested, AchievementsClosing, AchievementsClosed,
         AchievementClaimRequested, AchievementClaiming, AchievementClaimed, AchievementClaimFailed,
         AchievementUnlocked, AchievementProgressUpdated,
+        DistanceUpdated,
         // --- Rewarded Ads ---
         RewardAdWatching, RewardAdWatched,
         RewardAdFailedToShow, RewardAdClosedWithoutReward,

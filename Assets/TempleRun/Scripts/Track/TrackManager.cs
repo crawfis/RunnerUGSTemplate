@@ -1,5 +1,3 @@
-using CrawfisSoftware.GameFlow;
-
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -33,7 +31,6 @@ namespace CrawfisSoftware.TempleRun
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunScenesReady, OnGameStarting);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
-            if(GameState.IsGameConfigured) OnGameConfigured("junk", null, null);
         }
 
         protected virtual void OnDestroy()

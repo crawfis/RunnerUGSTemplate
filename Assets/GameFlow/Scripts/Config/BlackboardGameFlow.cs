@@ -1,4 +1,4 @@
-using CrawfisSoftware.TempleRun.GameConfig;
+using CrawfisSoftware.Config;
 
 using UnityEngine;
 using CrawfisSoftware.GameFlow.Events;

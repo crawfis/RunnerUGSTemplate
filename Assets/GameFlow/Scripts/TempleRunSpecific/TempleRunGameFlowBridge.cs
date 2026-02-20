@@ -1,6 +1,7 @@
 using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 using CrawfisSoftware.TempleRun;
+using CrawfisSoftware.UGS.Events;
 
 using System;
 using System.Collections.Generic;
@@ -44,10 +45,12 @@ namespace CrawfisSoftware.TempleRun.Events
             { GameFlowEvents.GameConfigApplied, TempleRunEvents.TempleRunConfigApplied },
             { GameFlowEvents.GameScenesLoaded, TempleRunEvents.TempleRunScenesReady },
 
-            // Difficulty responses from GameDifficultyManager back to TempleRun
-            // Note: DifficultySettingsApplied flows TempleRun->GameFlow only (no reverse to avoid loop)
-            { GameFlowEvents.DifficultyChanged, TempleRunEvents.TempleRunDifficultyChanged },
-            { GameFlowEvents.DifficultyChangeFailed, TempleRunEvents.TempleRunDifficultyChangeFailed },
+            // Difficulty: GameFlow events map to TempleRun events
+            // GameFlow difficulty changes flow to TempleRun for processing
+            { GameFlowEvents.DifficultyChanged, TempleRunEvents.DifficultyChanged },
+            { GameFlowEvents.DifficultyChangeFailed, TempleRunEvents.DifficultyChangeFailed },
+            { GameFlowEvents.DifficultyChanging, TempleRunEvents.DifficultyChanging },
+            { GameFlowEvents.DifficultySettingsApplied, TempleRunEvents.DifficultySettingsApplied },
         };
 
         protected virtual void Awake()
@@ -58,6 +61,10 @@ namespace CrawfisSoftware.TempleRun.Events
             // Manual cross-publisher bridge: UserInitiated → GameFlow
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(
                 UserInitiatedEvents.QuitRequested, OnQuitRequested);
+
+            // Manual bridge: TempleRun distance updates → UGS distance tracking
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+                TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
         }
 
         protected virtual void OnDestroy()
@@ -67,11 +74,20 @@ namespace CrawfisSoftware.TempleRun.Events
 
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(
                 UserInitiatedEvents.QuitRequested, OnQuitRequested);
+
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+                TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
         }
 
         private void OnQuitRequested(string eventName, object sender, object data)
         {
             DelayedFire(_delayBetweenEvents, GameFlowEvents.GameEndRequested.ToString(), sender, data);
+        }
+
+        private void OnDistanceUpdated(string eventName, object sender, object data)
+        {
+            // Bridge TempleRun distance updates to UGS for achievement tracking
+            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.DistanceUpdated, sender, data);
         }
 
         private void AutoFireGameFlowEventFromTempleRunEvent(string eventName, object sender, object data)

@@ -10,8 +10,8 @@ namespace CrawfisSoftware.GameFlow
 {
     /// <summary>
     /// Handles quitting.
-    ///    Dependency: EventsPublisherTempleRun
-    ///    Subscribes: GameOver - Currently it quits the application.
+    ///    Dependency: GameConstants
+    ///    Subscribes: GameFlowEvents.Quitting - Currently it quits the application.
     /// </summary>
     public class QuitController : MonoBehaviour
     {

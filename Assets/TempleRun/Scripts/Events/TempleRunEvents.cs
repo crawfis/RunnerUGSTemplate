@@ -139,5 +139,14 @@
         TempleRunDifficultyChanged = 314,
         TempleRunDifficultyChangeFailed = 316,
         TempleRunDifficultyChangeRequested = 318,
+
+        // ---------- New difficulty events (direct, non-legacy) ----------
+        DifficultySettingsApplied = 320,
+        DifficultyChanging = 321,
+        DifficultyChanged = 322,
+        DifficultyChangeFailed = 323,
+
+        // ---------- Distance tracking (for achievements/UGS) ----------
+        DistanceUpdated = 330,
     }
 }

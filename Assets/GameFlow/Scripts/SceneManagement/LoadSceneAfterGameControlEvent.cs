@@ -1,5 +1,4 @@
-﻿using CrawfisSoftware.TempleRun;
-using CrawfisSoftware.Events;
+﻿using CrawfisSoftware.Events;
 
 using System;
 using System.Collections;

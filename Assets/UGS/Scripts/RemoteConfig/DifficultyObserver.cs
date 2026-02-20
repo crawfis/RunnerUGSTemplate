@@ -5,7 +5,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.RemoteConfig;
 
-using CrawfisSoftware.TempleRun.GameConfig;
+using CrawfisSoftware.Config;
 using CrawfisSoftware.UGS.Events;
 
 using System.Collections.Generic;

@@ -2,7 +2,7 @@
 
 using Blocks.Achievements;
 
-using CrawfisSoftware.TempleRun;
+using CrawfisSoftware.UGS.Events;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -13,10 +13,17 @@ namespace CrawfisSoftware.UGS.Achievements
 {
     /// <summary>
     /// Unlocks achievements based on distance travelled.
+    /// Receives distance updates via UGS events (bridged from TempleRun domain).
+    ///    Dependencies: EventsPublisherUGS, AchievementsObserver
+    ///    Subscribes: UGS_EventsEnum.DistanceUpdated
+    ///    Publishes: (via AchievementsObserver)
     /// </summary>
     public class DistanceBasedAchievements : MonoBehaviour
     {
         [SerializeField] private List<float> _distances;
+        private float _currentDistance = 0f;
+        private int _nextAchievementIndex = 0;
+
         private void Awake()
         {
             // Ensure the AchievementsObserver is initialized
@@ -25,30 +32,47 @@ namespace CrawfisSoftware.UGS.Achievements
             {
                 Debug.Log($"Achievement Unlocked: {achievement.Id}");
             };
-            //_ = observer.ResetAchievementsAsync();
-        }
-        private void Start()
-        {
-            StartCoroutine(ClaimAchievements());
+
+            // Subscribe to distance updates from the bridge
+            EventsPublisherUGS.Instance.SubscribeToEvent(
+                UGS_EventsEnum.DistanceUpdated,
+                OnDistanceUpdated);
         }
 
-        private IEnumerator ClaimAchievements()
+        private void OnDestroy()
         {
-            DistanceTracker _distanceTracker = Blackboard.Instance.DistanceTracker;
-            int index = 0;
-            //float distance = _distances[index];
-            while (index < _distances.Count)
+            EventsPublisherUGS.Instance.UnsubscribeToEvent(
+                UGS_EventsEnum.DistanceUpdated,
+                OnDistanceUpdated);
+        }
+
+        private void OnDistanceUpdated(string eventName, object sender, object data)
+        {
+            if (data is float distance)
             {
-                if (Blackboard.Instance.DistanceTracker.DistanceTravelled > _distances[index])
-                {
-                    Debug.Log($"Distance Achievement reached at {_distances[index]}");
-                    index++;
-                    //distance = _distances[index];
-                    var ach = AchievementsObserver.Instance.RuntimeAchievementData.Achievements
-                        .Find(a => a.Id == "first_achievement");
-                    yield return AchievementsObserver.Instance.UnlockAchievementAsync(ach);
-                }
-                yield return null;
+                _currentDistance = distance;
+                CheckAndUnlockAchievements();
+            }
+        }
+
+        private void CheckAndUnlockAchievements()
+        {
+            while (_nextAchievementIndex < _distances.Count &&
+                   _currentDistance > _distances[_nextAchievementIndex])
+            {
+                Debug.Log($"Distance Achievement reached at {_distances[_nextAchievementIndex]}");
+                var ach = AchievementsObserver.Instance.RuntimeAchievementData.Achievements
+                    .Find(a => a.Id == "first_achievement");
+                StartCoroutine(UnlockAchievementAsync(ach));
+                _nextAchievementIndex++;
+            }
+        }
+
+        private IEnumerator UnlockAchievementAsync(object achievement)
+        {
+            if (achievement != null)
+            {
+                yield return AchievementsObserver.Instance.UnlockAchievementAsync(achievement);
             }
         }
     }

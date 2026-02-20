@@ -4,5 +4,6 @@ namespace CrawfisSoftware.TempleRun.GameConfig
     {
         public const float CountdownSeconds = 3f;
         public const float DelayAfterFailureBeforeAutoTurning = 0.85f;
+        public const float ResumeDelay = 1.5f;
     }
 }

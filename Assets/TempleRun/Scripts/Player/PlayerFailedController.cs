@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.GameFlow.GameConfig;
+﻿using CrawfisSoftware.TempleRun.GameConfig;
 
 using System.Collections;
 
@@ -8,7 +8,7 @@ namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Simple behavior for failure. In this case, pauses the game for a fixed time and then resumes.
-    ///    Dependencies: GameConstants, EventsPublisherTempleRun
+    ///    Dependencies: TempleRunConstants, EventsPublisherTempleRun
     ///    Subscribes: TempleRunEvents.PlayerFailingAtTurn
     ///    Subscribes: TempleRunEvents.PlayerFailingAtObstacle
     ///    Publishes: TempleRunEvents.PlayerPaused (pause the game)
@@ -33,7 +33,7 @@ namespace CrawfisSoftware.TempleRun
         private IEnumerator DeathDelay()
         {
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerPaused, this, UnityEngine.Time.time);
-            yield return new WaitForSecondsRealtime(GameConstants.ResumeDelay);
+            yield return new WaitForSecondsRealtime(TempleRunConstants.ResumeDelay);
             _pauseCoroutine = null;
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.PlayerResumeRequested, this, UnityEngine.Time.time);
         }
