@@ -5,7 +5,12 @@
       "Skill(audit-events)",
       "Skill(audit-events:*)",
       "Bash(git mv:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nRemediate cross-domain coupling violations - Phase Complete\n\nThis commit resolves 9 cross-domain coupling violations identified in the\nevent system audit. All communication between domains now flows through\nproperly-isolated bridge files, and state access is fully event-driven.\n\n## Changes\n\n### Foundation: Shared Configuration\n- Created Assets/_Common/Config/DifficultyConfig.cs \\(shared domain-neutral config\\)\n- Updated BlackboardGameFlow.cs to import from _Common instead of TempleRun\n- Updated DifficultyObserver.cs to import from _Common instead of TempleRun\n- TempleRun.DifficultyConfig now alias to shared class for compatibility\n\n### Domain Relocation\n- Moved GameDifficultyManager to Assets/TempleRun/Scripts/Config/ \\(correct domain\\)\n- Updated to subscribe to TempleRun events instead of GameFlow events\n- Uses EventsPublisherTempleRun and TempleRunEvents exclusively\n\n### Decoupling\n- TrackManager: Removed GameFlow import, removed GameState.IsGameConfigured check\n- PlayerFailedController: Changed GameConstants -> TempleRunConstants reference\n- DistanceBasedAchievements: Replaced Blackboard access with event subscription\n- LoadSceneAfterGameControlEvent: Removed unused CrawfisSoftware.TempleRun import\n\n### Event Infrastructure\n- Added TempleRunEvents: DifficultyChanging, DifficultyChanged, etc. \\(new non-legacy names\\)\n- Added UGS_EventsEnum.DistanceUpdated\n- Added TempleRunConstants: ResumeDelay \\(moved from GameConstants\\)\n- Created UGSConstants with LeaderboardDisplayTime \\(moved from GameConstants\\)\n\n### Bridge Enhancement\n- TempleRunGameFlowBridge: Added distance tracking bridge \\(TempleRun -> UGS\\)\n- TempleRunGameFlowBridge: Added difficulty event mappings \\(new events\\)\n- All subscriptions properly unsubscribed in OnDestroy\\(\\)\n\n### Documentation\n- Updated QuitController comment to reflect actual dependencies\n- Added XML docs to GameDifficultyManager \\(new location\\)\n- Added commentary to bridge handlers\n\n## Verification\n- Audit: 0 domain isolation violations\n- Audit: 0 missing unsubscriptions\n- Audit: 0 circular dependencies\n- Audit: 0 compilation errors\n- All new events properly wired through bridges\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   }
 }
