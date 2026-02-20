@@ -26,7 +26,7 @@ namespace CrawfisSoftware.TempleRun
         public DistanceTracker DistanceTracker { get; set; } = new DistanceTracker();
         public float TrackWidthOffset { get; set; } = 1f;
         public float TileLength { get; set; } = 4f;
-        public float CurrentSpeed { get; set; }
+        public float CurrentSpeed { get; set; } = 0f;
 
         // ---------- Lane State ----------
         public LaneConfig LaneConfig { get => _laneConfig; set => _laneConfig = value; }
@@ -35,6 +35,9 @@ namespace CrawfisSoftware.TempleRun
         // ---------- Jump State ----------
         public JumpConfig JumpConfig { get => _jumpConfig; set => _jumpConfig = value; }
         public float JumpHeightOffset { get; set; } = 0f;    // Current Y offset during jump arc
+
+        private const float DEFAULT_TRACK_WIDTH_OFFSET = 1f;
+        private const float DEFAULT_TILE_LENGTH = 4f;
 
         private void Awake()
         {
@@ -53,7 +56,20 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             UnsubscribeToEvents();
+            ResetState();
+        }
+
+        /// <summary>
+        /// Resets all gameplay state to initial defaults. Called on scene unload.
+        /// </summary>
+        private void ResetState()
+        {
+            GameConfig = new DifficultyConfig();
             DistanceTracker = new DistanceTracker();
+            CurrentSpeed = 0f;
+            TrackWidthOffset = DEFAULT_TRACK_WIDTH_OFFSET;
+            TileLength = DEFAULT_TILE_LENGTH;
+            JumpHeightOffset = 0f;
         }
 
         private void OnConfigApplied(string eventName, object sender, object data)
