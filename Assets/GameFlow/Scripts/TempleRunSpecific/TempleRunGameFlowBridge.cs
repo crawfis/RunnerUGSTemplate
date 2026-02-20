@@ -88,7 +88,11 @@ namespace CrawfisSoftware.TempleRun.Events
         private void OnDistanceUpdated(string eventName, object sender, object data)
         {
             // Bridge TempleRun distance updates to UGS for achievement tracking
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.DistanceUpdated, sender, data);
+            // Only publish if UGS is initialized (may not be available in all boot sequences)
+            if (EventsPublisherUGS.Instance != null)
+            {
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.DistanceUpdated, sender, data);
+            }
         }
 
         private void AutoFireGameFlowEventFromTempleRunEvent(string eventName, object sender, object data)
