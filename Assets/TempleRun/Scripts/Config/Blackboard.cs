@@ -1,4 +1,5 @@
-﻿using CrawfisSoftware.TempleRun.GameConfig;
+﻿using CrawfisSoftware.Config;
+using CrawfisSoftware.TempleRun.GameConfig;
 using CrawfisSoftware.Utility;
 
 #if UNITY_EDITOR
@@ -19,7 +20,11 @@ namespace CrawfisSoftware.TempleRun
         [SerializeField] private RandomProviderFromList _randomProvider;
         [SerializeField] private LaneConfig _laneConfig;
         [SerializeField] private JumpConfig _jumpConfig;
-        [SerializeField] private LaneChangeController _laneChangeController;
+        [SerializeField] private SlideConfig _slideConfig;
+        [SerializeField] private DashConfig _dashConfig;
+
+        private LaneChangeController _laneChangeController;
+
         public static Blackboard Instance { get; private set; }
         public System.Random MasterRandom { get { return _randomProvider.RandomGenerator; } }
         public DifficultyConfig GameConfig { get; set; }  = new DifficultyConfig();
@@ -35,6 +40,15 @@ namespace CrawfisSoftware.TempleRun
         // ---------- Jump State ----------
         public JumpConfig JumpConfig { get => _jumpConfig; set => _jumpConfig = value; }
         public float JumpHeightOffset { get; set; } = 0f;    // Current Y offset during jump arc
+
+        // ---------- Slide State ----------
+        public SlideConfig SlideConfig { get => _slideConfig; set => _slideConfig = value; }
+        public float SlideHeightOffset { get; set; } = 0f;   // Current Y offset during slide (negative when sliding)
+        public float CurrentSlideMultiplier { get; set; } = 1.0f;  // Speed multiplier during slide (1.0 = normal speed)
+
+        // ---------- Dash State ----------
+        public DashConfig DashConfig { get => _dashConfig; set => _dashConfig = value; }
+        public float CurrentDashMultiplier { get; set; } = 1.0f;  // Speed multiplier during dash (1.0 = normal speed)
 
         private const float DEFAULT_TRACK_WIDTH_OFFSET = 1f;
         private const float DEFAULT_TILE_LENGTH = 4f;
@@ -70,6 +84,9 @@ namespace CrawfisSoftware.TempleRun
             TrackWidthOffset = DEFAULT_TRACK_WIDTH_OFFSET;
             TileLength = DEFAULT_TILE_LENGTH;
             JumpHeightOffset = 0f;
+            SlideHeightOffset = 0f;
+            CurrentSlideMultiplier = 1.0f;
+            CurrentDashMultiplier = 1.0f;
         }
 
         private void OnConfigApplied(string eventName, object sender, object data)
@@ -82,8 +99,15 @@ namespace CrawfisSoftware.TempleRun
             }
         }
 
+        private void OnGameEnded(string eventName, object sender, object data)
+        {
+            ResetState();
+        }
+
         private void SubscribeToEvents()
         {
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+                TempleRunEvents.TempleRunEnded, OnGameEnded);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(
                 TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(
@@ -92,6 +116,8 @@ namespace CrawfisSoftware.TempleRun
 
         private void UnsubscribeToEvents()
         {
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+                TempleRunEvents.TempleRunEnded, OnGameEnded);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
                 TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(

@@ -38,10 +38,10 @@ namespace CrawfisSoftware.TempleRun
             switch (_turnController.TurnDirection)
             {
                 case Direction.Left:
-                    EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.LeftTurnRequested, this, distance);
+                    EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserLeftTurnRequested, this, distance);
                     break;
                 default:
-                    EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.RightTurnRequested, this, distance);
+                    EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserRightTurnRequested, this, distance);
                     break;
             }
         }

@@ -36,12 +36,33 @@ namespace CrawfisSoftware.TempleRun.Events
             { TempleRunEvents.TempleRunStarting, TempleRunEvents.TempleRunStarted },
 
             // ================================================================================
+            // GAME END BRIDGE
+            // ================================================================================
+            { TempleRunEvents.PlayerDied, TempleRunEvents.TempleRunEndRequested },
+            { TempleRunEvents.TempleRunEndRequested, TempleRunEvents.TempleRunEnding },
+            { TempleRunEvents.TempleRunEnding, TempleRunEvents.TempleRunEnded },
+
+            // ================================================================================
             // LANE CHANGE AUTO-CHAINS
             // ================================================================================
             { TempleRunEvents.LaneChangeLeftRequested, TempleRunEvents.LaneChangingLeft },
             { TempleRunEvents.LaneChangeRightRequested, TempleRunEvents.LaneChangingRight },
             // LaneChangingLeft -> LaneChangedLeft: Published by LaneOffsetController (after lerp completes)
             // LaneChangingRight -> LaneChangedRight: Published by LaneOffsetController (after lerp completes)
+
+            // ================================================================================
+            // SLIDE AUTO-CHAINS
+            // ================================================================================
+            //{ TempleRunEvents.SlideRequested, TempleRunEvents.SlideStarting },
+            // SlideStarting -> SlideStarted: Published by SlideController (when slide starts)
+            // SlideEnding -> SlideEnded: Published by SlideController (when slide completes)
+
+            // ================================================================================
+            // DASH AUTO-CHAINS
+            // ================================================================================
+            { TempleRunEvents.DashRequested, TempleRunEvents.DashStarting },
+            // DashStarting -> DashStarted: Published by DashController (when dash initiates)
+            // DashEnding -> DashEnded: Published by DashController (when dash completes)
 
             // ================================================================================
             // JUMP AUTO-CHAINS
@@ -70,6 +91,7 @@ namespace CrawfisSoftware.TempleRun.Events
         {
             if (_autoTempleRun2TempleRunEvents.TryGetValue((TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), eventName), out TempleRunEvents autoEvent))
             {
+                //Debug.Log($"Auto firing event TempleRunEvents.{eventName} to TempleRunEvents.{autoEvent.ToString()}");
                 DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
             }
         }

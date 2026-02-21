@@ -28,12 +28,12 @@ namespace CrawfisSoftware.TempleRun.Input
         }
         private void TEMP_GameQuit(InputAction.CallbackContext obj)
         {
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.QuitRequested, this, UnityEngine.Time.time);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserQuitRequested, this, UnityEngine.Time.time);
         }
 
         private void PauseResumeToggle_performed(InputAction.CallbackContext obj)
         {
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.PauseToggle, this, UnityEngine.Time.time);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserPauseToggle, this, UnityEngine.Time.time);
         }
     }
 }

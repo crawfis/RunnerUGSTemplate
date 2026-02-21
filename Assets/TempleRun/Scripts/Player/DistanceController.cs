@@ -21,6 +21,9 @@ namespace CrawfisSoftware.TempleRun
         private Coroutine _coroutine;
         private bool _isMoving = true;
         private float _trackDistance = 0;
+        private int _distancePublishIndex = 0;
+        private float _nextDistancePublishThreshold = 0f;
+        private static readonly float[] DistancePublishThresholds = { 25f, 100f, 200f, 500f, 1000f, 2000f, 5000f };
 
         private void Awake()
         {
@@ -53,6 +56,8 @@ namespace CrawfisSoftware.TempleRun
             _maxSpeed = Blackboard.Instance.GameConfig.MaxSpeed;
             _acceleration = Blackboard.Instance.GameConfig.Acceleration;
             _speed = _initialSpeed;
+            _distancePublishIndex = 0;
+            _nextDistancePublishThreshold = DistancePublishThresholds[0];
             float initialDistance = Blackboard.Instance.TrackWidthOffset;
             //Blackboard.Instance.DistanceTracker.UpdateDistance(initialDistance);
             _coroutine = StartCoroutine(UpdateAfterGameStart());
@@ -89,7 +94,26 @@ namespace CrawfisSoftware.TempleRun
             {
                 if (_isMoving)
                 {
-                    _distanceTracker.UpdateDistance(_speed * GameTime.Instance.deltaTime);
+                    // Apply both dash and slide speed multipliers (both default to 1.0 when inactive)
+                    float effectiveSpeed = _speed * Blackboard.Instance.CurrentDashMultiplier * Blackboard.Instance.CurrentSlideMultiplier;
+                    _distanceTracker.UpdateDistance(effectiveSpeed * GameTime.Instance.deltaTime);
+
+                    if (_distanceTracker.DistanceTravelled >= _nextDistancePublishThreshold)
+                    {
+                        EventsPublisherTempleRun.Instance.PublishEvent(
+                            TempleRunEvents.DistanceUpdated, this, _distanceTracker.DistanceTravelled);
+
+                        if (_distancePublishIndex < DistancePublishThresholds.Length - 1)
+                        {
+                            _distancePublishIndex++;
+                            _nextDistancePublishThreshold = DistancePublishThresholds[_distancePublishIndex];
+                        }
+                        else
+                        {
+                            _nextDistancePublishThreshold += DistancePublishThresholds[_distancePublishIndex];
+                        }
+                    }
+
                     _speed += _acceleration * GameTime.Instance.deltaTime;
                     _speed = Mathf.Clamp(_speed, _initialSpeed, _maxSpeed);
                     Blackboard.Instance.CurrentSpeed = _speed;

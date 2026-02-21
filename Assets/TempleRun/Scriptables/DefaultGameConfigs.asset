@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.TempleRunGameConfig
   DifficultyConfigs:
   - DifficultyName: Easy
-    InitialSpeed: 5
+    InitialSpeed: 1
     MaxSpeed: 7
     Acceleration: 0.2
-    StartRunway: 12
-    MinTrackLength: 24
-    MaxTrackLength: 48
+    StartRunway: 32
+    MinTrackLength: 32
+    MaxTrackLength: 128
     SafePreTurnDistance: 6
     SafePostTurnDistance: 0.3
     InputCoolDownForTurns: 0.1
-    NumberOfLives: 2
-    ObstacleSpawnRate: 1
+    NumberOfLives: 5
+    ObstacleSpawnRate: 0.1
     PowerUpSpawnRate: 0
     ScoreMultiplier: 0
     EnableAdvancedObstacles: 0

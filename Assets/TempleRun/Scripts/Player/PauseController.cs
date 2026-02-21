@@ -12,7 +12,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.PauseToggle, OnPauseToggle);
+            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.UserPauseToggle, OnPauseToggle);
 
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerPaused, OnPause);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerResumed, OnResume);
@@ -20,7 +20,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.PauseToggle, OnPauseToggle);
+            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.UserPauseToggle, OnPauseToggle);
 
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerPaused, OnPause);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerResumed, OnResume);

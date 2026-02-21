@@ -32,9 +32,9 @@ namespace CrawfisSoftware.TempleRun
         {
             // Subscribe to raw input events
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(
-                UserInitiatedEvents.LeftLaneChangeRequested, OnLeftLaneChangeRequested);
+                UserInitiatedEvents.UserLeftLaneChangeRequested, OnLeftLaneChangeRequested);
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(
-                UserInitiatedEvents.RightLaneChangeRequested, OnRightLaneChangeRequested);
+                UserInitiatedEvents.UserRightLaneChangeRequested, OnRightLaneChangeRequested);
 
             // Subscribe to completion events to clear the _isChanging flag
             EventsPublisherTempleRun.Instance.SubscribeToEvent(
@@ -66,9 +66,9 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(
-                UserInitiatedEvents.LeftLaneChangeRequested, OnLeftLaneChangeRequested);
+                UserInitiatedEvents.UserLeftLaneChangeRequested, OnLeftLaneChangeRequested);
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(
-                UserInitiatedEvents.RightLaneChangeRequested, OnRightLaneChangeRequested);
+                UserInitiatedEvents.UserRightLaneChangeRequested, OnRightLaneChangeRequested);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
                 TempleRunEvents.LaneChangedLeft, OnLaneChangeCompleted);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(

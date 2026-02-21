@@ -37,8 +37,8 @@ namespace CrawfisSoftware.TempleRun
         }
         private void Awake()
         {
-            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.LeftTurnRequested, OnLeftTurnRequested);
-            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.RightTurnRequested, OnRightTurnRequested);
+            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.UserLeftTurnRequested, OnLeftTurnRequested);
+            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.UserRightTurnRequested, OnRightTurnRequested);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             _safeTurnDistance = Blackboard.Instance.GameConfig.SafePreTurnDistance;
         }
@@ -78,8 +78,8 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.LeftTurnRequested, OnLeftTurnRequested);
-            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.RightTurnRequested, OnRightTurnRequested);
+            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.UserLeftTurnRequested, OnLeftTurnRequested);
+            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.UserRightTurnRequested, OnRightTurnRequested);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
         }
     }

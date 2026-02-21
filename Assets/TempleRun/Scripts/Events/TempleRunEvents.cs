@@ -60,6 +60,13 @@
         SlideEnding = 64,
         SlideEnded = 65,
 
+        // ---------- Player movement: dash ----------
+        DashRequested = 70,
+        DashStarting = 71,
+        DashStarted = 72,
+        DashEnding = 73,
+        DashEnded = 74,
+
         // ---------- Player movement: jump ----------
         JumpRequested = 80,
         JumpStarting = 81,

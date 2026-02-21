@@ -26,6 +26,7 @@ namespace CrawfisSoftware.TempleRun
         protected float _minDistance = 3;
         protected float _maxDistance = 9;
         protected System.Random _random;
+        private bool _isInitialized = false;
 
         protected virtual void Awake()
         {
@@ -41,16 +42,30 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
         }
 
-        private void OnGameConfigured(string eventName, object sender, object data)
+        private void Start()
         {
             _trackSegments = new(_numberOfLookAheadTracks);
+
+        }
+        private void OnGameConfigured(string eventName, object sender, object data)
+        {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
             var gameConfig = Blackboard.Instance.GameConfig;
             Initialize(gameConfig.StartRunway, gameConfig.MinTrackLength,
                 gameConfig.MaxTrackLength, Blackboard.Instance.MasterRandom);
+            _isInitialized = true;
         }
 
         protected virtual void OnGameStarting(string eventName, object sender, object data)
         {
+            if(!_isInitialized)
+            {
+                Initialize();
+            }
             CreateInitialTrack();
         }
 

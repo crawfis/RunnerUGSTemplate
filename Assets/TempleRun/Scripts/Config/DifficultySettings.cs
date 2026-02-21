@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CrawfisSoftware.Config;
+
+using System;
 using System.Collections.Generic;
 
 namespace CrawfisSoftware.TempleRun.GameConfig

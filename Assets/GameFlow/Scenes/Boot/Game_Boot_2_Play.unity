@@ -150,7 +150,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1726317010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &149559975
 MonoBehaviour:
@@ -170,7 +170,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1807073403}
+    m_TransformParent: {fileID: 1726317010}
     m_Modifications:
     - target: {fileID: 561945479365497037, guid: 192421086cc5f7e4f977d1f4b108f31a,
         type: 3}
@@ -280,7 +280,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1726317010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &714839504
 MonoBehaviour:
@@ -306,7 +306,7 @@ GameObject:
   - component: {fileID: 807874757}
   - component: {fileID: 807874756}
   m_Layer: 0
-  m_Name: Blackboard
+  m_Name: TempleRun-Blackboard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -327,6 +327,8 @@ MonoBehaviour:
   _randomProvider: {fileID: 630594866}
   _laneConfig: {fileID: 11400000, guid: 0a571e4122923674f9dea535c5953b4e, type: 2}
   _jumpConfig: {fileID: 11400000, guid: 054adedd7f2d441468d0ad02b25ef425, type: 2}
+  _slideConfig: {fileID: 11400000, guid: 29e1241597eb6ae4da0555169169cfb9, type: 2}
+  _dashConfig: {fileID: 11400000, guid: 57d96b9cf7eba3a409af7cc82cbdfe85, type: 2}
 --- !u!4 &807874757
 Transform:
   m_ObjectHideFlags: 0
@@ -340,7 +342,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1807073403}
+  m_Father: {fileID: 1726317010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1334405940
 GameObject:
@@ -351,7 +353,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1334405941}
-  - component: {fileID: 1334405943}
   - component: {fileID: 1334405942}
   m_Layer: 0
   m_Name: LoadGameConfig
@@ -373,7 +374,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1807073403}
+  m_Father: {fileID: 1726317010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1334405942
 MonoBehaviour:
@@ -389,18 +390,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.LoadDefaultGameConfigs
   _gameConfig: {fileID: 11400000, guid: 2e12c54a4b139d94589098af2528c64e, type: 2}
   _difficultyLevel: Easy
---- !u!114 &1334405943
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1334405940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fec75e43df7248540b23bd2405957253, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.UGS.GameDifficultyManager
 --- !u!1 &1438859063
 GameObject:
   m_ObjectHideFlags: 0
@@ -508,9 +497,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1807073403}
+  m_Father: {fileID: 1726317010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1807073402
+--- !u!1 &1726317009
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -518,38 +507,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1807073403}
+  - component: {fileID: 1726317010}
   m_Layer: 0
-  m_Name: Global
+  m_Name: TempleRun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1807073403
+--- !u!4 &1726317010
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1807073402}
+  m_GameObject: {fileID: 1726317009}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 807874757}
   - {fileID: 630594865}
   - {fileID: 1555168400}
   - {fileID: 1334405941}
+  - {fileID: 807874757}
+  - {fileID: 149559974}
+  - {fileID: 714839503}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1807073403}
+  - {fileID: 1726317010}
   - {fileID: 1438859066}
-  - {fileID: 149559974}
-  - {fileID: 714839503}

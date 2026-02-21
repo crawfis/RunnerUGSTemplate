@@ -3,7 +3,7 @@
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Moves the player along the current spline with lateral lane offset and jump height.
+    /// Moves the player along the current spline with lateral lane offset, jump height, and slide height.
     ///    Dependencies: Blackboard, DistanceTracker, LaneChangeController, EventsPublisherTempleRun
     ///    Subscribes: CurrentSplineChanged
     /// </summary>
@@ -30,7 +30,7 @@ namespace CrawfisSoftware.TempleRun
             _currentDirection = (point2 - point1).normalized;
             _lastAnchorPoint = point1;
             _lastAnchorDistance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
-            float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset;
+            float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset + Blackboard.Instance.SlideHeightOffset;
             Vector3 basePos = new Vector3(point1.x, yPos, point1.z);
             basePos += GetLateralOffset();
             _objectToMove.localPosition = basePos;
@@ -49,7 +49,7 @@ namespace CrawfisSoftware.TempleRun
             if (distance - _currentDistance < 0.001f) return;
 
             Vector3 newPosition = _lastAnchorPoint + (distance - _lastAnchorDistance) * _currentDirection;
-            float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset;
+            float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset + Blackboard.Instance.SlideHeightOffset;
             newPosition = new Vector3(newPosition.x, yPos, newPosition.z);
             newPosition += GetLateralOffset();
             _objectToMove.localPosition = newPosition;

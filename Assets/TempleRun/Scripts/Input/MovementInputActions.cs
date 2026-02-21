@@ -25,10 +25,12 @@ namespace CrawfisSoftware.TempleRun
         private InputAction _laneLeftAction;
         private InputAction _laneRightAction;
         private InputAction _jumpAction;
+        private InputAction _slideAction;
+        private InputAction _dashAction;
 
         private void OnEnable()
         {
-            if(_inputActions == null)
+            if (_inputActions == null)
                 _inputActions = new LeftRightJumpSlide();
             _inputActions.Enable();
             _leftAction = _inputActions.Player.Left;
@@ -38,30 +40,24 @@ namespace CrawfisSoftware.TempleRun
             _rightAction.Enable();
             _rightAction.performed += RightAction_performed;
 
-            // Lane change bindings — uses FindAction so it gracefully handles
-            // the case where LaneLeft/LaneRight haven't been added to the
-            // .inputactions asset yet (returns null, no-op).
-            _laneLeftAction = _inputActions.asset.FindAction("Player/LaneLeft");
-            if (_laneLeftAction != null)
-            {
-                _laneLeftAction.Enable();
-                _laneLeftAction.performed += LaneLeftAction_performed;
-            }
-            _laneRightAction = _inputActions.asset.FindAction("Player/LaneRight");
-            if (_laneRightAction != null)
-            {
-                _laneRightAction.Enable();
-                _laneRightAction.performed += LaneRightAction_performed;
-            }
+            _laneLeftAction = _inputActions.Player.LaneLeft;
+            _laneLeftAction.Enable();
+            _laneLeftAction.performed += LaneLeftAction_performed;
+            _laneRightAction = _inputActions.Player.LaneRight;
+            _laneRightAction.Enable();
+            _laneRightAction.performed += LaneRightAction_performed;
 
-            // Jump binding — uses FindAction so it gracefully handles
-            // the case where Jump hasn't been added to the .inputactions asset yet.
-            _jumpAction = _inputActions.asset.FindAction("Player/Jump");
-            if (_jumpAction != null)
-            {
-                _jumpAction.Enable();
-                _jumpAction.performed += JumpAction_performed;
-            }
+            _jumpAction = _inputActions.Player.Jump;
+            _jumpAction.Enable();
+            _jumpAction.performed += JumpAction_performed;
+
+            _slideAction = _inputActions.Player.Slide;
+            _slideAction.Enable();
+            _slideAction.performed += SlideAction_performed;
+
+            _dashAction = _inputActions.Player.Dash;
+            _dashAction.Enable();
+            _dashAction.performed += DashAction_performed;
         }
 
         private void OnDisable()
@@ -87,6 +83,10 @@ namespace CrawfisSoftware.TempleRun
                 _jumpAction.Disable();
                 _jumpAction.performed -= JumpAction_performed;
             }
+            _slideAction?.Disable();
+            _slideAction.performed -= SlideAction_performed;
+            _dashAction?.Disable();
+            _dashAction.performed -= DashAction_performed;
         }
 
         private void OnDestroy()
@@ -100,36 +100,50 @@ namespace CrawfisSoftware.TempleRun
         private void LeftAction_performed(InputAction.CallbackContext obj)
         {
             _leftAction.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.LeftTurnRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserLeftTurnRequested, this, PlayerNumber);
             StartCoroutine(EnableAfterDelay(_leftAction));
         }
 
         private void RightAction_performed(InputAction.CallbackContext obj)
         {
             _rightAction.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.RightTurnRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserRightTurnRequested, this, PlayerNumber);
             StartCoroutine(EnableAfterDelay(_rightAction));
         }
 
         private void LaneLeftAction_performed(InputAction.CallbackContext obj)
         {
             _laneLeftAction.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.LeftLaneChangeRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserLeftLaneChangeRequested, this, PlayerNumber);
             StartCoroutine(EnableLaneAfterDelay(_laneLeftAction));
         }
 
         private void LaneRightAction_performed(InputAction.CallbackContext obj)
         {
             _laneRightAction.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.RightLaneChangeRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserRightLaneChangeRequested, this, PlayerNumber);
             StartCoroutine(EnableLaneAfterDelay(_laneRightAction));
         }
 
         private void JumpAction_performed(InputAction.CallbackContext obj)
         {
             _jumpAction.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.JumpRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserJumpRequested, this, PlayerNumber);
             StartCoroutine(EnableJumpAfterDelay(_jumpAction));
+        }
+
+        private void SlideAction_performed(InputAction.CallbackContext obj)
+        {
+            _slideAction.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserSlideRequested, this, PlayerNumber);
+            StartCoroutine(EnableAfterDelay(_slideAction));
+        }
+
+        private void DashAction_performed(InputAction.CallbackContext obj)
+        {
+            _dashAction.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserDashRequested, this, PlayerNumber);
+            StartCoroutine(EnableAfterDelay(_dashAction));
         }
 
         private IEnumerator EnableAfterDelay(InputAction actionToEnable)

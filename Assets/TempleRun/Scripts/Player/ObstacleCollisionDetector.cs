@@ -6,9 +6,9 @@ namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Detects collisions between the player and obstacles using Unity trigger colliders.
-    /// If the player is jumping high enough, the collision is ignored (obstacle cleared).
+    /// If the player is jumping high enough, or sliding low enough, the collision is ignored (obstacle cleared).
     /// Otherwise publishes ObstacleHit which auto-chains to PlayerFailing.
-    ///    Dependencies: Blackboard, JumpConfig
+    ///    Dependencies: Blackboard, JumpConfig, SlideConfig
     ///    Publishes: TempleRunEvents.ObstacleHit
     /// </summary>
     [RequireComponent(typeof(Collider))]
@@ -24,11 +24,22 @@ namespace CrawfisSoftware.TempleRun
             // Check if the player is jumping high enough to clear the obstacle
             float currentJumpHeight = Blackboard.Instance.JumpHeightOffset;
             JumpConfig jumpConfig = Blackboard.Instance.JumpConfig;
-            float clearanceHeight = jumpConfig != null ? jumpConfig.ObstacleClearanceHeight : 1f;
+            float jumpClearanceHeight = jumpConfig != null ? jumpConfig.ObstacleClearanceHeight : 1f;
 
-            if (currentJumpHeight >= clearanceHeight)
+            if (currentJumpHeight >= jumpClearanceHeight)
             {
-                // Player cleared the obstacle — no collision
+                // Player cleared the obstacle by jumping — no collision
+                return;
+            }
+
+            // Check if the player is sliding low enough to pass under the obstacle
+            float currentSlideHeight = Blackboard.Instance.SlideHeightOffset;
+            SlideConfig slideConfig = Blackboard.Instance.SlideConfig;
+            float slideClearanceHeight = slideConfig != null ? slideConfig.SlideObstacleClearanceHeight : 0.5f;
+
+            if (currentSlideHeight <= -slideClearanceHeight)
+            {
+                // Player cleared the obstacle by sliding under — no collision
                 return;
             }
 

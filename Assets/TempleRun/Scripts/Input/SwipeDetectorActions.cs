@@ -78,10 +78,18 @@ namespace CrawfisSoftware.TempleRun
 
         private void DetectSwipeDirection(Vector2 swipeDirection)
         {
+            // Determine if swipe is primarily horizontal or vertical
             if (Mathf.Abs(swipeDirection.x) > Mathf.Abs(swipeDirection.y))
             {
+                // Horizontal swipe - lane changes
                 if (swipeDirection.x > 0) RightAction_performed();
                 else LeftAction_performed();
+            }
+            else
+            {
+                // Vertical swipe - jump or slide
+                if (swipeDirection.y > 0) JumpAction_performed();
+                else SlideAction_performed();
             }
         }
 
@@ -89,14 +97,28 @@ namespace CrawfisSoftware.TempleRun
         private void LeftAction_performed()
         {
             _swipePressed.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.LeftTurnRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserLeftTurnRequested, this, PlayerNumber);
             StartCoroutine(EnableAfterDelay(_swipePressed));
         }
 
         private void RightAction_performed()
         {
             _swipePressed.Disable();
-            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.RightTurnRequested, this, PlayerNumber);
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserRightTurnRequested, this, PlayerNumber);
+            StartCoroutine(EnableAfterDelay(_swipePressed));
+        }
+
+        private void JumpAction_performed()
+        {
+            _swipePressed.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserJumpRequested, this, PlayerNumber);
+            StartCoroutine(EnableAfterDelay(_swipePressed));
+        }
+
+        private void SlideAction_performed()
+        {
+            _swipePressed.Disable();
+            EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserSlideRequested, this, PlayerNumber);
             StartCoroutine(EnableAfterDelay(_swipePressed));
         }
 

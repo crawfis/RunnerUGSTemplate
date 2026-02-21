@@ -20,7 +20,7 @@ namespace CrawfisSoftware.TempleRun
         private void Awake()
         {
             EventsPublisherUserInitiated.Instance.SubscribeToEvent(
-                UserInitiatedEvents.JumpRequested, OnJumpInputReceived);
+                UserInitiatedEvents.UserJumpRequested, OnJumpInputReceived);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(
                 TempleRunEvents.JumpLanded, OnJumpLanded);
         }
@@ -28,7 +28,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(
-                UserInitiatedEvents.JumpRequested, OnJumpInputReceived);
+                UserInitiatedEvents.UserJumpRequested, OnJumpInputReceived);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
                 TempleRunEvents.JumpLanded, OnJumpLanded);
         }

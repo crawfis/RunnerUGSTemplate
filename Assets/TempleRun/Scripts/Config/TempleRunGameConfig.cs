@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CrawfisSoftware.Config;
+
+using System;
 using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun.GameConfig

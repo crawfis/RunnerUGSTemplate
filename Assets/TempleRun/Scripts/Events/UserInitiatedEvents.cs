@@ -2,12 +2,14 @@
 {
     public enum UserInitiatedEvents
     {
-        LeftTurnRequested,
-        RightTurnRequested,
-        PauseToggle,
-        LeftLaneChangeRequested,
-        RightLaneChangeRequested,
-        JumpRequested,
-        QuitRequested,
+        UserLeftTurnRequested,
+        UserRightTurnRequested,
+        UserPauseToggle,
+        UserLeftLaneChangeRequested,
+        UserRightLaneChangeRequested,
+        UserJumpRequested,
+        UserQuitRequested,
+        UserSlideRequested,
+        UserDashRequested,
     }
 }
