@@ -40,9 +40,15 @@ namespace CrawfisSoftware.GameFlow.Events
     /// [Published] MainMenuShown
     ///
     /// --- GAME START (user clicks Play) ---
-    /// [Published] GameScenesLoadRequested
-    /// [AUTO] GameScenesLoadRequested -> GameScenesLoading
+    /// [Published] LevelSelectorShowRequested
+    /// [AUTO] LevelSelectorShowRequested -> LevelSelectorShowing
     /// [Published] MainMenuHidden
+    /// [Published] LevelSelectorShown
+    /// User selects a level:
+    /// [Published] LevelSelected (data: LevelConfig)
+    /// [AUTO] LevelSelected -> GameScenesLoadRequested
+    /// [AUTO] GameScenesLoadRequested -> GameScenesLoading
+    /// [Published] LevelSelectorHidden
     /// [Published] DifficultyChanging -> DifficultyChanged
     /// [Published] GameConfigApplying -> GameConfigApplied
     /// [Published] GameScenesLoaded
@@ -114,6 +120,14 @@ namespace CrawfisSoftware.GameFlow.Events
             // MainMenuHiding -> MainMenuHidden: Published by MainMenuPanelController
 
             // ================================================================================
+            // LEVEL SELECTOR BRIDGES
+            // ================================================================================
+            { GameFlowEvents.LevelSelectorShowRequested, GameFlowEvents.LevelSelectorShowing },
+            { GameFlowEvents.LevelSelectorHideRequested, GameFlowEvents.LevelSelectorHiding },
+            // LevelSelectorShowing -> LevelSelectorShown: Published by LevelSelectorPanelController
+            // LevelSelectorHiding -> LevelSelectorHidden: Published by LevelSelectorPanelController
+
+            // ================================================================================
             // GAME SESSION BRIDGES
             // ================================================================================
             { GameFlowEvents.GameStartRequested, GameFlowEvents.GameStarting },
@@ -167,7 +181,11 @@ namespace CrawfisSoftware.GameFlow.Events
             // After authentication completes, UGSGameFlowBridge fires GameplayReady
             { GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowRequested },
 
-            // --- Play button -> Game Start ---
+            // --- Level Selected -> Scene Loading ---
+            // After user selects a level, proceed to scene loading (existing flow)
+            { GameFlowEvents.LevelSelected, GameFlowEvents.GameScenesLoadRequested },
+
+            // --- Scenes Loaded -> Game Start ---
             // After scenes finish loading, start the game (TempleRun countdown lives in TempleRun domain)
             { GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
 

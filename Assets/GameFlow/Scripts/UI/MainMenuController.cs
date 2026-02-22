@@ -39,7 +39,7 @@ namespace CrawfisSoftware.GameFlow.UI
 
         private void OnStartGameButtonClicked()
         {
-            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameScenesLoadRequested, this, null);
+            EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.LevelSelectorShowRequested, this, null);
         }
     }
 }

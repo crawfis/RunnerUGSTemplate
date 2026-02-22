@@ -91,5 +91,16 @@
         Quitting = 121,
         QuitCancelled = 122,
         QuitCompleted = 123,
+
+        // ---------- Level Selector ----------
+        LevelSelectorShowRequested = 130,
+        LevelSelectorShowing = 131,
+        LevelSelectorShown = 132,
+        LevelSelectorHideRequested = 133,
+        LevelSelectorHiding = 134,
+        LevelSelectorHidden = 135,
+        LevelSelected = 136,              // data: LevelConfig
+        LevelUnlocked = 137,              // data: LevelConfig (newly unlocked)
+        LevelProgressSaved = 138,
     }
 }

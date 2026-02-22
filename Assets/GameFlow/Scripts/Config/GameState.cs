@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Config;
 using CrawfisSoftware.GameFlow.Events;
 
 using UnityEngine;
@@ -14,6 +15,8 @@ namespace CrawfisSoftware.GameFlow
         public static bool IsGameOver { get; internal set; } = false;
         public static bool IsGamePaused { get; internal set; } = false;
         public static bool IsGameConfigured { get; internal set; } = false;
+        public static bool IsLevelSelectorActive { get; set; } = false;
+        public static LevelConfig SelectedLevel { get; set; }
 
         public  void Reset()
         {
@@ -22,7 +25,8 @@ namespace CrawfisSoftware.GameFlow
             IsGameOver = false;
             IsGamePaused = false;
             IsGameConfigured = false;
-
+            IsLevelSelectorActive = false;
+            SelectedLevel = null;
         }
         private void Awake()
         {
@@ -40,6 +44,8 @@ namespace CrawfisSoftware.GameFlow
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Paused, OnPause);
             EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Resumed, OnResume);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.LevelSelectorShowing, OnLevelSelectorShowing);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.LevelSelectorHidden, OnLevelSelectorHidden);
         }
 
         private void OnDestroy()
@@ -51,6 +57,8 @@ namespace CrawfisSoftware.GameFlow
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameConfigApplied, OnGameConfigured);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Paused, OnPause);
             EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Resumed, OnResume);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.LevelSelectorShowing, OnLevelSelectorShowing);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.LevelSelectorHidden, OnLevelSelectorHidden);
         }
 
         private void OnMainMenuShowing(string eventName, object sender, object data)
@@ -86,6 +94,16 @@ namespace CrawfisSoftware.GameFlow
         private void OnResume(string eventName, object sender, object data)
         {
             GameState.IsGamePaused = false;
+        }
+
+        private void OnLevelSelectorShowing(string eventName, object sender, object data)
+        {
+            GameState.IsLevelSelectorActive = true;
+        }
+
+        private void OnLevelSelectorHidden(string eventName, object sender, object data)
+        {
+            GameState.IsLevelSelectorActive = false;
         }
     }
 }

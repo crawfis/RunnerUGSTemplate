@@ -444,10 +444,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1438859066}
-  - component: {fileID: 1438859068}
   - component: {fileID: 1438859067}
   m_Layer: 0
-  m_Name: LoadGamePlay
+  m_Name: LevelSelector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -477,29 +476,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1438859063}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
+  m_Script: {fileID: 11500000, guid: acc5da45e642d434dbc6dd0939fdd131, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
-  _sceneName: TempleRunGameplay
-  _loadadditively: 1
-  _eventToListenTo: GameScenesLoading
-  _delayInSeconds: 0
---- !u!114 &1438859068
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438859063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2576fb7e6823e6a4e9ec1647b89df54c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
-  _sceneName: TempleRunTrackPCG
-  _loadadditively: 1
-  _eventToListenTo: GameScenesLoading
-  _delayInSeconds: 0
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameFlow.SceneManagement.DynamicLevelSceneLoader
+  _fallbackGameplayScene: TempleRunGameplay
+  _sharedTrackPCGScene: TempleRunTrackPCG
 --- !u!1 &1555168398
 GameObject:
   m_ObjectHideFlags: 0
