@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c66b465b451389c4aa17f5e82b18bf15, type: 3}
   m_Name: DashConfig
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.DashConfig
-  DashSpeedMultiplier: 2
+  DashSpeedMultiplier: 5
   DashDuration: 0.8
   DashCurve:
     serializedVersion: 2

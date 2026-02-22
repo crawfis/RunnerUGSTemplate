@@ -621,6 +621,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735b543ff40dc16468e864e4d9ffa5cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &902283844
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 902283846}
+  - component: {fileID: 902283845}
+  m_Layer: 0
+  m_Name: LoadGameConfig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &902283845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 902283844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ac1e045f5be5fd4db4b893303d3e558, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.GameConfig.LoadDefaultGameConfigs
+  _gameConfig: {fileID: 11400000, guid: 2e12c54a4b139d94589098af2528c64e, type: 2}
+  _difficultyLevel: Easy
+--- !u!4 &902283846
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 902283844}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1342369818
 GameObject:
   m_ObjectHideFlags: 0
@@ -1242,6 +1288,7 @@ GameObject:
   - component: {fileID: 2145456649}
   - component: {fileID: 2145456650}
   - component: {fileID: 2145456652}
+  - component: {fileID: 2145456653}
   - component: {fileID: 2145456651}
   m_Layer: 0
   m_Name: LoadVisuals
@@ -1348,6 +1395,7 @@ MonoBehaviour:
   - TempleRunGuiOverlay
   - TempleRunEnvironment
   - TempleRunSfx
+  - TempleRunCollectables
   - TempleRunObstacles
   _eventToFire: GameScenesLoaded
   _resetOnEvent: GameEnded
@@ -1364,6 +1412,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _sceneName: TempleRunObstacles
+--- !u!114 &2145456653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145456644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9757640d57a48e4b971e04bef7fc493, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _sceneName: TempleRunCollectables
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1373,3 +1434,4 @@ SceneRoots:
   - {fileID: 331296745}
   - {fileID: 1451360433}
   - {fileID: 2145456646}
+  - {fileID: 902283846}

@@ -39,6 +39,9 @@ EditorBuildSettings:
     path: Assets/TempleRun/Scenes/Gameplay/TempleRunTrackVisuals.unity
     guid: 1b830593780cdf84f8dfc9c8fd813cc0
   - enabled: 1
+    path: Assets/TempleRun/Scenes/Gameplay/TempleRunCollectables.unity
+    guid: 4a8956cae12af614d8ba57204bc4b128
+  - enabled: 1
     path: Assets/TempleRun/Scenes/Gameplay/TempleRunObstacles.unity
     guid: 2e4399bebcc0efe4a8aa653c6bb99ff5
   m_configObjects:

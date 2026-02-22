@@ -139,6 +139,7 @@ GameObject:
   - component: {fileID: 961756923}
   - component: {fileID: 961756924}
   - component: {fileID: 961756925}
+  - component: {fileID: 961756927}
   - component: {fileID: 961756926}
   m_Layer: 0
   m_Name: Character
@@ -253,6 +254,20 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &961756927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961756920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9511f84600ff3f64380f5f64c1675623, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.CollectableCollisionDetector
+  _coinTag: Coin
+  _powerUpTag: PowerUp
 --- !u!1 &1071799295
 GameObject:
   m_ObjectHideFlags: 0

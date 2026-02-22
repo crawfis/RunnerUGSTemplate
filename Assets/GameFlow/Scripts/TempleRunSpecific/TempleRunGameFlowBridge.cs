@@ -38,34 +38,28 @@ namespace CrawfisSoftware.GameFlow.Events
             { GameFlowEvents.GameScenesLoaded, TempleRunEvents.TempleRunScenesReady },
         };
 
+        // TempleRun → UGS passthrough (bypasses GameFlow — this bridge is the authorized crossing point)
+        private Dictionary<TempleRunEvents, UGS_EventsEnum> _autoTempleRun2UGSEvents = new Dictionary<TempleRunEvents, UGS_EventsEnum>()
+        {
+            // Distance updates for achievement tracking
+            { TempleRunEvents.DistanceUpdated, UGS_EventsEnum.DistanceUpdated },
+
+            // Coin collection for economy sync and achievement tracking
+            { TempleRunEvents.CoinCollected, UGS_EventsEnum.CoinUpdated },
+        };
+
         protected virtual void Awake()
         {
             EventsPublisherTempleRun.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromTempleRunEvent);
             EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireTempleRunEventFromGameFlowEvent);
-
-            // Todo: This should auto fire a GameFlow Distance updated which then should fire a UGS Distance updated.
-            // Manual bridge: TempleRun distance updates → UGS distance tracking
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
+            EventsPublisherTempleRun.Instance.SubscribeToAllEnumEvents(AutoFireUGSEventFromTempleRunEvent);
         }
 
         protected virtual void OnDestroy()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromTempleRunEvent);
             EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireTempleRunEventFromGameFlowEvent);
-
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
-        }
-
-        private void OnDistanceUpdated(string eventName, object sender, object data)
-        {
-            // Bridge TempleRun distance updates to UGS for achievement tracking
-            // Only publish if UGS is initialized (may not be available in all boot sequences)
-            if (EventsPublisherUGS.Instance != null)
-            {
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.DistanceUpdated, sender, data);
-            }
+            EventsPublisherTempleRun.Instance.UnsubscribeToAllEnumEvents(AutoFireUGSEventFromTempleRunEvent);
         }
 
         private void AutoFireGameFlowEventFromTempleRunEvent(string eventName, object sender, object data)
@@ -73,6 +67,15 @@ namespace CrawfisSoftware.GameFlow.Events
             if (_autoTempleRun2GameFlowEvents.TryGetValue((TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), eventName), out GameFlowEvents autoEvent))
             {
                 DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+            }
+        }
+
+        private void AutoFireUGSEventFromTempleRunEvent(string eventName, object sender, object data)
+        {
+            if (EventsPublisherUGS.Instance == null) return;
+            if (_autoTempleRun2UGSEvents.TryGetValue((TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), eventName), out UGS_EventsEnum autoEvent))
+            {
+                EventsPublisherUGS.Instance.PublishEvent(autoEvent, sender, data);
             }
         }
 

@@ -23,13 +23,14 @@ After adding a bridge mapping, remind the user that any existing code that direc
 
 | Bridge Class | File | Connects |
 |-------------|------|----------|
-| **TempleRunGameFlowBridge** | `Assets/GameFlow/Scripts/Events/TempleRunGameFlowBridge.cs` | TempleRun <-> GameFlow (bidirectional) |
+| **TempleRunGameFlowBridge** | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | TempleRun <-> GameFlow (bidirectional) + TempleRun -> UGS (passthrough) |
 | **UGSGameFlowBridge** | `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs` | UGS <-> GameFlow (bidirectional) |
 
-Note: There is no direct TempleRun <-> UGS bridge. Events flow through GameFlow as intermediary:
-```
-TempleRun -> (bridge) -> GameFlow -> (bridge) -> UGS
-```
+Note: TempleRun -> UGS passthrough mappings live in `TempleRunGameFlowBridge` as a third dictionary. This avoids routing through GameFlow when a TempleRun event maps directly to a UGS event (e.g., `DistanceUpdated`, `CoinCollected`).
+
+## CRITICAL: Always use dictionaries
+
+**NEVER add individual `SubscribeToEvent` / `UnsubscribeToEvent` calls in bridge or auto-flow classes.** All event mappings MUST go into the appropriate dictionary. The `SubscribeToAllEnumEvents` handler will pick them up automatically. Individual subscriptions break the declarative pattern and create maintenance burden.
 
 ## Procedure
 
@@ -55,9 +56,10 @@ Read the appropriate bridge class to understand:
 
 Add the new entry to the correct direction dictionary. Include a comment explaining why this bridge exists.
 
-**TempleRunGameFlowBridge has two dictionaries:**
+**TempleRunGameFlowBridge has three dictionaries:**
 - `_autoTempleRun2GameFlowEvents` — TempleRun fires, GameFlow receives
 - `_autoGameFlow2TempleRunEvents` — GameFlow fires, TempleRun receives
+- `_autoTempleRun2UGSEvents` — TempleRun fires, UGS receives (passthrough, bypasses GameFlow)
 
 **UGSGameFlowBridge has two dictionaries:**
 - `_autoUGS2GameFlowEvents` — UGS fires, GameFlow receives

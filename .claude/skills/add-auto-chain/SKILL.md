@@ -23,6 +23,10 @@ Add an auto-event chain mapping within a single event domain. Auto-chains fire a
 
 Note: `UserInitiatedEvents` does NOT have an auto-flow — input events are always handled by subscribers directly.
 
+## CRITICAL: Always use dictionaries
+
+**NEVER add individual `SubscribeToEvent` / `UnsubscribeToEvent` calls in auto-flow or bridge classes.** All event mappings MUST go into the appropriate dictionary. The `SubscribeToAllEnumEvents` handler will pick them up automatically. Individual subscriptions break the declarative pattern and create maintenance burden.
+
 ## Procedure
 
 ### Step 1: Verify both events are in the same domain

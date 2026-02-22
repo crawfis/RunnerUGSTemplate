@@ -33,10 +33,10 @@ namespace CrawfisSoftware.Config
         public float InputCoolDownForTurns = 1f; // Minimum time between turn requests. Hopefully less than MinTrackLength / MaxSpeed
         public int NumberOfLives = 2;
 
-        // Currently not used, but good food for thought.
-        [Header("Additional Difficulty Modifiers")]
+        [Header("Spawn Rates")]
         public float ObstacleSpawnRate = 1f;
-        public float PowerUpSpawnRate = 1f;
+        public float CoinSpawnRate = 0.8f;
+        public float PowerUpSpawnRate = 0.15f;
         public int ScoreMultiplier = 1;
         public bool EnableAdvancedObstacles = false;
     }

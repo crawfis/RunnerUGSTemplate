@@ -74,7 +74,29 @@ namespace CrawfisSoftware.TempleRun.Events
             // ================================================================================
             // OBSTACLE AUTO-CHAINS
             // ================================================================================
-            { TempleRunEvents.ObstacleHit, TempleRunEvents.PlayerFailingAtObstacle },
+            // Gated by PowerUpBuffController for Shield support. See PowerUpBuffController.cs.
+            // PowerUpBuffController subscribes to ObstacleHit and decides:
+            //   Shield active  -> publishes ObstacleRecovered
+            //   Shield inactive -> publishes PlayerFailingAtObstacle
+            //{ TempleRunEvents.ObstacleHit, TempleRunEvents.PlayerFailingAtObstacle },
+
+            // ================================================================================
+            // COIN COLLECTION AUTO-CHAINS
+            // ================================================================================
+            { TempleRunEvents.CoinCollectRequested, TempleRunEvents.CoinCollecting },
+            // CoinCollecting -> CoinCollected: Published by CoinCollectionController
+
+            // ================================================================================
+            // POWER-UP COLLECTION AUTO-CHAINS
+            // ================================================================================
+            { TempleRunEvents.PowerUpCollectRequested, TempleRunEvents.PowerUpCollecting },
+            // PowerUpCollecting -> PowerUpCollected: Published by PowerUpBuffController (destroys GO, confirms pickup)
+            { TempleRunEvents.PowerUpCollected, TempleRunEvents.PowerUpActivateRequested },
+            { TempleRunEvents.PowerUpActivateRequested, TempleRunEvents.PowerUpActivating },
+            // PowerUpActivating -> PowerUpActivated: Published by PowerUpBuffController (after buff applied)
+            // PowerUpDeactivateRequested: Published by PowerUpBuffController (after timer expires)
+            { TempleRunEvents.PowerUpDeactivateRequested, TempleRunEvents.PowerUpDeactivating },
+            // PowerUpDeactivating -> PowerUpDeactivated: Published by PowerUpBuffController (after buff removed)
         };
 
         protected virtual void Awake()

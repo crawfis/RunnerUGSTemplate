@@ -22,6 +22,7 @@ namespace CrawfisSoftware.TempleRun
         [SerializeField] private JumpConfig _jumpConfig;
         [SerializeField] private SlideConfig _slideConfig;
         [SerializeField] private DashConfig _dashConfig;
+        [SerializeField] private CoinConfig _coinConfig;
 
         private LaneChangeController _laneChangeController;
 
@@ -50,6 +51,17 @@ namespace CrawfisSoftware.TempleRun
         // ---------- Dash State ----------
         public DashConfig DashConfig { get => _dashConfig; set => _dashConfig = value; }
         public float CurrentDashMultiplier { get; set; } = 1.0f;  // Speed multiplier during dash (1.0 = normal speed)
+
+        // ---------- Coin State ----------
+        public CoinConfig CoinConfig { get => _coinConfig; set => _coinConfig = value; }
+        public int SessionCoinCount { get; set; } = 0;
+
+        // ---------- Power-Up / Buff State ----------
+        public float ActiveSpeedMultiplier { get; set; } = 1.0f;    // Applied by SpeedBoost power-up
+        public float ActiveScoreMultiplier { get; set; } = 1.0f;    // Applied by ScoreMultiplier power-up
+        public bool CoinMagnetActive { get; set; } = false;         // Applied by CoinMagnet power-up
+        public float CoinMagnetRadius { get; set; } = 0f;           // 0 = collider only, >0 = attraction radius
+        public bool ShieldActive { get; set; } = false;             // Applied by Shield power-up
 
         private const float DEFAULT_TRACK_WIDTH_OFFSET = 1f;
         private const float DEFAULT_TILE_LENGTH = 4f;
@@ -85,6 +97,12 @@ namespace CrawfisSoftware.TempleRun
             SlideHeightOffset = 0f;
             CurrentSlideMultiplier = 1.0f;
             CurrentDashMultiplier = 1.0f;
+            SessionCoinCount = 0;
+            ActiveSpeedMultiplier = 1.0f;
+            ActiveScoreMultiplier = 1.0f;
+            CoinMagnetActive = false;
+            CoinMagnetRadius = 0f;
+            ShieldActive = false;
         }
 
         private void OnConfigApplied(string eventName, object sender, object data)

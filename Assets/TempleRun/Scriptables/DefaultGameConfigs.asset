@@ -15,7 +15,7 @@ MonoBehaviour:
   DifficultyConfigs:
   - DifficultyName: Easy
     InitialSpeed: 1
-    MaxSpeed: 7
+    MaxSpeed: 70
     Acceleration: 0.2
     StartRunway: 32
     MinTrackLength: 32
@@ -24,7 +24,8 @@ MonoBehaviour:
     SafePostTurnDistance: 0.3
     InputCoolDownForTurns: 0.1
     NumberOfLives: 5
-    ObstacleSpawnRate: 0.1
-    PowerUpSpawnRate: 0
+    ObstacleSpawnRate: 0.2
+    CoinSpawnRate: 1
+    PowerUpSpawnRate: 1
     ScoreMultiplier: 0
     EnableAdvancedObstacles: 0
