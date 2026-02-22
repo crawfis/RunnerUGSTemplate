@@ -61,7 +61,7 @@ namespace CrawfisSoftware.TempleRun
                 _isPressing = true;
                 //_startPosition = _playerControls.PlayerTouch.InitialPress.ReadValue<float>();
                 //_startPosition = Touchscreen.current.primaryTouch.position.ReadValue();
-                _startPosition = _swipePressed.ReadValue<Vector2>();
+                _startPosition = Touchscreen.current?.primaryTouch.position.ReadValue() ?? Vector2.zero;
             }
             else if (_isPressing)
             {

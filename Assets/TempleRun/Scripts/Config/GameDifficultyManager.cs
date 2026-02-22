@@ -40,14 +40,14 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 
         public void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.DifficultyChanging, OnDifficultyChanging);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.DifficultySettingsApplied, OnDifficultySettingsChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.DifficultyChanging, OnDifficultyChanging);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.DifficultySettingsApplied, OnDifficultySettingsChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
         }
 
         public void SetDifficulty(string difficultyName)
@@ -56,7 +56,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             if (_difficultyConfigs.ContainsKey(difficultyName))
             {
                 CurrentDifficulty = difficultyName;
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.DifficultyChanged, this, _difficultyConfigs[CurrentDifficulty]);
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TempleRunDifficultyChanging, this, _difficultyConfigs[CurrentDifficulty]);
             }
             else
             {

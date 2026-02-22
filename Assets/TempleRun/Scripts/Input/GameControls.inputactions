@@ -85,7 +85,7 @@
                     "name": "",
                     "id": "5b3d7501-ae16-4739-a9d4-d2e1fcfc1360",
                     "path": "<Touchscreen>/Press",
-                    "interactions": "MultiTap(tapCount=3)",
+                    "interactions": "MultiTap(tapCount=4)",
                     "processors": "",
                     "groups": "",
                     "action": "Quit",

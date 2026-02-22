@@ -27,7 +27,8 @@ namespace CrawfisSoftware.TempleRun
 
         public static Blackboard Instance { get; private set; }
         public System.Random MasterRandom { get { return _randomProvider.RandomGenerator; } }
-        public DifficultyConfig GameConfig { get; set; }  = new DifficultyConfig();
+        public DifficultyConfig GameConfig { get; 
+            set; }  = new DifficultyConfig();
         public DistanceTracker DistanceTracker { get; set; } = new DistanceTracker();
         public float TrackWidthOffset { get; set; } = 1f;
         public float TileLength { get; set; } = 4f;
@@ -78,11 +79,8 @@ namespace CrawfisSoftware.TempleRun
         /// </summary>
         private void ResetState()
         {
-            GameConfig = new DifficultyConfig();
             DistanceTracker = new DistanceTracker();
             CurrentSpeed = 0f;
-            TrackWidthOffset = DEFAULT_TRACK_WIDTH_OFFSET;
-            TileLength = DEFAULT_TILE_LENGTH;
             JumpHeightOffset = 0f;
             SlideHeightOffset = 0f;
             CurrentSlideMultiplier = 1.0f;
@@ -96,6 +94,7 @@ namespace CrawfisSoftware.TempleRun
             {
                 GameConfig = difficulty;
                 Debug.Log($"Blackboard: GameConfig set to '{difficulty.DifficultyName}'");
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TempleRunDifficultyChanged, this, difficulty);
             }
         }
 
@@ -106,22 +105,16 @@ namespace CrawfisSoftware.TempleRun
 
         private void SubscribeToEvents()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.TempleRunEnded, OnGameEnded);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.TempleRunDifficultyChanged, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunEnded, OnGameEnded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunDifficultyChanging, OnConfigApplied);
         }
 
         private void UnsubscribeToEvents()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.TempleRunEnded, OnGameEnded);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.TempleRunDifficultyChanged, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunEnded, OnGameEnded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunDifficultyChanging, OnConfigApplied);
         }
 
 #if UNITY_EDITOR

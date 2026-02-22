@@ -15,10 +15,8 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(
-                TempleRunEvents.TempleRunDifficultySettingsApplied, this, _gameConfig.DifficultyConfigs);
-            EventsPublisherTempleRun.Instance.PublishEvent(
-                TempleRunEvents.TempleRunDifficultyChangeRequested, this, _difficultyLevel);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TempleRunDifficultySettingsApplied, this, _gameConfig.DifficultyConfigs);
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TempleRunDifficultyChangeRequested, this, _difficultyLevel);
         }
     }
 }

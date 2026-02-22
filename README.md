@@ -355,9 +355,15 @@ Clicking Play triggers:
 Active gameplay with Temple Run mechanics:
 - **Track Generation** - Procedurally generated path segments
 - **Player Movement** - Automatic forward motion
-- **Turn Mechanics** - Timed teleportation to new path segments
+- **Lane System** - Three-lane traversal with configurable lane width
+- **Turn Mechanics** - Timed teleportation (snap) to new path segments
+- **Obstacles** - Head-height and full-width barriers with lane-specific variants
+- **Jump Mechanics** - Arc-based jumping to clear full-width obstacles
+- **Slide Mechanics** - Event-driven slide with configurable cooldown
+- **Dash Mechanics** - Speed boost with configurable parameters
 - **Distance Tracking** - Score based on total distance traveled
 - **Lives System** - Configurable number of lives (default: 2)
+- **Player Animations** - Lean, jump, and slide animations linked to game events
 
 The screenshot above shows a typical production run with all gameplay and UGS-related scenes loaded additively:
 
@@ -374,10 +380,13 @@ HUD elements visible in the image:
 **Controls:**
 | Input | Action |
 |-------|--------|
-| Arrow keys / WASD | Turn left/right |
+| Arrow keys / WASD | Turn left/right (lane change) |
 | Swipe (touch) | Turn left/right |
+| Space | Jump |
+| S | Slide |
+| D | Dash |
 | Tab | Pause/Resume toggle |
-| Esc | End gameplay |separate diagram on the game-flow and gmae play side
+| Esc | End gameplay |
 
 **Hierarchy:** All TempleRun* scenes active:
 - `TempleRunGameplay` - `DistanceController`, `TurnController`
@@ -885,12 +894,14 @@ RunnerUGSTemplate/
 │   ├── TempleRun/                        # Gameplay domain
 │   │   ├── Scripts/
 │   │   │   ├── Events/                   # TempleRunEvents, EventsPublisherTempleRun, TempleRunAutoEventFlow
-│   │   │   │                             # UserInitiatedEvents, EventsPublisherUserInitiated
-│   │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, DifficultySettings
-│   │   │   ├── Player/                   # TurnController, TurnCollisionDetector, PlayerLifeController
-│   │   │   ├── Track/                    # TrackManager, SplineCreator2D, DistanceTracker, Direction
+│   │   │   │                             # UserInitiatedEvents, EventsPublisherUserInitiated, Input2TempleRunAutoEventBridge
+│   │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, LaneConfig, SlideConfig, DashConfig, JumpConfig
+│   │   │   ├── Player/                   # TeleportController, LaneChangeController, ObstacleCollisionDetector, PlayerLifeController
+│   │   │   │                             # SlideController, DashController, JumpController, AnimationLink, etc.
+│   │   │   ├── Track/                    # TrackManager, SplineCreator2D, DistanceTracker, Direction, ObstacleSpawner
 │   │   │   ├── TrackVisuals/             # PrefabSpawner (SimplePlane, Voxels)
-│   │   │   ├── Input/                    # MovementInputActions, SwipeDetectorActions, PauseQuitInputActions
+│   │   │   ├── Animation/                # CapsuleAnimationLink (animator state management)
+│   │   │   ├── Input/                    # MovementInputActions, DashInputActions, PauseQuitInputActions, LeftRightJumpSlide
 │   │   │   └── Audio/                    # TurnAudioFeedback, Metronome, SetMusicPlayer
 │   │   ├── Scenes/
 │   │   │   └── Gameplay/                 # TempleRunGameplay, TempleRunPlayerVisuals, TempleRunEnvironment
@@ -1066,12 +1077,17 @@ During play, you can:
 
 | Event | Publisher | Description |
 |-------|-----------|-------------|
-| `PlayerFailRequested/Failing/Failed` | CollisionController | Player hit obstacle |
+| `PlayerFailRequested/Failing/Failed` | ObstacleCollisionDetector | Player hit obstacle |
 | `PlayerDeathRequested/Dying/Died` | PlayerLifeController | Player lost all lives |
 | `CountdownStartRequested/Starting/Tick/Ended` | CountdownController | Pre-game countdown |
-| `TurnLeftRequested/Starting/Completed` | TurnController | Left turn mechanics |
-| `TurnRightRequested/Starting/Completed` | TurnController | Right turn mechanics |
+| `LaneChangingLeft/ChangedLeft` | LaneChangeController | Left lane change mechanics |
+| `LaneChangingRight/ChangedRight` | LaneChangeController | Right lane change mechanics |
+| `TeleportRequested/Starting/Ended` | TeleportController | Teleportation to new segments |
+| `SlideRequested/Starting/Ended` | SlideController | Slide mechanics with cooldown |
+| `DashRequested/Starting/Ended` | DashController | Dash speed boost |
+| `JumpRequested/Starting/Ended` | JumpController | Jump arc mechanics |
 | `ActiveTrackChangeRequested/Changing/Changed` | TrackManager | Track segment changes |
+| `SplineSegmentCreated` | SplineCreator2D | New spline segment created |
 | `CoinCollectRequested/Collecting/Collected` | CollectibleController | Coin collection |
 | `PowerUpActivateRequested/Activating/Activated` | PowerUpController | Power-up usage |
 
@@ -1199,7 +1215,12 @@ Achievements are defined in `Assets/Blocks/Achievements/Deployment/Achievements.
 
 ### Gameplay Features
 
-- [ ] **Obstacles**: Head/slide, foot/jump
+- [x] **Lane System**: Three-lane movement with configurable lane width
+- [x] **Obstacles**: Full-width (jump) and lane-specific (slide/dodge) barriers
+- [x] **Jump Mechanics**: Arc-based jumping with configurable height/duration
+- [x] **Slide Mechanics**: Event-driven slide with cooldown
+- [x] **Dash Mechanics**: Speed boost with duration/cooldown config
+- [x] **Player Animations**: Lean (left/right), jump, slide, and dash animations
 - [ ] **Collectibles**: Coins, power-ups
 - [ ] **Difficulty Progression**: Use Remote Config
 
@@ -1266,6 +1287,52 @@ Be aware of hidden dependencies:
 - Speed assumptions in gameplay code
 - Art asset size assumptions (`bounds.size`)
 - Force designers to provide data you need
+
+---
+
+## Animation Architecture
+
+### Current Approach: Event-Driven Animation in Place
+
+The current implementation places animation logic directly alongside gameplay controllers:
+
+**File:** `Assets/TempleRun/Scripts/Animation/CapsuleAnimationLink.cs`
+
+```csharp
+// CapsuleAnimationLink subscribes to TempleRun domain events
+EventsPublisherTempleRun.Instance.SubscribeToEvent(
+    TempleRunEvents.LaneChangingLeft,
+    TriggerLeanLeftAnimation
+);
+```
+
+**Advantages:**
+- ✅ Single-responsibility: Animation state is co-located with the events that trigger it
+- ✅ No separate scene: Animations load with gameplay
+- ✅ Easy to debug: Event logs show animation triggers
+- ✅ Event-system compliant: Follows the domain isolation rule
+- ✅ Scalable: Each new animation type (jump, slide, dash) can have its own event listener or extend `CapsuleAnimationLink`
+
+**Disadvantages:**
+- ❌ If animations become very complex: May benefit from separation (e.g., separate `AnimationController` that subscribes to multiple events)
+- ❌ Harder to reuse animations: Would require instantiating the same animation handler in multiple scenes
+
+### Alternative Approaches Considered
+
+**1. Separate Animation Scene (Alternative)**
+Place animations in a dedicated `TempleRunPlayerAnimations` scene, loaded additively. The scene would contain a single animator that listens to all gameplay events.
+
+**Pros:**
+- Animation logic is centralized and easier to maintain
+- Modular: Can disable/replace animation system without touching gameplay code
+
+**Cons:**
+- ❌ Adds complexity: Another scene to manage in boot sequence
+- ❌ Domain isolation: Animation scene would need to subscribe to TempleRun events (acceptable) but adds coupling
+- ❌ No clear benefit: Current `CapsuleAnimationLink` is already minimal and event-driven
+- ❌ Overkill for lean animations
+
+**Recommendation:** **Stay with current approach** unless animations grow significantly (e.g., ragdoll, IK, complex state machines). The event-driven pattern in a single script is clean, debuggable, and follows the architecture principles.
 
 ---
 
@@ -1347,6 +1414,133 @@ The architecture supports swapping input methods:
 - Motion capture
 
 Modify `InputController` and adjust cooldown timers as needed.
+
+---
+
+## Gameplay Mechanics
+
+### Lane System
+
+**File:** `Assets/TempleRun/Scripts/Config/LaneConfig.cs`
+
+Players move through three lanes (left, center, right). Lane changes are triggered by input events and are validated by the lane change controller.
+
+**Configuration:**
+```csharp
+public int LaneCount = 3;            // Number of lanes
+public float LaneWidth = 2f;          // Width of each lane
+```
+
+**Key Classes:**
+- `LaneOffsetController` - Tracks current lane offset
+- `LaneChangeController` - Handles left/right input, fires `LaneChangingLeft/Right` events
+- `CapsuleAnimationLink` - Triggers "LeanLeft"/"LeanRight" animator parameters on lane change
+
+### Obstacle System
+
+**File:** `Assets/TempleRun/Scripts/Track/ObstacleSpawner.cs`
+
+Obstacles spawn procedurally on track segments. Two types:
+
+1. **Full-Width Obstacles** (30% by default) — Span entire track width, requires jump to clear
+2. **Lane Obstacles** — Block a single lane, avoidable by jumping or lane-changing
+
+**Configuration (in Blackboard.GameConfig):**
+```csharp
+public float ObstacleSpawnRate = 0.6f;  // Probability of obstacle per segment
+```
+
+**Obstacle Prefabs:**
+- `_fullWidthObstaclePrefab` - Head-height barrier (0.5m default)
+- `_laneObstaclePrefab` - Lane-specific barrier
+
+**Events:**
+- `SplineSegmentCreated` (fired by SplineCreator2D) — Triggers obstacle spawn
+- `TeleportEnded` — Cleans up obstacles from previous segment
+
+### Jump Mechanics
+
+**Files:**
+- `Assets/TempleRun/Scripts/Config/JumpConfig.cs` — Configuration (height, duration, cooldown)
+- `Assets/TempleRun/Scripts/Player/JumpController.cs` — Input validation and event firing
+- `Assets/TempleRun/Scripts/Player/JumpArcController.cs` — Applies arc trajectory to player
+
+**How It Works:**
+1. Player input triggers `JumpRequested` (via `UserInitiated` domain or input script)
+2. Input2TempleRunBridge translates to `TempleRunEvents.JumpRequested`
+3. `JumpController` validates cooldown and publishes `JumpStarting` → `JumpStarted`
+4. `JumpArcController` smoothly interpolates Y position along a parabolic arc
+5. On arc completion, fires `JumpEnded`
+
+**Configuration:**
+```csharp
+public float JumpHeight = 2f;         // Peak height above ground
+public float JumpDuration = 0.6f;     // Time to complete arc
+public float JumpCooldown = 0.2f;     // Minimum time between jumps
+```
+
+### Slide Mechanics
+
+**Files:**
+- `Assets/TempleRun/Scripts/Config/SlideConfig.cs` — Configuration (cooldown, duration)
+- `Assets/TempleRun/Scripts/Player/SlideController.cs` — Validation and event firing
+- `Assets/TempleRun/Scripts/Player/SlideArcController.cs` — Applies slide trajectory
+
+**How It Works:**
+1. Player input triggers `SlideRequested`
+2. `SlideController` checks cooldown and publishes `SlideStarting` → `SlideStarted`
+3. `SlideArcController` lowers player Y position during slide duration
+4. On completion, fires `SlideEnded`
+
+**Configuration:**
+```csharp
+public float SlideDuration = 0.4f;    // How long the slide lasts
+public float SlideCooldown = 0.5f;    // Minimum time between slides
+public float SlideHeightReduction = 0.8f;  // How much to lower player
+```
+
+### Dash Mechanics
+
+**Files:**
+- `Assets/TempleRun/Scripts/Config/DashConfig.cs` — Configuration (speed multiplier, duration, cooldown)
+- `Assets/TempleRun/Scripts/Player/DashController.cs` — Input validation
+- `Assets/TempleRun/Scripts/Player/DashSpeedController.cs` — Applies speed boost
+
+**How It Works:**
+1. Player input triggers `DashRequested`
+2. `DashController` validates cooldown and publishes `DashStarting` → `DashStarted`
+3. `DashSpeedController` multiplies forward movement speed
+4. On duration expiry, fires `DashEnded`
+
+**Configuration:**
+```csharp
+public float DashSpeedMultiplier = 1.5f;  // Speed multiplier while dashing
+public float DashDuration = 1.0f;         // How long dash lasts
+public float DashCooldown = 2.0f;         // Minimum time between dashes
+```
+
+### Player Animations
+
+**File:** `Assets/TempleRun/Scripts/Animation/CapsuleAnimationLink.cs`
+
+Animator parameters are triggered by gameplay events:
+
+| Event | Animator Trigger | Animation |
+|-------|------------------|-----------|
+| `LaneChangingLeft` | `LeanLeft` | Left lean |
+| `LaneChangingRight` | `LeanRight` | Right lean |
+| `JumpRequested` | `Jump` | Jump start |
+| `SlideRequested` | `Slide` | Slide start |
+| `DashRequested` | `Dash` | Dash start |
+
+**Implementation Pattern:**
+```csharp
+private void TriggerLeanLeftAnimation(string eventName, object sender, object data)
+{
+    if (animator != null)
+        animator.SetTrigger("LeanLeft");
+}
+```
 
 ---
 
