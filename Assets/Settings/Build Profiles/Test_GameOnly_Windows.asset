@@ -21,27 +21,31 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Test/0_BootStrap_Game_Only.unity
+    m_path: Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Test/Game_Boot_0_Test_Initialization.unity
+    m_path: Assets/GameFlow/Scenes/Boot/Game_Boot_0_Test_Initialization.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Game_Boot_1_UI.unity
+    m_path: Assets/GameFlow/Scenes/Boot/Game_Boot_1_UI.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Game_Boot_2_Play.unity
+    m_path: Assets/GameFlow/Scenes/Boot/Game_Boot_2_Play.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunEnvironment.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunCollectables.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunGameplay.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunEnvironment.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunGuiOverlay.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunGameplay.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunPlayerVisuals.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunGuiOverlay.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunSfx.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunObstacles.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunTrackPCG.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Gameplay/TempleRunTrackVisuals.unity
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunSfx.unity
+  - m_enabled: 1
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunTrackPCG.unity
+  - m_enabled: 1
+    m_path: Assets/TempleRun/Scenes/Gameplay/TempleRunTrackVisuals.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:

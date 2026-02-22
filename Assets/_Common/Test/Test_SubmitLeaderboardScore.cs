@@ -41,7 +41,7 @@ namespace CrawfisSoftware.UGS.Leaderboard.Test
             if(_endGameAfterSubmissions)
             {
                 Debug.Log("All scores submitted. Ending game.");
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnding, this, null);
+                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnded, this, null);
             }
         }
     }

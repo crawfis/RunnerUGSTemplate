@@ -23,9 +23,9 @@
         AchievementsCloseRequested, AchievementsClosing, AchievementsClosed,
         AchievementClaimRequested, AchievementClaiming, AchievementClaimed, AchievementClaimFailed,
         AchievementUnlocked, AchievementProgressUpdated,
-        DistanceUpdated,
+        UGS_DistanceUpdated,
         // --- Economy ---
-        CoinUpdated,
+        UGS_CoinUpdated,
         // --- Rewarded Ads ---
         RewardAdWatching, RewardAdWatched,
         RewardAdFailedToShow, RewardAdClosedWithoutReward,

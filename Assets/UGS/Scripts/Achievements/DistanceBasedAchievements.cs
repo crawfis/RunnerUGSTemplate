@@ -35,14 +35,14 @@ namespace CrawfisSoftware.UGS.Achievements
 
             // Subscribe to distance updates from the bridge
             EventsPublisherUGS.Instance.SubscribeToEvent(
-                UGS_EventsEnum.DistanceUpdated,
+                UGS_EventsEnum.UGS_DistanceUpdated,
                 OnDistanceUpdated);
         }
 
         private void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToEvent(
-                UGS_EventsEnum.DistanceUpdated,
+                UGS_EventsEnum.UGS_DistanceUpdated,
                 OnDistanceUpdated);
         }
 

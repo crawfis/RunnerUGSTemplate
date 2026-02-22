@@ -42,10 +42,10 @@ namespace CrawfisSoftware.GameFlow.Events
         private Dictionary<TempleRunEvents, UGS_EventsEnum> _autoTempleRun2UGSEvents = new Dictionary<TempleRunEvents, UGS_EventsEnum>()
         {
             // Distance updates for achievement tracking
-            { TempleRunEvents.DistanceUpdated, UGS_EventsEnum.DistanceUpdated },
+            { TempleRunEvents.DistanceUpdated, UGS_EventsEnum.UGS_DistanceUpdated },
 
             // Coin collection for economy sync and achievement tracking
-            { TempleRunEvents.CoinCollected, UGS_EventsEnum.CoinUpdated },
+            { TempleRunEvents.CoinCollected, UGS_EventsEnum.UGS_CoinUpdated },
         };
 
         protected virtual void Awake()

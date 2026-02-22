@@ -76,7 +76,7 @@ namespace CrawfisSoftware.UGS.Events
             { UGS_EventsEnum.PlayerSignInFailed, UGS_EventsEnum.PlayerSigningIn }, // Loop back to allow re-sign in
 
             // --- Post-game UGS UI loop ---
-            { UGS_EventsEnum.ScoreUpdating, UGS_EventsEnum.ScoreUpdated },
+            //{ UGS_EventsEnum.ScoreUpdating, UGS_EventsEnum.ScoreUpdated },
 
             //{ UGS_EventsEnum.LeaderboardOpening, UGS_EventsEnum.LeaderboardOpened }, // Published by LeaderboardController
             //{ UGS_EventsEnum.LeaderboardOpened, UGS_EventsEnum.LeaderboardClosing },

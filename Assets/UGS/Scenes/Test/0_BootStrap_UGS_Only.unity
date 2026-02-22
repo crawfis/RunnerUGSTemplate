@@ -488,7 +488,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e90b90efb9448ce42998d726476a36cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Test.Test_AutoFireEvent
-  _eventNameToListenFor: CountdownEnded
+  _eventNameToListenFor: GameplayReady
   _eventNameToFire: GameStarted
 --- !u!4 &1156924396
 Transform:

@@ -28,14 +28,14 @@ namespace CrawfisSoftware.UGS.Achievements
         private void Awake()
         {
             EventsPublisherUGS.Instance.SubscribeToEvent(
-                UGS_EventsEnum.CoinUpdated,
+                UGS_EventsEnum.UGS_CoinUpdated,
                 OnCoinUpdated);
         }
 
         private void OnDestroy()
         {
             EventsPublisherUGS.Instance.UnsubscribeToEvent(
-                UGS_EventsEnum.CoinUpdated,
+                UGS_EventsEnum.UGS_CoinUpdated,
                 OnCoinUpdated);
         }
 

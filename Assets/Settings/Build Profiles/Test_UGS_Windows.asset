@@ -21,31 +21,31 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Test/0_BootStrap_UGS_Only.unity
+    m_path: Assets/UGS/Scenes/Test/0_BootStrap_UGS_Only.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Test/DummyGame_Boot_0_Initialization.unity
+    m_path: Assets/UGS/Scenes/Boot/UGS_Boot_0_Initialization.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/UGS_Boot_0_Initialization.unity
+    m_path: Assets/UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Game_Boot_0_Initialization.unity
+    m_path: Assets/UGS/Scenes/Boot/UGS_Boot_2_Authentication.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Game_Boot_1_UI.unity
+    m_path: Assets/UGS/Scenes/Boot/UGS_Boot_3_Achievements.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/Game_Boot_2_Play.unity
+    m_path: Assets/UGS/Scenes/Boot/UGS_Boot_4_Leaderboards.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/UGS_Boot_1_RemoteConfig.unity
+    m_path: Assets/UGS/Scenes/Test/DummyGame_Boot_0_Initialization.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/UGS_Boot_2_Authentication.unity
+    m_path: Assets/GameFlow/Scenes/Boot/Game_Boot_1_UI.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/UGS_Boot_3_Achievements.unity
+    m_path: Assets/UGS/Scenes/Test/Test_SubmitScoreAndEnd.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/Boot/UGS_Boot_4_Leaderboards.unity
+    m_path: Assets/UGS/Scenes/UGS/AchievementNotifications.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/UGS/AchievementNotifications.unity
+    m_path: Assets/UGS/Scenes/UGS/Achievements.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/UGS/Achievements.unity
+    m_path: Assets/UGS/Scenes/UGS/Leaderboards.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/UGS/Leaderboards.unity
+    m_path: Assets/UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
