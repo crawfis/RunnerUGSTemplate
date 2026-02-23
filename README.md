@@ -10,72 +10,136 @@ A Unity project template demonstrating **event-driven architecture** for integra
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Template Lineage](#template-lineage)
-3. [Architecture](#architecture)
-4. [Getting Started](#getting-started)
-5. [Build Profiles](#build-profiles)
-6. [Visual Walkthrough: Loading Panel (All Profiles)](#visual-walkthrough-loading-panel-all-profiles)
-7. [Visual Walkthrough: Windows](#visual-walkthrough-windows)
-8. [Visual Walkthrough: Test_UGS_Windows](#visual-walkthrough-test_ugs_windows)
-9. [Visual Walkthrough: Test_GameOnly_Windows](#visual-walkthrough-test_gameonly_windows)
-10. [Project Structure](#project-structure)
-11. [Scene Architecture](#scene-architecture)
-12. [Event System](#event-system)
-13. [Unity Gaming Services Integration](#unity-gaming-services-integration)
-14. [Dependencies](#dependencies)
-15. [Development Tasks](#development-tasks)
-16. [Design Principles](#design-principles)
-17. [Extension Points](#extension-points)
-18. [License](#license)
+2. [Codebase Statistics](#codebase-statistics)
+3. [Template Lineage](#template-lineage)
+4. [Architecture](#architecture)
+5. [Getting Started](#getting-started)
+6. [Build Profiles](#build-profiles)
+7. [Visual Walkthrough: Loading Panel (All Profiles)](#visual-walkthrough-loading-panel-all-profiles)
+8. [Visual Walkthrough: Windows](#visual-walkthrough-windows)
+9. [Visual Walkthrough: Test_UGS_Windows](#visual-walkthrough-test_ugs_windows)
+10. [Visual Walkthrough: Test_GameOnly_Windows](#visual-walkthrough-test_gameonly_windows)
+11. [Project Structure](#project-structure)
+12. [Scene Architecture](#scene-architecture)
+13. [Event System](#event-system)
+14. [Unity Gaming Services Integration](#unity-gaming-services-integration)
+15. [Dependencies](#dependencies)
+16. [Development Tasks](#development-tasks)
+17. [Design Principles](#design-principles)
+18. [Extension Points](#extension-points)
+19. [License](#license)
 
 ---
 
 ## Overview
 
-This template is used in **CSE 5912: Game Design and Development Capstone** at The Ohio State University. It provides student teams with scaffolding for event-based flow and control of 
-various Unity Gaming Services (UGS) and a simple infinite-runner game that demonstrates:
+This template is used in **CSE 5912: Game Design and Development Capstone** at The Ohio State University. Its primary purpose is to provide **the glue** — the event-driven wiring that connects gameplay mechanics, Unity Gaming Services, UI, audio, and visuals without any of those systems knowing about each other.
 
-- **Decoupled event-driven communication** via the EventsPublisher package
-- **UGS Building Blocks** (Authentication, Leaderboards, Achievements) wired through events
-- **Additive scene loading** for modular game structure
-- **Separation of gameplay logic from visuals/audio**
-- **Multiple build profiles** for testing UGS and gameplay independently
+The gameplay itself (a Temple Run-style endless runner) is intentionally simple. The core mechanic is a timed teleportation that snaps the player to a new path segment when triggered within a valid distance window. The game exists to give the glue something meaningful to connect, not as a showcase of gameplay depth.
 
-The gameplay itself is a Temple Run-style endless runner where the core mechanic is a timed teleportation (not a true turn) that snaps the player to a new path segment 
-when triggered within a valid distance window.
+**What the template provides:**
+
+- **Event buses** — four typed publishers (`GameFlow`, `TempleRun`, `UserInitiated`, `UGS`) that any system can publish to or subscribe from without holding a reference to anything else
+- **Bridge classes** — explicit cross-domain translators (`TempleRunGameFlowBridge`, `UGSGameFlowBridge`) that are the *only* permitted places for one domain to react to another domain's events
+- **Auto-event chains** — dictionary-driven progressions (`Requested → Starting → Started`) that fire automatically, eliminating boilerplate sequencing code while allowing for new hooks to be injected at key times / events.
+- **Additive scene isolation** — each gameplay concern (obstacles, collectables, visuals, audio, HUD/countdown, track) lives in its own scene and communicates exclusively through events (preferred) or a shared Blackboard
+- **Domain isolation enforcement** — rules and skills that prevent accidental coupling from creeping back in
+- **Multiple build profiles** — swap the gameplay or UGS layers independently to test either in isolation
+
+Student teams can replace the Temple Run gameplay with their own game, add new UGS services, or swap visual/audio layers — without modifying any existing code — because every boundary is an event.
+
+---
+
+## Codebase Statistics
+
+> Assembly-CSharp only — excludes `Blocks/`, `ThirdParty/`, `CloudCode/`, and generated bindings.
+
+| Metric | Count |
+|--------|-------|
+| C# source files | 148 |
+| Declared types (class / interface / enum / struct) | 139 |
+| MonoBehaviours | 90 |
+| ScriptableObjects | 10 |
+| Namespaces | 29 |
+| Unity scenes | 31 |
+| Defined events (across all 4 domains) | 186 |
+
+### Types by Domain
+
+| Domain | Files | Types | Primary responsibility |
+|--------|-------|-------|------------------------|
+| `TempleRun` | 76 | 78 | Gameplay mechanics, player, track, input, audio |
+| `UGS` | 36 | 33 | Authentication, leaderboards, achievements, remote config |
+| `GameFlow` | 26 | 19 | Boot, menus, level selection, scene management, UI panels |
+| `_Common` | 10 | 9 | Shared base classes, utilities, test infrastructure |
+
+### Namespaces
+
+```
+CrawfisSoftware.Events                  CrawfisSoftware.TempleRun
+CrawfisSoftware.GameFlow                CrawfisSoftware.TempleRun.Audio
+CrawfisSoftware.GameFlow.Config         CrawfisSoftware.TempleRun.Events
+CrawfisSoftware.GameFlow.Events         CrawfisSoftware.TempleRun.GameConfig
+CrawfisSoftware.GameFlow.GameConfig     CrawfisSoftware.TempleRun.Input
+CrawfisSoftware.GameFlow.GameControl    CrawfisSoftware.TempleRun.UI
+CrawfisSoftware.GameFlow.SceneManagement
+CrawfisSoftware.GameFlow.UI             CrawfisSoftware.UGS
+                                        CrawfisSoftware.UGS.Achievements
+CrawfisSoftware.Test                    CrawfisSoftware.UGS.Authentication
+CrawfisSoftware.Utility                 CrawfisSoftware.UGS.Events
+CrawfisSoftware.Utility.Testing         CrawfisSoftware.UGS.GameConfig
+                                        CrawfisSoftware.UGS.Leaderboard
+CrawfisSoftware.PlayerDataManagement    CrawfisSoftware.UGS.Leaderboard.Test
+CrawfisSoftware.PlayerEconomyManagement CrawfisSoftware.UGS.RemoteConfig
+```
 
 ---
 
 ## Template Lineage
 
+Each generation adds a new layer of **glue** — more systems, more boundaries to cross, more wiring needed.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         TempleRun1-NoArt                                │
-│   Programming-centric implementation with no graphics dependencies      │
+│                         TempleRun1-NoArt   (out-dated)                  │
+│   The core gameplay model — no art, no physics dependencies             │
 │   - Event-based architecture (MVC pattern)                              │
 │   - Distance model: total, segment, turn, death distances               │
 │   - No physics/graphics required for core gameplay                      │
+│                                                                         │
+│   GLUE: TempleRunEvents + EventsPublisherTempleRun wires input,         │
+│         distance tracking, turn logic, and player lifecycle together    │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                       EndlessRunnerTemplate                             │
-│   Adds visual/audio layers and additional scenes                        │
-│   - 8 additive scenes (gameplay, visuals, SFX, environment)             │
+│                       EndlessRunnerTemplate       (out-dated)           │
+│   Adds visual/audio layers as separate additive scenes                  │
+│   - Additive scenes: gameplay, visuals, SFX, environment, HUD           │
 │   - TrackManager with PCG track generation                              │
 │   - UI Toolkit integration                                              │
 │   - Audio Manager via GTMY.Audio package                                │
+│                                                                         │
+│   GLUE: GameFlowEvents + GameFlowAutoEventFlow bridge the boot          │
+│         sequence → menus → countdown → gameplay → game over flow;       │
+│         TempleRunGameFlowBridge translates gameplay events (PlayerDied) │
+│         into session lifecycle events (GameEnding)                      │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    RunnerUGSTemplate (this repo)                        │
-│   Integrates Unity Gaming Services                                      │
+│   Integrates Unity Gaming Services as an independent domain             │
 │   - Player Authentication (Anonymous, Unity, Password)                  │
 │   - Leaderboards (Global / Self views)                                  │
 │   - Achievements (Instant and Progressive)                              │
 │   - Remote Config, Cloud Save, Cloud Code ready                         │
-│   - Three build profiles for isolated testing                           │
+│   - Three build profiles for isolated layer testing                     │
+│                                                                         │
+│   GLUE: UGSGameFlowBridge translates GameFlowEvents (GameEnding) into   │
+│         UGS_EventsEnum (ScoreUpdating) so UGS never touches gameplay;   │
+│         UGSAutoEventFlow chains initialization → auth → config →        │
+│         leaderboards → achievements without any system calling another  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -112,10 +176,13 @@ when triggered within a valid distance window.
 │  │ Building Blocks:         │   │  │  │ Gameplay Scenes:             │     │
 │  │ - Authentication         │   │  │  │ - TempleRunGameplay          │     │
 │  │ - Remote Config          │   │  │  │ - TempleRunTrackPCG          │     │
-│  │ - Leaderboards           │   │  │  │ - TempleRunVisuals           │     │
-│  │ - Achievements           │   │  │  │ - TempleRunGuiOverlay        │     │
-│  └──────────────────────────┘   │  │  │ - TempleRunEnvironment       │     │
-└─────────────────────────────────┘  │  │ - TempleRunSfx               │     │
+│  │ - Leaderboards           │   │  │  │ - TempleRunTrackVisuals      │     │
+│  │ - Achievements           │   │  │  │ - TempleRunPlayerVisuals     │     │
+│  └──────────────────────────┘   │  │  │ - TempleRunObstacles         │     │
+└─────────────────────────────────┘  │  │ - TempleRunCollectables      │     │
+                    │                │  │ - TempleRunGuiOverlay        │     │
+                    │                │  │ - TempleRunEnvironment       │     │
+                    │                │  │ - TempleRunSfx               │     │
                     │                │  └──────────────────────────────┘     │
                     │                └───────────────────────────────────────┘
                     │                                 │
@@ -134,9 +201,57 @@ when triggered within a valid distance window.
 | Layer | Responsibility | Examples |
 |-------|----------------|----------|
 | **Model** | Distance tracking, game state | `DistanceController`, `TrackManager` |
-| **View** | Visual/audio feedback | `TempleRunVisuals`, `TempleRunSfx` |
+| **View** | Visual/audio feedback | `TempleRunPlayerVisuals`, `TempleRunTrackVisuals`, `TempleRunSfx` |
 | **Controller** | Input handling, game flow | `InputController`, `TurnController` |
 | **Services** | UGS integration | Authentication, Leaderboards, Achievements |
+
+### How the Glue Works: A Complete Event Chain
+
+This example traces what happens from the moment a player hits an obstacle to a score appearing on the leaderboard. No system along the chain holds a reference to any other — every handoff is an event.
+
+```
+[Player hits obstacle]
+        │
+        ▼  ObstacleCollisionDetector (TempleRun domain)
+EventsPublisherTempleRun.PublishEvent(PlayerFailRequested)
+        │
+        ▼  TempleRunAutoEventFlow (same-domain auto-chain)
+        PlayerFailRequested → PlayerFailing → PlayerFailed
+        │
+        ▼  PlayerLifeController (TempleRun domain)
+        Decrements life count
+        ├─ lives > 0 ──► PlayerRevived (run continues)
+        └─ lives = 0 ──► PlayerDeathRequested
+        │
+        ▼  TempleRunAutoEventFlow (same-domain auto-chain)
+        PlayerDeathRequested → PlayerDying → PlayerDied
+        │
+        ▼  TempleRunGameFlowBridge (GameFlow domain — bridge duty only)
+        Subscribes to TempleRunEvents.PlayerDied
+        Publishes GameFlowEvents.GameEndRequested
+        │
+        ▼  GameFlowAutoEventFlow (same-domain auto-chain)
+        GameEndRequested → GameEnding → GameEnded
+        │
+        ▼  UGSGameFlowBridge (UGS domain — bridge duty only)
+        Subscribes to GameFlowEvents.GameEnding
+        Reads score from Blackboard
+        Publishes UGS_EventsEnum.ScoreUpdating
+        │
+        ▼  LeaderboardController (UGS domain)
+        Subscribes to UGS_EventsEnum.ScoreUpdating
+        Calls UGS Leaderboards SDK
+        Publishes UGS_EventsEnum.ScoreUpdated
+        │
+        ▼  [Leaderboard UI shown, achievements checked, ...]
+```
+
+**Key properties of this chain:**
+- `ObstacleCollisionDetector` never imports anything from `GameFlow` or `UGS`
+- `LeaderboardController` never imports anything from `TempleRun` or `GameFlow`
+- The two bridge classes (`TempleRunGameFlowBridge`, `UGSGameFlowBridge`) are the *only* files that cross domain boundaries — and they contain no gameplay or service logic, only translation
+- Replacing the leaderboard with a different service requires changing only `LeaderboardController` and `UGSGameFlowBridge`
+- Replacing the Temple Run game with a different game requires only re-publishing the same `PlayerDied` event from the new game's death logic
 
 ---
 
@@ -227,19 +342,19 @@ Three build profiles support isolated development and testing:
 ### Test_UGS_Windows Scene List
 
 ```
- 0  _Common/Test/Scenes/0_BootStrap_UGS_Only          ◄── Entry point
- 1  _Common/Test/Scenes/UGS_Boot_0_Test_Init_UGS_Only ◄── UGS init
- 2  _Common/Test/Scenes/DummyGame_Boot_0_Initialization ◄── Dummy game
- 3  GameFlow/Scenes/Boot/Game_Boot_0_Initialization
- 4  GameFlow/Scenes/Boot/Game_Boot_1_UI
- 5  GameFlow/Scenes/Boot/Game_Boot_2_Play
- 6  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig
- 7  UGS/Scenes/Boot/UGS_Boot_2_Authentication
- 8  UGS/Scenes/Boot/UGS_Boot_3_Achievements
- 9  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards
-10  UGS/Scenes/UGS/AchievementNotifications
-11  UGS/Scenes/UGS/Achievements
-12  UGS/Scenes/UGS/Leaderboards
+ 0  UGS/Scenes/Test/0_BootStrap_UGS_Only              ◄── Entry point
+ 1  UGS/Scenes/Boot/UGS_Boot_0_Initialization         ◄── UGS services init
+ 2  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig           ◄── Remote Config
+ 3  UGS/Scenes/Boot/UGS_Boot_2_Authentication         ◄── Player sign-in
+ 4  UGS/Scenes/Boot/UGS_Boot_3_Achievements           ◄── Achievements system
+ 5  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards           ◄── Leaderboards system
+ 6  UGS/Scenes/Test/DummyGame_Boot_0_Initialization   ◄── Dummy game (random score)
+ 7  GameFlow/Scenes/Boot/Game_Boot_1_UI               ◄── Main Menu, Level Selection, Game Over
+ 8  UGS/Scenes/Test/Test_SubmitScoreAndEnd            ◄── Auto-submits score and ends game
+ 9  UGS/Scenes/UGS/AchievementNotifications           ◄── In-game achievement toasts
+10  UGS/Scenes/UGS/Achievements                       ◄── Achievements UI panel
+11  UGS/Scenes/UGS/Leaderboards                       ◄── Leaderboards UI panel
+12  UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only    ◄── UGS init for test-only boot
 ```
 
 ### Switching Profiles
@@ -275,24 +390,27 @@ The **Windows** profile is the full production build with UGS integration and ac
 ### Windows Scene List
 
 ```
- 0  GameFlow/Scenes/Boot/0_BootStrap                      ◄── Entry point
- 1  GameFlow/Scenes/Boot/Game_Boot_0_Initialization       ◄── Game config, RandomProvider
- 2  GameFlow/Scenes/Boot/Game_Boot_1_UI                   ◄── Main Menu, HUD, Overlays
- 3  GameFlow/Scenes/Boot/Game_Boot_2_Play                 ◄── Gameplay scene loader
- 4  UGS/Scenes/Boot/UGS_Boot_0_Initialization             ◄── UGS services init
- 5  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig               ◄── Remote Config
- 6  UGS/Scenes/Boot/UGS_Boot_2_Authentication             ◄── Player sign-in
- 7  UGS/Scenes/Boot/UGS_Boot_3_Achievements               ◄── Achievements system
- 8  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards               ◄── Leaderboards system
+ 0  UGS/Scenes/Boot/0_BootStrap                           ◄── Entry point
+ 1  UGS/Scenes/Boot/UGS_Boot_0_Initialization             ◄── UGS services init
+ 2  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig               ◄── Remote Config
+ 3  UGS/Scenes/Boot/UGS_Boot_2_Authentication             ◄── Player sign-in
+ 4  UGS/Scenes/Boot/UGS_Boot_3_Achievements               ◄── Achievements system
+ 5  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards               ◄── Leaderboards system
+ 6  GameFlow/Scenes/Boot/Game_Boot_0_Initialization       ◄── Game config, RandomProvider
+ 7  GameFlow/Scenes/Boot/Game_Boot_1_UI                   ◄── Main Menu, Level Selection, Game Over
+ 8  GameFlow/Scenes/Boot/Game_Boot_2_Play                 ◄── Gameplay scene loader
  9  UGS/Scenes/UGS/AchievementNotifications               ◄── In-game achievement toasts
 10  UGS/Scenes/UGS/Achievements                           ◄── Achievements UI panel
 11  UGS/Scenes/UGS/Leaderboards                           ◄── Leaderboards UI panel
-12  TempleRun/Scenes/Gameplay/TempleRunGameplay           ◄── Core gameplay model
-13  TempleRun/Scenes/Gameplay/TempleRunTrackPCG           ◄── Procedural track generation
-14  TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals      ◄── Visual representation
-15  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay         ◄── Gameplay HUD
-16  TempleRun/Scenes/Gameplay/TempleRunEnvironment        ◄── Skybox, lighting
-17  TempleRun/Scenes/Gameplay/TempleRunSfx                ◄── Sound effects
+12  TempleRun/Scenes/Gameplay/TempleRunGameplay            ◄── Core gameplay logic (distance, lives)
+13  TempleRun/Scenes/Gameplay/TempleRunTrackPCG            ◄── Procedural track generation
+14  TempleRun/Scenes/Gameplay/TempleRunEnvironment         ◄── Skybox, lighting
+15  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay          ◄── Gameplay HUD and Countdown overlay
+16  TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals       ◄── Player visual representation
+17  TempleRun/Scenes/Gameplay/TempleRunSfx                 ◄── Sound effects
+18  TempleRun/Scenes/Gameplay/TempleRunTrackVisuals        ◄── Track visual meshes
+19  TempleRun/Scenes/Gameplay/TempleRunCollectables        ◄── Coins and power-up spawning
+20  TempleRun/Scenes/Gameplay/TempleRunObstacles           ◄── Obstacle spawning
 ```
 
 ---
@@ -335,20 +453,33 @@ After successful authentication:
 
 ---
 
-### Step 4: Countdown
+### Step 4: Level Selection
 
-![Countdown](docs/images/03_countdown.png)
+After clicking Play from the Main Menu, the Level Selection screen appears:
+- Player selects a level (or difficulty configuration) from the `LevelSelector` panel
+- `LevelSelectorPanelController` reads the chosen `LevelConfig` ScriptableObject
+- `LevelConfigApplier` applies the selected config to `Blackboard`
+- `DynamicLevelSceneLoader` loads the appropriate TempleRun gameplay scenes additively
 
-Clicking Play triggers:
-- Gameplay scenes load additively (TempleRunGameplay, TrackPCG, Visuals, etc.)
-- HUD appears: `Score: 000000` and timer `00:00`
-- Countdown overlay: 3... 2... 1...
-
-**Hierarchy:** `Overlay-Countdown` active, `HUD` visible, TempleRun* scenes loading
+**Hierarchy:** `LevelSelection` panel active under `UIRoot` in `Game_Boot_1_UI`
 
 ---
 
-### Step 5: Gameplay
+### Step 5: Countdown
+
+![Countdown](docs/images/03_countdown.png)
+
+Once the level scenes finish loading:
+- HUD appears: `Score: 000000` and timer `00:00`
+- Countdown overlay: 3... 2... 1...
+
+Both the HUD and Countdown are part of the `TempleRunGuiOverlay` scene (TempleRun domain), managed by `CountdownController` and `CountdownUIController`.
+
+**Hierarchy:** Countdown overlay and HUD active inside `TempleRunGuiOverlay`
+
+---
+
+### Step 6: Gameplay
 
 ![Gameplay](docs/images/07_gameplay.png)
 
@@ -369,7 +500,7 @@ The screenshot above shows a typical production run with all gameplay and UGS-re
 
 - `UGS_Boot_1_RemoteConfig`, `UGS_Boot_2_Authentication`, `UGS_Boot_3_Achievements`, `UGS_Boot_4_Leaderboards`
 - `AchievementNotifications` and `Achievements` (for in-run notifications and post-run panel)
-- Core Temple Run scenes: `TempleRunGameplay`, `TempleRunTrackPCG`, `TempleRunPlayerVisuals`, `TempleRunGuiOverlay`, `TempleRunEnvironment`, `TempleRunSfx`
+- Core Temple Run scenes: `TempleRunGameplay`, `TempleRunTrackPCG`, `TempleRunPlayerVisuals`, `TempleRunGuiOverlay`, `TempleRunEnvironment`, `TempleRunSfx`, `TempleRunTrackVisuals`, `TempleRunCollectables`, `TempleRunObstacles`
 
 HUD elements visible in the image:
 - **Score (top-left):** `Score: 000000` – total distance-based score
@@ -389,16 +520,19 @@ HUD elements visible in the image:
 | Esc | End gameplay |
 
 **Hierarchy:** All TempleRun* scenes active:
-- `TempleRunGameplay` - `DistanceController`, `TurnController`
-- `TempleRunTrackPCG` - `TrackManager`, path segments
-- `TempleRunVisuals` - Player visual, track visuals
-- `TempleRunGuiOverlay` - HUD, score, timer
+- `TempleRunGameplay` - `DistanceController`, `TurnController`, `PlayerLifeController`
+- `TempleRunTrackPCG` - `TrackManager`, spline path segments
+- `TempleRunTrackVisuals` - Track mesh generation (SimplePlane / Voxels)
+- `TempleRunPlayerVisuals` - Player character visual and animations
+- `TempleRunObstacles` - `ObstacleSpawner` (full-width and lane barriers)
+- `TempleRunCollectables` - `CoinSpawner`, `PowerUpSpawner`, `CollectablesController`
+- `TempleRunGuiOverlay` - HUD (score, distance, timer) and Countdown overlay (`CountdownController`, `CountdownUIController`)
 - `TempleRunEnvironment` - Skybox, lighting
 - `TempleRunSfx` - Audio sources
 
 ---
 
-### Step 6: Player Failure
+### Step 7: Player Failure
 
 When the player fails (collision, missed turn, falls):
 - `PlayerFailed` event fires
@@ -415,7 +549,7 @@ PlayerFailRequested → PlayerFailing → PlayerFailed → Check Lives
 
 ---
 
-### Step 7: Game Over
+### Step 8: Game Over
 
 ![Game Over](docs/images/04_game_over.png)
 
@@ -432,7 +566,7 @@ When all lives are exhausted:
 
 ---
 
-### Step 8: Leaderboard
+### Step 9: Leaderboard
 
 ![Leaderboard](docs/images/05_leaderboard.png)
 
@@ -450,7 +584,7 @@ The Leaderboard automatically appears showing:
 
 ---
 
-### Step 9: Achievements
+### Step 10: Achievements
 
 ![Achievements](docs/images/06_achievements.png)
 
@@ -468,10 +602,10 @@ The Achievements panel displays earned and available achievements:
 
 ---
 
-### Step 10: Return to Main Menu
+### Step 11: Return to Main Menu
 
-After achievements auto-close (or manual close), returns to Main Menu. 
-- **Play** to start a new game
+After achievements auto-close (or manual close), returns to Main Menu.
+- **Play** to start a new game (goes to Level Selection — Step 4)
 - **Sign Out** returns to authentication (Step 2)
 
 ### Complete Flow Diagram (Windows)
@@ -498,6 +632,12 @@ After achievements auto-close (or manual close), returns to Main Menu.
          │ Play                            │
          ▼                                 │
 ┌─────────────────┐                        │
+│ Level Selection │                        │
+│ (choose level)  │                        │
+└────────┬────────┘                        │
+         │ Select                          │
+         ▼                                 │
+┌─────────────────┐                        │
 │   Countdown     │                        │
 │   3... 2... 1   │ ◄────────────────┐     │
 └────────┬────────┘                  │     │
@@ -510,14 +650,14 @@ After achievements auto-close (or manual close), returns to Main Menu.
          │ PlayerFailed    │         │     │
          ▼                 │         │     │
     ┌─────────┐            │         │     │
-    │ Lives?  │───Yes───-──┘         │     │
+    │ Lives?  │───Yes──────┘         │     │
     └────┬────┘                      │     │
          │ No                        │     │
          ▼                           │     │
 ┌─────────────────┐                  │     │
-│   Game Over     │──Retry (future)─-┘     │
+│   Game Over     │──Retry───────────┘     │
 │ Retry|Main Menu │───Main Menu───────────►│
-└─────────────────┘        (future )       │
+└─────────────────┘                        │
          │ auto                            │
          ▼                                 │
 ┌─────────────────┐                        │
@@ -553,19 +693,19 @@ The **Test_UGS_Windows** profile bypasses actual gameplay to focus on UGS integr
 ### Test_UGS_Windows Scene List
 
 ```
- 0  _Common/Test/Scenes/0_BootStrap_UGS_Only          ◄── Entry point
- 1  _Common/Test/Scenes/UGS_Boot_0_Test_Init_UGS_Only ◄── UGS init
- 2  _Common/Test/Scenes/DummyGame_Boot_0_Initialization ◄── Dummy game
- 3  GameFlow/Scenes/Boot/Game_Boot_0_Initialization
- 4  GameFlow/Scenes/Boot/Game_Boot_1_UI
- 5  GameFlow/Scenes/Boot/Game_Boot_2_Play
- 6  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig
- 7  UGS/Scenes/Boot/UGS_Boot_2_Authentication
- 8  UGS/Scenes/Boot/UGS_Boot_3_Achievements
- 9  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards
-10  UGS/Scenes/UGS/AchievementNotifications
-11  UGS/Scenes/UGS/Achievements
-12  UGS/Scenes/UGS/Leaderboards
+ 0  UGS/Scenes/Test/0_BootStrap_UGS_Only              ◄── Entry point
+ 1  UGS/Scenes/Boot/UGS_Boot_0_Initialization         ◄── UGS services init
+ 2  UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig           ◄── Remote Config
+ 3  UGS/Scenes/Boot/UGS_Boot_2_Authentication         ◄── Player sign-in
+ 4  UGS/Scenes/Boot/UGS_Boot_3_Achievements           ◄── Achievements system
+ 5  UGS/Scenes/Boot/UGS_Boot_4_Leaderboards           ◄── Leaderboards system
+ 6  UGS/Scenes/Test/DummyGame_Boot_0_Initialization   ◄── Dummy game (random score)
+ 7  GameFlow/Scenes/Boot/Game_Boot_1_UI               ◄── Main Menu, Level Selection, Game Over
+ 8  UGS/Scenes/Test/Test_SubmitScoreAndEnd            ◄── Auto-submits score and ends game
+ 9  UGS/Scenes/UGS/AchievementNotifications           ◄── In-game achievement toasts
+10  UGS/Scenes/UGS/Achievements                       ◄── Achievements UI panel
+11  UGS/Scenes/UGS/Leaderboards                       ◄── Leaderboards UI panel
+12  UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only    ◄── UGS init for test-only boot
 ```
 
 ---
@@ -605,7 +745,9 @@ Clicking Play triggers:
 - HUD appears: `Score: 000000` and timer `00:00`
 - Countdown overlay: 3... 2... 1...
 
-**Hierarchy:** `Overlay-Countdown` active, `HUD` visible
+The HUD and Countdown are rendered by the TempleRun domain (`CountdownUIController` in `TempleRunGuiOverlay`). In the DummyGame profile the gameplay scenes are not loaded, so the countdown fires from the dummy game's own event flow.
+
+**Hierarchy:** Countdown overlay and HUD driven by `DummyGame_Boot_0_Initialization` event sequence
 
 ---
 
@@ -747,19 +889,22 @@ The **Test_GameOnly_Windows** profile runs actual Temple Run gameplay **without*
 ### Scene List
 
 ```
- 0  Scenes/Boot/0_BootStrap                      ◄── Entry point
- 1  Scenes/Boot/Game_Boot_0_Initialization       ◄── Game config, RandomProvider
- 2  Scenes/Boot/Game_Boot_1_UI                   ◄── Main Menu, HUD, Overlays
- 3  Scenes/Boot/Game_Boot_2_Play                 ◄── Gameplay scene loader
- 4  Scenes/Game/TempleRunGameplay                ◄── Core gameplay model
- 5  Scenes/Game/TempleRunTrackPCG                ◄── Procedural track generation
- 6  Scenes/Game/TempleRunVisuals                 ◄── Visual representation
- 7  Scenes/Game/TempleRunGuiOverlay              ◄── Gameplay HUD
- 8  Scenes/Game/TempleRunEnvironment             ◄── Skybox, lighting
- 9  Scenes/Game/TempleRunSfx                     ◄── Sound effects
+ 0  GameFlow/Scenes/Boot/0_BootStrap_Game_Only           ◄── Entry point (UGS disabled)
+ 1  GameFlow/Scenes/Boot/Game_Boot_0_Test_Initialization ◄── Game config, RandomProvider
+ 2  GameFlow/Scenes/Boot/Game_Boot_1_UI                  ◄── Main Menu, Level Selection, Game Over
+ 3  GameFlow/Scenes/Boot/Game_Boot_2_Play                ◄── Gameplay scene loader
+ 4  TempleRun/Scenes/Gameplay/TempleRunCollectables      ◄── Coins and power-up spawning
+ 5  TempleRun/Scenes/Gameplay/TempleRunEnvironment       ◄── Skybox, lighting
+ 6  TempleRun/Scenes/Gameplay/TempleRunGameplay          ◄── Core gameplay logic (distance, lives)
+ 7  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay        ◄── Gameplay HUD and Countdown overlay
+ 8  TempleRun/Scenes/Gameplay/TempleRunObstacles         ◄── Obstacle spawning
+ 9  TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals     ◄── Player visual representation
+10  TempleRun/Scenes/Gameplay/TempleRunSfx               ◄── Sound effects
+11  TempleRun/Scenes/Gameplay/TempleRunTrackPCG          ◄── Procedural track generation
+12  TempleRun/Scenes/Gameplay/TempleRunTrackVisuals      ◄── Track visual meshes
 ```
 
-> **Note:** UGS scenes (4-11 from Windows profile) are not loaded.
+> **Note:** UGS scenes are not loaded. Authentication is skipped and leaderboards/achievements are unavailable.
 
 ---
 
@@ -785,7 +930,7 @@ Authentication is bypassed entirely:
 
 ### Step 3: Countdown → Gameplay
 
-Same flow as [Windows Steps 4-6](#step-4-countdown) but without UGS event handlers:
+Same flow as [Windows Steps 5-6](#step-5-countdown) but without UGS event handlers and without Level Selection:
 - Countdown: 3... 2... 1...
 - Gameplay starts with full Temple Run mechanics
 - Score tracked locally only
@@ -837,13 +982,13 @@ After Game Over, player can:
          │                                 │
          ▼                                 │
 ┌─────────────────┐                        │
-│    Gameplay     │◄───────┐         ┌────┘
+│    Gameplay     │◄───────┐         ┌─────┘
 │  (Temple Run)   │        │         │
 └────────┬────────┘        │         │
          │ PlayerFailed    │         │
          ▼                 │         │
     ┌─────────┐            │         │
-    │ Lives?  │───Yes─────┘         │
+    │ Lives?  │───Yes──────┘         │
     └────┬────┘                      │
          │ No                        │
          ▼                           │
@@ -904,8 +1049,9 @@ RunnerUGSTemplate/
 │   │   │   ├── Input/                    # MovementInputActions, DashInputActions, PauseQuitInputActions, LeftRightJumpSlide
 │   │   │   └── Audio/                    # TurnAudioFeedback, Metronome, SetMusicPlayer
 │   │   ├── Scenes/
-│   │   │   └── Gameplay/                 # TempleRunGameplay, TempleRunPlayerVisuals, TempleRunEnvironment
-│   │   │                                 # TempleRunTrackPCG, TempleRunTrackVisuals, TempleRunGuiOverlay, TempleRunSfx
+│   │   │   └── Gameplay/                 # TempleRunGameplay, TempleRunTrackPCG, TempleRunTrackVisuals
+│   │   │                                 # TempleRunPlayerVisuals, TempleRunObstacles, TempleRunCollectables
+│   │   │                                 # TempleRunGuiOverlay, TempleRunEnvironment, TempleRunSfx
 │   │   ├── Graphics/                     # Models, Textures, Materials, Shaders, VFX, Animations
 │   │   ├── Audio/                        # Gameplay music and SFX
 │   │   ├── Prefabs/                      # Gameplay prefabs
@@ -1005,11 +1151,6 @@ UGS_Boot_0_Test_Init_UGS_Only
     └── Load_Leaderboards
 
 DummyGame_Boot_0_Initialization
-├── Global
-│   ├── Blackboard
-│   ├── RandomProvider
-│   └── EventsPublisher_TempleRun
-├── LoadGameUI
 └── DummyGame
 
 UGS_Boot_1_RemoteConfig
@@ -1037,8 +1178,7 @@ UGS_Boot_4_Leaderboards
 Game_Boot_1_UI
 └── UIRoot
     ├── MainMenu
-    ├── HUD
-    ├── Overlay-Countdown
+    ├── LevelSelection
     ├── Overlay-GameOver
     ├── Feedback
     ├── LoadingPanel
@@ -1128,7 +1268,7 @@ During play, you can:
 
 1. **Anonymous** - Auto-generated player name (e.g., "AdmirableSparklingTriangle#1")
 2. **Unity Player Account** - Google, Apple, or email sign-in (Unity-managed)
-3. **Username/Password** - Developer-managed credentials
+3. **Username/Password** - Unity / Developer-managed credentials
 
 ### Leaderboard Configuration
 
@@ -1209,20 +1349,22 @@ Achievements are defined in `Assets/Blocks/Achievements/Deployment/Achievements.
 
 - [ ] **Main Menu**: Customize title, add logo
 - [ ] **Credits Screen**: Data-driven, track third-party assets
-- [ ] **Game Over Panel**: Wire up Retry/Main Menu buttons
+- [ ] **Game Over Panel**: Wire up Retry/Main Menu buttons fully
 - [ ] **Settings Panel**: Audio, graphics options
 - [ ] **Localization**: Set up string tables
 
 ### Gameplay Features
 
 - [x] **Lane System**: Three-lane movement with configurable lane width
-- [x] **Obstacles**: Full-width (jump) and lane-specific (slide/dodge) barriers
+- [x] **Obstacles**: Full-width (jump) and lane-specific (slide/dodge) barriers (`TempleRunObstacles` scene)
 - [x] **Jump Mechanics**: Arc-based jumping with configurable height/duration
 - [x] **Slide Mechanics**: Event-driven slide with cooldown
 - [x] **Dash Mechanics**: Speed boost with duration/cooldown config
 - [x] **Player Animations**: Lean (left/right), jump, slide, and dash animations
-- [ ] **Collectibles**: Coins, power-ups
-- [ ] **Difficulty Progression**: Use Remote Config
+- [x] **Collectibles**: Coins (`CoinSpawner`, `CoinCollectionController`) and power-ups (`PowerUpSpawner`) in `TempleRunCollectables` scene
+- [x] **Level Selection**: `LevelSelectorPanelController`, `LevelRegistry`, `LevelConfig` ScriptableObjects, `DynamicLevelSceneLoader`
+- [x] **HUD and Countdown**: `CountdownController`, `CountdownUIController` in `TempleRunGuiOverlay` (TempleRun domain)
+- [ ] **Difficulty Progression**: Wire `LevelConfig` values through to Remote Config
 
 ### UGS Features
 
@@ -1257,7 +1399,7 @@ void OnTriggerEnter(Collider col) {
 
 ### Avoid "PlayerController" Anti-Pattern
 
-> "Do not call a class PlayerController unless it is an empty shell that delegates all of its work."
+> "Do not name a class PlayerController unless it is an empty shell that delegates all of its work."
 
 Split responsibilities:
 - `TurnController` - Handle turn requests
@@ -1285,8 +1427,9 @@ private static readonly Direction CrossSection = Direction.N | Direction.W | Dir
 
 Be aware of hidden dependencies:
 - Speed assumptions in gameplay code
+- Automatic turn and progress after failing at a turn.
 - Art asset size assumptions (`bounds.size`)
-- Force designers to provide data you need
+   - Force designers to provide data you need
 
 ---
 
@@ -1308,7 +1451,7 @@ EventsPublisherTempleRun.Instance.SubscribeToEvent(
 
 **Advantages:**
 - ✅ Single-responsibility: Animation state is co-located with the events that trigger it
-- ✅ No separate scene: Animations load with gameplay
+- ✅ No separate scene: Animations load with the Player Visuals scene (`TempleRunPlayerVisuals.unity`)
 - ✅ Easy to debug: Event logs show animation triggers
 - ✅ Event-system compliant: Follows the domain isolation rule
 - ✅ Scalable: Each new animation type (jump, slide, dash) can have its own event listener or extend `CapsuleAnimationLink`
@@ -1591,7 +1734,6 @@ You can copy, modify, distribute, and perform the work, even for commercial purp
 
 ## Acknowledgments
 
-- **Roger Crawfis** - Original Temple Run programming framework, OSU CSE 5912
+- **Roger Crawfis** - Original Temple Run programming framework
 - **Unity Technologies** - Building Blocks and UGS SDKs
-- **samyam** - YouTube tutorials that inspired the art-free approach
 - **CSE 5912 Capstone Students** - Ongoing refinement and feedback

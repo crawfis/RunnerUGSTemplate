@@ -397,7 +397,9 @@ Assets/
 │   │   ├── Input/                    # MovementInputActions, SwipeDetectorActions
 │   │   └── Audio/                    # TurnAudioFeedback, Metronome
 │   ├── Scenes/
-│   │   └── Gameplay/                 # Gameplay scenes (TempleRunGameplay, etc.)
+│   │   └── Gameplay/                 # TempleRunGameplay, TempleRunTrackPCG, TempleRunTrackVisuals
+│   │                                 # TempleRunPlayerVisuals, TempleRunObstacles, TempleRunCollectables
+│   │                                 # TempleRunGuiOverlay, TempleRunEnvironment, TempleRunSfx
 │   ├── Graphics/                     # Models, Textures, Materials, Shaders, VFX, Animations
 │   ├── Audio/                        # Gameplay music and SFX
 │   ├── Prefabs/                      # Gameplay prefabs
