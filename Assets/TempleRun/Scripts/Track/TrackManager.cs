@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -21,11 +22,16 @@ namespace CrawfisSoftware.TempleRun
     public class TrackManager : TrackManagerAbstract
     {
         [SerializeField] int _numberOfLookAheadTracks = 12;
-        protected Queue<(Direction direction, float distance)> _trackSegments;
+        [SerializeField] private TextAsset _trackSegmentLibraryJson;
+
+        protected Queue<TrackSegmentInfo> _trackSegments;
         protected float _startDistance = 10f;
         protected float _minDistance = 3;
         protected float _maxDistance = 9;
         protected System.Random _random;
+        private TrackSegmentLibrary _segmentLibrary;
+        private string _lastSegmentId;
+        private int _lastSegmentRepeatCount;
         private bool _isInitialized = false;
 
         protected virtual void Awake()
@@ -82,6 +88,12 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
+            if (_trackSegmentLibraryJson == null)
+            {
+                _trackSegmentLibraryJson = Resources.Load<TextAsset>("TrackSegments");
+            }
+
+            _segmentLibrary = TrackSegmentLibrary.LoadFromJson(_trackSegmentLibraryJson?.text);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
         }
@@ -89,7 +101,7 @@ namespace CrawfisSoftware.TempleRun
         protected virtual void CreateInitialTrack()
         {
             _maxDistance = Mathf.Max(_minDistance, _maxDistance);
-            var newTrackSegment = (GetNewDirection(), _startDistance);
+            var newTrackSegment = CreateTrackSegment(isStartSegment: true);
             _trackSegments.Enqueue(newTrackSegment);
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
             for (int i = 1; i < _numberOfLookAheadTracks; i++)
@@ -106,10 +118,54 @@ namespace CrawfisSoftware.TempleRun
 
         protected virtual void AddTrackSegment()
         {
-            float segmentLength = GetNewSegmentLength();
-            var newTrackSegment = (GetNewDirection(), segmentLength);
+            var newTrackSegment = CreateTrackSegment(isStartSegment: false);
             _trackSegments.Enqueue(newTrackSegment);
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
+        }
+
+        protected virtual TrackSegmentInfo CreateTrackSegment(bool isStartSegment)
+        {
+            if (_segmentLibrary != null)
+            {
+                var segmentDefinition = isStartSegment
+                    ? _segmentLibrary.GetStartSegment(_random)
+                    : _segmentLibrary.SelectNext(_lastSegmentId, _lastSegmentRepeatCount, _random);
+
+                if (segmentDefinition != null)
+                {
+                    UpdateRepeatTracking(segmentDefinition.Id);
+                    var direction = ParseDirection(segmentDefinition.Direction, GetNewDirection());
+                    return new TrackSegmentInfo(segmentDefinition.Id, direction.ToString(), (int)direction, segmentDefinition.Length);
+                }
+            }
+
+            float segmentLength = isStartSegment ? _startDistance : GetNewSegmentLength();
+            var fallbackDirection = GetNewDirection();
+            return new TrackSegmentInfo("random", fallbackDirection.ToString(), (int)fallbackDirection, segmentLength);
+        }
+
+        private static Direction ParseDirection(string directionValue, Direction fallback)
+        {
+            if (!string.IsNullOrWhiteSpace(directionValue) && Enum.TryParse(directionValue, true, out Direction parsed))
+            {
+                return parsed;
+            }
+
+            return fallback;
+        }
+
+
+        private void UpdateRepeatTracking(string segmentId)
+        {
+            if (string.Equals(_lastSegmentId, segmentId, System.StringComparison.Ordinal))
+            {
+                _lastSegmentRepeatCount++;
+            }
+            else
+            {
+                _lastSegmentId = segmentId;
+                _lastSegmentRepeatCount = 1;
+            }
         }
 
         protected virtual float GetNewSegmentLength()

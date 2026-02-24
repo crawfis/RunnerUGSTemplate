@@ -1,5 +1,3 @@
-using CrawfisSoftware.Events;
-using CrawfisSoftware.GameFlow.Events;
 using CrawfisSoftware.TempleRun;
 using CrawfisSoftware.UGS;
 using CrawfisSoftware.UGS.Events;
@@ -11,7 +9,7 @@ using UnityEngine;
 
 namespace CrawfisSoftware.GameFlow.Events
 {
-    internal class TempleRunGameFlowBridge : AutoEventFlowBase
+    internal class TempleRunGameFlowBridge : MonoBehaviour
     {
         private Dictionary<TempleRunEvents, GameFlowEvents> _autoTempleRun2GameFlowEvents = new Dictionary<TempleRunEvents, GameFlowEvents>()
         {
@@ -64,16 +62,25 @@ namespace CrawfisSoftware.GameFlow.Events
 
         private void AutoFireGameFlowEventFromTempleRunEvent(string eventName, object sender, object data)
         {
-            if (_autoTempleRun2GameFlowEvents.TryGetValue((TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), eventName), out GameFlowEvents autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            TempleRunEvents templeRunEvent = (TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), result);
+            if (_autoTempleRun2GameFlowEvents.TryGetValue(templeRunEvent, out GameFlowEvents autoEvent))
             {
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherGameFlow.Instance.PublishEvent(autoEvent, sender, data);
             }
         }
 
         private void AutoFireUGSEventFromTempleRunEvent(string eventName, object sender, object data)
         {
-            if (EventsPublisherUGS.Instance == null) return;
-            if (_autoTempleRun2UGSEvents.TryGetValue((TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), eventName), out UGS_EventsEnum autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            TempleRunEvents templeRunEvent = (TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), result);
+            if (_autoTempleRun2UGSEvents.TryGetValue(templeRunEvent, out UGS_EventsEnum autoEvent))
             {
                 EventsPublisherUGS.Instance.PublishEvent(autoEvent, sender, data);
             }
@@ -81,9 +88,14 @@ namespace CrawfisSoftware.GameFlow.Events
 
         private void AutoFireTempleRunEventFromGameFlowEvent(string eventName, object sender, object data)
         {
-            if (_autoGameFlow2TempleRunEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out TempleRunEvents autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            GameFlowEvents gameflowEvent = (GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), result);
+            if (_autoGameFlow2TempleRunEvents.TryGetValue(gameflowEvent, out TempleRunEvents autoEvent))
             {
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherTempleRun.Instance.PublishEvent(autoEvent, this, data);
             }
         }
     }

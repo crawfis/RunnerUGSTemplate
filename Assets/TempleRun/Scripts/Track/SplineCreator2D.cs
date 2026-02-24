@@ -88,10 +88,11 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnTrackCreated(string eventName, object sender, object data)
         {
-            var (direction, segmentDistance) = ((Direction direction, float segmentDistance))data;
-            CreateSplineSegment(segmentDistance, direction);
+            var trackSegment = (TrackSegmentInfo)data;
+            var turnDirection = (Direction)trackSegment.TurnDirectionValue;
+            CreateSplineSegment(trackSegment.Length, turnDirection);
             _anchorPoint -= Blackboard.Instance.TrackWidthOffset * _directionAxes[_directionIndex];
-            switch (direction)
+            switch (turnDirection)
             {
                 case Direction.Left: TurnLeft(); break;
                 case Direction.Right: TurnRight(); break;

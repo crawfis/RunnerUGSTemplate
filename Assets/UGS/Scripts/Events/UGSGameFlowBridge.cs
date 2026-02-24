@@ -4,6 +4,8 @@ using CrawfisSoftware.GameFlow.Events;
 using System;
 using System.Collections.Generic;
 
+using UnityEngine;
+
 namespace CrawfisSoftware.UGS.Events
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace CrawfisSoftware.UGS.Events
     /// [BRIDGE] GameEnding -> ScoreUpdating
     /// [BRIDGE] GameEnded -> LeaderboardOpening
     /// </summary>
-    internal class UGSGameFlowBridge : AutoEventFlowBase
+    internal class UGSGameFlowBridge : MonoBehaviour
     {
         private Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
         {
@@ -55,17 +57,27 @@ namespace CrawfisSoftware.UGS.Events
 
         private void AutoFireGameFlowEventFromUGSEvent(string eventName, object sender, object data)
         {
-            if (_autoUGS2GameFlowEvents.TryGetValue((UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName), out GameFlowEvents autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            UGS_EventsEnum uGS_Event = Enum.Parse<UGS_EventsEnum>(result);
+            if (_autoUGS2GameFlowEvents.TryGetValue(uGS_Event, out GameFlowEvents autoEvent))
             {
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherGameFlow.Instance.PublishEvent(autoEvent, sender, data);
             }
         }
 
         private void AutoFireUGSEventFromGameFlowEvent(string eventName, object sender, object data)
         {
-            if (_autoGameFlow2UGSEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out UGS_EventsEnum autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            GameFlowEvents gameFlowEvent = Enum.Parse<GameFlowEvents>(result);
+            if (_autoGameFlow2UGSEvents.TryGetValue(gameFlowEvent, out UGS_EventsEnum autoEvent))
             {
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherUGS.Instance.PublishEvent(autoEvent, sender, data); 
             }
         }
     }

@@ -328,7 +328,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
   _sceneName: Game_Boot_0_Initialization
   _loadadditively: 1
-  _eventToListenTo: RemoteConfigUpdated
+  _eventToListenTo: UGS_EventsEnum/RemoteConfigUpdated
   _delayInSeconds: 0
 --- !u!1 &1139485616
 GameObject:

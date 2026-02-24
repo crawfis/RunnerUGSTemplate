@@ -1,9 +1,14 @@
 using CrawfisSoftware.Events;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using Unity.Services.Core;
+
+using UnityEditor.Localization.Plugins.XLIFF.V20;
+
+using UnityEngine;
 
 namespace CrawfisSoftware.UGS.Events
 {
@@ -45,8 +50,9 @@ namespace CrawfisSoftware.UGS.Events
     /// ========================================================================================
     /// </summary>
 
-    internal class UGSAutoEventFlow : AutoEventFlowBase
+    internal class UGSAutoEventFlow : MonoBehaviour // AutoEventFlowBase
     {
+        [SerializeField] protected float _delayBetweenEvents = 0f;
         private Dictionary<UGS_EventsEnum, UGS_EventsEnum> _autoUGS2UGSEvents = new Dictionary<UGS_EventsEnum, UGS_EventsEnum>()
         {
             // --- Initialization / boot ---
@@ -107,16 +113,36 @@ namespace CrawfisSoftware.UGS.Events
         {
             if (UnityServices.State == ServicesInitializationState.Initialized)
             {
-                DelayedFire(0, UGS_EventsEnum.UnityServicesInitialized.ToString(), this, null);
+                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.UnityServicesInitialized, this, null);
             }
         }
 
         private void AutoFireUGSEventFromUGSEvent(string eventName, object sender, object data)
         {
-            if (_autoUGS2UGSEvents.TryGetValue((UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName), out UGS_EventsEnum autoEvent))
+            int lastSlashIndex = eventName.LastIndexOf('/');
+            // Use the range operator [startIndex..] to get the substring from the index + 1 to the end
+            string eventNameTrimmed = eventName[(lastSlashIndex + 1)..];
+            UGS_EventsEnum eventEnum = (UGS_EventsEnum) Enum.Parse(typeof(UGS_EventsEnum), eventNameTrimmed);
+            if (_autoUGS2UGSEvents.TryGetValue(eventEnum, out UGS_EventsEnum autoEvent))
             {
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherUGS.Instance.PublishEvent(autoEvent, this, data);
+                //DelayedFire(_delayBetweenEvents, autoEvent, sender, data);
             }
         }
+        //protected void DelayedFire(float delayBetweenEvents, UGS_EventsEnum autoEvent, object sender, object data)
+        //{
+        //    if (delayBetweenEvents <= 0)
+        //    {
+        //        EventsPublisherUGS.Instance.PublishEvent(autoEvent, this, data);
+        //        return;
+        //    }
+        //    StartCoroutine(DelayPublishingNextAutoEvent(delayBetweenEvents, autoEvent, sender, data));
+        //}
+
+        //private IEnumerator DelayPublishingNextAutoEvent(float delay, UGS_EventsEnum autoEvent, object sender, object data)
+        //{
+        //    yield return new WaitForSeconds(delay);
+        //    EventsPublisherUGS.Instance.PublishEvent(autoEvent, this, data);
+        //}
     }
 }
