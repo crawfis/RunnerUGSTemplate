@@ -6,13 +6,13 @@ using UnityEngine;
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Provides new track distance for each turn. It publishes a new track segment 
+    /// Provides new track distance for each turn. It publishes a new track segment
     ///       when needed (either to create visuals or to determine the currently active track).
-    ///    Dependencies: EventsPublisherTempleRun and (currently) BlackBoard.GameConfig, Blackboard.MasterRandom
-    ///        The Blackboard can be removed my having GameController create this instance and passing in data to the constructor.
+    ///    Dependencies: EventsPublisherTempleRun, Blackboard.GameConfig, Blackboard.MasterRandom,
+    ///                  Blackboard.TrackLevelDefinition (set by level selection)
     ///    Subscribes to the Turn Succeeded events (LeftTurnSucceeded, RightTurnSucceeded)
-    ///    Publishes: TrackSegmentCreated. Useful for creating prefabs. Several of these will be created at the start. Data is a tuple (Direction, distance)
-    ///    Publishes: ActiveTrackChanging. The track that we are transitioning to. Data is a tuple (Direction, distance)
+    ///    Publishes: TrackSegmentCreated. Useful for creating prefabs. Several of these will be created at the start. Data is a TrackSegmentInfo
+    ///    Publishes: ActiveTrackChanging. The track that we are transitioning to. Data is a TrackSegmentInfo
     /// </summary>
     /// <remarks> Obstacle and gap distances should be in a separate class(es).
     /// Random distances (_random) could be replaced with a list of possible distances, but a better / cleaner solution would
@@ -23,7 +23,6 @@ namespace CrawfisSoftware.TempleRun
     {
         [SerializeField] int _numberOfLookAheadTracks = 12;
         [SerializeField] private TextAsset _trackSegmentLibraryJson;
-        [SerializeField] private string _levelResourcePath;  // e.g., "TrackLevel_01_Beginner"
 
         protected Queue<TrackSegmentInfo> _trackSegments;
         protected float _startDistance = 10f;
@@ -89,10 +88,18 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
-            // Try level-based loading (two-file split: level + registry)
-            if (!string.IsNullOrWhiteSpace(_levelResourcePath))
+
+            // Build runtime library from Blackboard's level definition + registry
+            var levelDef = Blackboard.Instance.TrackLevelDefinition;
+            if (levelDef != null)
             {
-                _segmentLibrary = TrackSegmentLibrary.LoadFromResources(_levelResourcePath);
+                string registryJson = null;
+                if (!string.IsNullOrWhiteSpace(levelDef.SegmentRegistryFile))
+                {
+                    var registryAsset = Resources.Load<TextAsset>(levelDef.SegmentRegistryFile);
+                    registryJson = registryAsset?.text;
+                }
+                _segmentLibrary = TrackSegmentLibrary.LoadFromDefinition(levelDef, registryJson);
             }
 
             // Fall back to single-file loading (legacy / inspector-assigned TextAsset)
