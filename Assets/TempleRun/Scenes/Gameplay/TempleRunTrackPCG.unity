@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &9013853
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9013854}
+  m_Layer: 0
+  m_Name: TrackSegmentManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9013854
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9013853}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 494007424}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &226459355
 GameObject:
   m_ObjectHideFlags: 0
@@ -164,6 +195,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _numberOfLookAheadTracks: 2
+  _trackSegmentLibraryJson: {fileID: 0}
+  _levelResourcePath: 
   _validTrackLengths: {fileID: 11400000, guid: ce92da35dc02cf1408d67a368d202999, type: 2}
 --- !u!1 &494007423
 GameObject:
@@ -197,6 +230,7 @@ Transform:
   - {fileID: 1839240074}
   - {fileID: 1009615617}
   - {fileID: 226459356}
+  - {fileID: 9013854}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1009615616
@@ -243,7 +277,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bf893c918aab54799322dadc80fd11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _numberOfLookAheadTracks: 12
+  _numberOfLookAheadTracks: 2
+  _trackSegmentLibraryJson: {fileID: 4900000, guid: f702e72e0d2c3fb4f834db0c35b24844,
+    type: 3}
+  _levelResourcePath: TrackLevel_05_Expert
 --- !u!1 &1283783014
 GameObject:
   m_ObjectHideFlags: 0
@@ -319,6 +356,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _numberOfLookAheadTracks: 12
+  _trackSegmentLibraryJson: {fileID: 4900000, guid: f702e72e0d2c3fb4f834db0c35b24844,
+    type: 3}
+  _levelResourcePath: TrackLevel_03_Medium
 --- !u!4 &1839240074
 Transform:
   m_ObjectHideFlags: 0
