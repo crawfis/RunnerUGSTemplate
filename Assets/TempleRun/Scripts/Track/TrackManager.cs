@@ -23,6 +23,7 @@ namespace CrawfisSoftware.TempleRun
     {
         [SerializeField] int _numberOfLookAheadTracks = 12;
         [SerializeField] private TextAsset _trackSegmentLibraryJson;
+        [SerializeField] private string _levelResourcePath;  // e.g., "TrackLevel_01_Beginner"
 
         protected Queue<TrackSegmentInfo> _trackSegments;
         protected float _startDistance = 10f;
@@ -88,12 +89,21 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
-            if (_trackSegmentLibraryJson == null)
+            // Try level-based loading (two-file split: level + registry)
+            if (!string.IsNullOrWhiteSpace(_levelResourcePath))
             {
-                _trackSegmentLibraryJson = Resources.Load<TextAsset>("TrackSegments");
+                _segmentLibrary = TrackSegmentLibrary.LoadFromResources(_levelResourcePath);
             }
 
-            _segmentLibrary = TrackSegmentLibrary.LoadFromJson(_trackSegmentLibraryJson?.text);
+            // Fall back to single-file loading (legacy / inspector-assigned TextAsset)
+            if (_segmentLibrary == null)
+            {
+                if (_trackSegmentLibraryJson == null)
+                {
+                    _trackSegmentLibraryJson = Resources.Load<TextAsset>("TrackSegments");
+                }
+                _segmentLibrary = TrackSegmentLibrary.LoadFromJson(_trackSegmentLibraryJson?.text);
+            }
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
         }
