@@ -167,6 +167,19 @@ namespace CrawfisSoftware.TempleRun
         }
 
         /// <summary>
+        /// Build a runtime library from an already-deserialized level definition.
+        /// If registryJson is provided and levelDef has no Segments, merges from registry.
+        /// </summary>
+        public static TrackSegmentLibrary LoadFromDefinition(
+            TrackSegmentLibraryDefinition levelDef, string registryJson = null)
+        {
+            if (levelDef == null) return null;
+            if (!string.IsNullOrWhiteSpace(registryJson) && levelDef.Segments.Count == 0)
+                MergeRegistrySegments(levelDef, registryJson);
+            return new TrackSegmentLibrary(levelDef);
+        }
+
+        /// <summary>
         /// Load a level from Unity Resources. If the level definition specifies a
         /// SegmentRegistryFile, that registry is automatically loaded and merged.
         /// Example: LoadFromResources("TrackLevel_01_Beginner")

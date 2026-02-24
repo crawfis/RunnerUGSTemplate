@@ -68,6 +68,7 @@
         GameConfigApplying = 81,
         GameConfigApplied = 82,
         GameConfigApplyFailed = 83,
+        TrackConfigApplied = 85,              // data: string (Resources path of track level JSON)
 
         DifficultyChangeRequested = 90,
         DifficultyChanging = 91,

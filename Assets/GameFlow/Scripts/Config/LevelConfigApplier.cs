@@ -5,12 +5,11 @@ using UnityEngine;
 namespace CrawfisSoftware.GameFlow.Config
 {
     /// <summary>
-    /// Applies the selected level's DifficultyConfig to the game config pipeline.
-    /// Bridges level selection to the existing difficulty system by publishing
-    /// GameConfigApplied, which is already bridged to TempleRunConfigApplied
-    /// via TempleRunGameFlowBridge.
+    /// Applies the selected level's configuration to the game config pipeline.
+    /// Bridges level selection to both the difficulty system and track generation.
     ///    Subscribes: GameFlowEvents.LevelSelected
     ///    Publishes: GameFlowEvents.GameConfigApplied (data: DifficultyConfig)
+    ///    Publishes: GameFlowEvents.TrackConfigApplied (data: string trackLevelResourcePath)
     /// </summary>
     internal class LevelConfigApplier : MonoBehaviour
     {
@@ -29,11 +28,16 @@ namespace CrawfisSoftware.GameFlow.Config
         private void OnLevelSelected(string eventName, object sender, object data)
         {
             var levelConfig = data as LevelConfig;
-            if (levelConfig?.Difficulty != null)
+            if (levelConfig == null) return;
+
+            if (levelConfig.Difficulty != null)
             {
                 EventsPublisherGameFlow.Instance.PublishEvent(
                     GameFlowEvents.GameConfigApplied, this, levelConfig.Difficulty);
             }
+
+            EventsPublisherGameFlow.Instance.PublishEvent(
+                GameFlowEvents.TrackConfigApplied, this, levelConfig.TrackLevelResourcePath);
         }
     }
 }

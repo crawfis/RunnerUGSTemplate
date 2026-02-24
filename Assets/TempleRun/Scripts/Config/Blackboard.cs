@@ -13,7 +13,8 @@ namespace CrawfisSoftware.TempleRun
     /// TempleRun-domain singleton holding gameplay state.
     ///    Dependencies: None
     ///    Subscribes: TempleRunEvents.TempleRunConfigApplied (bridged from GameFlow)
-    ///    Subscribes: TempleRunEvents.TempleRunDifficultyChanged (bridged from GameFlow)
+    ///    Subscribes: TempleRunEvents.TempleRunDifficultyChanging (bridged from GameFlow)
+    ///    Subscribes: TempleRunEvents.TempleRunTrackConfigApplied (bridged from GameFlow)
     /// </summary>
     public class Blackboard : MonoBehaviour
     {
@@ -55,6 +56,9 @@ namespace CrawfisSoftware.TempleRun
         // ---------- Coin State ----------
         public CoinConfig CoinConfig { get => _coinConfig; set => _coinConfig = value; }
         public int SessionCoinCount { get; set; } = 0;
+
+        // ---------- Track Level ----------
+        public TrackSegmentLibraryDefinition TrackLevelDefinition { get; set; }
 
         // ---------- Power-Up / Buff State ----------
         public float ActiveSpeedMultiplier { get; set; } = 1.0f;    // Applied by SpeedBoost power-up
@@ -103,6 +107,7 @@ namespace CrawfisSoftware.TempleRun
             CoinMagnetActive = false;
             CoinMagnetRadius = 0f;
             ShieldActive = false;
+            TrackLevelDefinition = null;
         }
 
         private void OnConfigApplied(string eventName, object sender, object data)
@@ -116,6 +121,27 @@ namespace CrawfisSoftware.TempleRun
             }
         }
 
+        private void OnTrackConfigApplied(string eventName, object sender, object data)
+        {
+            string trackLevelPath = data as string;
+            if (!string.IsNullOrWhiteSpace(trackLevelPath))
+            {
+                var asset = Resources.Load<TextAsset>(trackLevelPath);
+                TrackLevelDefinition = asset != null
+                    ? JsonUtility.FromJson<TrackSegmentLibraryDefinition>(asset.text)
+                    : null;
+                if (TrackLevelDefinition != null)
+                    Debug.Log($"Blackboard: TrackLevelDefinition loaded from '{trackLevelPath}' " +
+                              $"(Level: {TrackLevelDefinition.LevelName}, Segments: {TrackLevelDefinition.Segments.Count})");
+                else
+                    Debug.LogWarning($"Blackboard: Failed to load track level from '{trackLevelPath}'");
+            }
+            else
+            {
+                TrackLevelDefinition = null;
+            }
+        }
+
         private void OnGameEnded(string eventName, object sender, object data)
         {
             ResetState();
@@ -126,6 +152,7 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunEnded, OnGameEnded);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunDifficultyChanging, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunTrackConfigApplied, OnTrackConfigApplied);
         }
 
         private void UnsubscribeToEvents()
@@ -133,6 +160,7 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunEnded, OnGameEnded);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunDifficultyChanging, OnConfigApplied);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunTrackConfigApplied, OnTrackConfigApplied);
         }
 
 #if UNITY_EDITOR

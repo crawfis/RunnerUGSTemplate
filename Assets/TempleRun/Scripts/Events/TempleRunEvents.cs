@@ -142,6 +142,7 @@
         // ---------- Bridged from GameFlow ----------
         TempleRunConfigApplied = 300,
         TempleRunScenesReady = 302,
+        TempleRunTrackConfigApplied = 304,    // data: string (Resources path of track level JSON)
 
         // ---------- Difficulty (bridged to/from GameFlow) ----------
         TempleRunDifficultySettingsApplied = 310,
