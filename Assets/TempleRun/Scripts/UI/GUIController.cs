@@ -43,9 +43,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnTrackChanging(string EventName, object sender, object data)
         {
-            (Direction direction, float distance) = ((Direction, float))data;
-            _nextTrackDirection = direction;
-            _trackDistance += distance;
+            var trackSegment = (TrackSegmentInfo)data;
+            _nextTrackDirection = (Direction)trackSegment.TurnDirectionValue;
+            _trackDistance += trackSegment.Length;
         }
 
         private void OnDestroy()

@@ -70,9 +70,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnTrackChanging(string eventName, object sender, object data)
         {
-            var (direction, segmentDistance) = ((Direction direction, float segmentDistance))data;
-            _nextTrackDirection = direction;
-            _trackDistance += segmentDistance;
+            var trackSegment = (TrackSegmentInfo)data;
+            _nextTrackDirection = (Direction)trackSegment.TurnDirectionValue;
+            _trackDistance += trackSegment.Length;
             _turnAvailableDistance = _trackDistance - _safeTurnDistance;
         }
 

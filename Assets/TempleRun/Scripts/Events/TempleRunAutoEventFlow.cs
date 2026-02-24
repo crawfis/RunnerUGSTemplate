@@ -1,5 +1,3 @@
-using CrawfisSoftware.Events;
-
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +9,7 @@ namespace CrawfisSoftware.TempleRun.Events
     /// Auto-chain TempleRun-specific events. Keep this focused on TempleRun internal lifecycles;
     /// cross-system bridges live in TempleRunGameFlowBridge.
     /// </summary>
-    internal class TempleRunAutoEventFlow : AutoEventFlowBase
+    internal class TempleRunAutoEventFlow : MonoBehaviour
     {
         [SerializeField] private Dictionary<TempleRunEvents, TempleRunEvents> _autoTempleRun2TempleRunEvents = new Dictionary<TempleRunEvents, TempleRunEvents>()
         {
@@ -111,10 +109,14 @@ namespace CrawfisSoftware.TempleRun.Events
 
         private void AutoFireTempleRunEventFromTempleRunEvent(string eventName, object sender, object data)
         {
-            if (_autoTempleRun2TempleRunEvents.TryGetValue((TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), eventName), out TempleRunEvents autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            TempleRunEvents templeRunEvent = (TempleRunEvents)Enum.Parse(typeof(TempleRunEvents), result);
+            if (_autoTempleRun2TempleRunEvents.TryGetValue(templeRunEvent, out TempleRunEvents autoEvent))
             {
-                //Debug.Log($"Auto firing event TempleRunEvents.{eventName} to TempleRunEvents.{autoEvent.ToString()}");
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherTempleRun.Instance.PublishEvent(autoEvent, sender, data);
             }
         }
     }

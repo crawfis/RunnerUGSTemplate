@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun.Events
 {
-    internal class Input2TempleRunAutoEventBridge : AutoEventFlowBase
+    internal class Input2TempleRunAutoEventBridge : MonoBehaviour
     {
         private Dictionary<UserInitiatedEvents, TempleRunEvents> _autoUserInitiated2TempleRunEvents = new Dictionary<UserInitiatedEvents, TempleRunEvents>()
         {
@@ -31,10 +31,14 @@ namespace CrawfisSoftware.TempleRun.Events
 
         private void AutoFireTempleRunEventFromUserInitiatedEvent(string eventName, object sender, object data)
         {
-            if (_autoUserInitiated2TempleRunEvents.TryGetValue((UserInitiatedEvents)Enum.Parse(typeof(UserInitiatedEvents), eventName), out TempleRunEvents autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            UserInitiatedEvents userInitiatedEvent = Enum.Parse<UserInitiatedEvents>(result);
+            if (_autoUserInitiated2TempleRunEvents.TryGetValue(userInitiatedEvent, out TempleRunEvents autoEvent))
             {
-                //Debug.Log($"Auto firing event UserInitiatedEvents.{eventName} to TempleRunEvents.{autoEvent.ToString()}");
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherTempleRun.Instance.PublishEvent(autoEvent, sender, data);
             }
         }
     }

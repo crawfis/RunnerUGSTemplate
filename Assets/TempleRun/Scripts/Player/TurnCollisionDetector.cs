@@ -47,7 +47,9 @@ namespace CrawfisSoftware.TempleRun
         private void OnTrackChanging(string eventName, object sender, object data)
         {
             _isRunning = true;
-            (Direction _, float distance) = ((Direction, float))data;
+            TrackSegmentInfo trackSegmentInfo = (TrackSegmentInfo) data;
+            float distance = trackSegmentInfo.Length;
+            //(Direction _, float distance) = ((Direction, float))data;
             _currentSegmentDistance += distance;
         }
 

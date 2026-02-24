@@ -501,7 +501,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab308fb3364ecb845bbf947ab0b0e2e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.Events.TempleRunAutoEventFlow
-  _delayBetweenEvents: 0
 --- !u!4 &606655412
 Transform:
   m_ObjectHideFlags: 0
@@ -529,7 +528,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e15cf8e3c045adb4bb75312b58419f5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.TempleRun.Events.Input2TempleRunAutoEventBridge
-  _delayBetweenEvents: 0
 --- !u!1 &635303659
 GameObject:
   m_ObjectHideFlags: 0
@@ -1397,8 +1395,8 @@ MonoBehaviour:
   - TempleRunSfx
   - TempleRunCollectables
   - TempleRunObstacles
-  _eventToFire: GameScenesLoaded
-  _resetOnEvent: GameEnded
+  _eventToFire: GameFlowEvents/GameScenesLoaded
+  _resetOnEvent: GameFlowEvents/GameEnded
 --- !u!114 &2145456652
 MonoBehaviour:
   m_ObjectHideFlags: 0

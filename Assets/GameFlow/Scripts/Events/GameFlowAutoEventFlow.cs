@@ -1,4 +1,6 @@
 using CrawfisSoftware.Events;
+using CrawfisSoftware.UGS;
+using CrawfisSoftware.UGS.Events;
 
 using System;
 using System.Collections.Generic;
@@ -99,7 +101,7 @@ namespace CrawfisSoftware.GameFlow.Events
     ///
     /// ========================================================================================
     /// </summary>
-    internal class GameFlowAutoEventFlow : AutoEventFlowBase
+    internal class GameFlowAutoEventFlow : MonoBehaviour
     {
         [SerializeField] private Dictionary<GameFlowEvents, GameFlowEvents> _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
         {
@@ -207,9 +209,14 @@ namespace CrawfisSoftware.GameFlow.Events
 
         private void AutoFireGameFlowEventFromGameFlowEvent(string eventName, object sender, object data)
         {
-            if (_autoGameFlow2GameFlowEvents.TryGetValue((GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName), out GameFlowEvents autoEvent))
+            ReadOnlySpan<char> input = eventName.AsSpan();
+            int index = input.LastIndexOf('/');
+            if (index < 0) return;
+            string result = input.Slice(index + 1).ToString();
+            GameFlowEvents gameFlowEvent = Enum.Parse<GameFlowEvents>(result);
+            if (_autoGameFlow2GameFlowEvents.TryGetValue(gameFlowEvent, out GameFlowEvents autoEvent))
             {
-                DelayedFire(_delayBetweenEvents, autoEvent.ToString(), sender, data);
+                EventsPublisherGameFlow.Instance.PublishEvent(autoEvent, sender, data);
             }
         }
     }

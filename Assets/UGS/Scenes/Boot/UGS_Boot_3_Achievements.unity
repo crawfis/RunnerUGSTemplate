@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.FireEventWhenSceneCloses
   _sceneName: Leaderboards
-  _eventName: LeaderboardClosed
+  _eventName: UGS_EventsEnum/LeaderboardClosed
 --- !u!1 &556502428
 GameObject:
   m_ObjectHideFlags: 0
@@ -212,7 +212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.LoadSceneAfterGameControlEvent
   _sceneName: Achievements
   _loadadditively: 1
-  _eventToListenTo: LeaderboardClosing
+  _eventToListenTo: UGS_EventsEnum/LeaderboardClosing
   _delayInSeconds: 0
 --- !u!1 &671667149
 GameObject:

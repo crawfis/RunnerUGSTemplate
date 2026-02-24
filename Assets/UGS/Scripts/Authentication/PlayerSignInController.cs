@@ -29,7 +29,7 @@ namespace CrawfisSoftware.UGS.Authentication
 
             if(UGS_State.IsPlayerSigningIn)
             {
-                OnPlayerSigningIn(UGS_EventsEnum.PlayerSigningIn.ToString(), this, null);
+                OnPlayerSigningIn("UGS_EventsEnum/" + UGS_EventsEnum.PlayerSigningIn.ToString(), this, null);
             }
         }
 

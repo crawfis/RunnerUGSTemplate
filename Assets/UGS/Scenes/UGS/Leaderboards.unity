@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e55dc4bd72bfd0d43ba0441becf5105c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.SceneManagement.CloseSceneOnEvent
-  _eventToSubscribeTo: LeaderboardClosed
+  _eventToSubscribeTo: UGS_EventsEnum/LeaderboardClosed
   _unsubscribeOnEvent: 1
 --- !u!4 &200580836
 Transform:
@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Utility.TimedEvent
   _delayInSeconds: 5
-  _eventName: LeaderboardCloseRequested
+  _eventName: UGS_EventsEnum/LeaderboardCloseRequested
   _useRealtime: 1
 --- !u!1001 &1707870260
 PrefabInstance:

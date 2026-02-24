@@ -1,4 +1,5 @@
 ﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Events;
 
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,11 @@ namespace CrawfisSoftware.Utility.Testing
 {
     internal class EventLoggerDump : MonoBehaviour
     {
+        [SerializeField] GameFlowEvents _dumpTriggerEvent = GameFlowEvents.QuitRequested;
         private StringBuilder _sb = new StringBuilder();
         private void Awake()
         {
-            EventsPublisher.Instance.SubscribeToEvent("QuitRequested", DumpLogs);
+            EventsPublisherGameFlow.Instance.SubscribeToEvent(_dumpTriggerEvent, DumpLogs);
             EventsPublisher.Instance.SubscribeToAllEvents(LogEvent);
             _sb.AppendLine("Sequence of events:");
         }
@@ -23,7 +25,7 @@ namespace CrawfisSoftware.Utility.Testing
         private void OnDestroy()
         {
             EventsPublisher.Instance.UnsubscribeToAllEvents(LogEvent);
-            EventsPublisher.Instance.UnsubscribeToEvent("QuitRequested", DumpLogs);
+            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(_dumpTriggerEvent, DumpLogs);
         }
 
         private void LogEvent(string eventName, object arg2, object arg3)
