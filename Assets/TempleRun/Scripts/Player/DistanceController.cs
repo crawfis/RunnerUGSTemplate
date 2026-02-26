@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 
 using UnityEngine;
 
@@ -7,10 +7,10 @@ namespace CrawfisSoftware.TempleRun
     /// <summary>
     /// Speed controller that updates a DistanceTracker.
     ///    Dependencies: Blackboard, DistanceTracker and GameConfig (from Blackboard)
-    ///    Subscribes: GameStarted
-    ///    Subscribes: GameOver
-    ///    Subscribes: TeleportStarted
-    ///    Subscribes: TeleportEnded
+    ///    Subscribes: TempleRunStarted
+    ///    Subscribes: PlayerDied
+    ///    Subscribes: TeleportStarted — pauses movement during cinematic teleport
+    ///    Subscribes: TeleportEnded — snaps distance to LandingDistance from event data, resumes movement
     /// </summary>
     internal class DistanceController : MonoBehaviour
     {
@@ -20,7 +20,6 @@ namespace CrawfisSoftware.TempleRun
         private float _speed;
         private Coroutine _coroutine;
         private bool _isMoving = true;
-        private float _trackDistance = 0;
         private int _distancePublishIndex = 0;
         private float _nextDistancePublishThreshold = 0f;
         private static readonly float[] DistancePublishThresholds = { 25f, 100f, 200f, 500f, 1000f, 2000f, 5000f };
@@ -32,7 +31,6 @@ namespace CrawfisSoftware.TempleRun
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnGameOver);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportEnded, OnTeleportEnded);
-            //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.ActiveTrackChanging, OnTrackChanging);
         }
 
         private void OnDestroy()
@@ -58,8 +56,6 @@ namespace CrawfisSoftware.TempleRun
             _speed = _initialSpeed;
             _distancePublishIndex = 0;
             _nextDistancePublishThreshold = DistancePublishThresholds[0];
-            float initialDistance = Blackboard.Instance.TrackWidthOffset;
-            //Blackboard.Instance.DistanceTracker.UpdateDistance(initialDistance);
             _coroutine = StartCoroutine(UpdateAfterGameStart());
         }
 
@@ -68,23 +64,24 @@ namespace CrawfisSoftware.TempleRun
             DeleteCoroutine();
         }
 
-        //private void OnTrackChanging(object sender, object data)
-        //{
-        //    var (_, segmentDistance) = ((Direction direction, float segmentDistance))data;
-        //    _trackDistance += segmentDistance;
-        //}
-
         private void OnTeleportStarted(string eventName, object sender, object data)
         {
             _isMoving = false;
         }
 
+        /// <summary>
+        /// Snaps the distance tracker to the LandingDistance provided by
+        /// SegmentTransitionController via the event data tuple.
+        /// </summary>
         private void OnTeleportEnded(string eventName, object sender, object data)
         {
             _isMoving = true;
-            Blackboard.Instance.DistanceTracker.UpdateDistance(_trackDistance - Blackboard.Instance.DistanceTracker.DistanceTravelled);
-            var (point1, point2, _) = ((Vector3 point1, Vector3 point2, Direction direction))data;
-            _trackDistance += Vector3.Magnitude(point1 - point2);
+            var (_, _, _, landingDistance) = ((Vector3, Vector3, Direction, float))data;
+            if (landingDistance > 0f)
+            {
+                float delta = landingDistance - Blackboard.Instance.DistanceTracker.DistanceTravelled;
+                Blackboard.Instance.DistanceTracker.UpdateDistance(delta);
+            }
         }
 
         IEnumerator UpdateAfterGameStart()

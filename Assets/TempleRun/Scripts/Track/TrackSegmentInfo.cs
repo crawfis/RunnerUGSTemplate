@@ -2,20 +2,34 @@ using System;
 
 namespace CrawfisSoftware.TempleRun
 {
+    /// <summary>
+    /// Runtime data for a single track segment passed via
+    /// <c>TempleRunEvents.TrackSegmentCreated</c>.
+    /// Carries the full <see cref="TrackSegmentDefinition"/> plus the
+    /// resolved turn <see cref="Direction"/>.
+    /// </summary>
     [Serializable]
     public struct TrackSegmentInfo
     {
-        public string SegmentId;
-        public string TurnDirection;
-        public int TurnDirectionValue;
-        public float Length;
+        public TrackSegmentDefinition Definition;
+        public Direction Direction;
 
-        public TrackSegmentInfo(string segmentId, string turnDirection, int turnDirectionValue, float length)
+        public string SegmentId        => Definition?.Id ?? "unknown";
+        public float  Length           => Definition?.Length ?? 0f;
+        public float  TurnPointDistance => Definition?.TurnFailureDistance ?? 0f;
+        public float  ToPivotDistance => Definition?.ToPivotDistance ?? 0f;
+        public float  ExitDistance     => Definition?.ExitDistance ?? 0f;
+        public float  TeleportDistance => Definition?.TeleportDistance ?? 0f;
+
+        public TrackSegmentInfo(TrackSegmentDefinition definition, Direction direction)
         {
-            SegmentId = segmentId;
-            TurnDirection = turnDirection;
-            TurnDirectionValue = turnDirectionValue;
-            Length = length;
+            Definition = definition;
+            Direction  = direction;
+        }
+
+        public override string ToString()
+        {
+            return $"TrackSegmentInfo: Id={SegmentId}, Length={Length}, EntranceDistance={ToPivotDistance}, ExitDistance={ExitDistance}, TeleportDistance={TeleportDistance}, Direction={Direction}";
         }
     }
 }

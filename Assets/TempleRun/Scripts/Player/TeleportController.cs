@@ -27,6 +27,10 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnActiveSplineChanging(string EventName, object sender, object data)
         {
+            // Do not teleport if the new spline is a straight segment.
+            var (_, _, direction, _) = ((Vector3, Vector3, Direction, float))data;
+            if (direction == Direction.Straight)
+                return;
             StartCoroutine(TeleportWithDelay(data));
         }
 

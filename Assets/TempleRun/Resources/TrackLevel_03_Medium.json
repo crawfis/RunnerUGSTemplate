@@ -7,7 +7,7 @@
   "LaneWidth": 2.0,
   "SegmentRegistryFile": "TrackSegments_Registry",
   "StartSegmentId": "start",
-  "ActiveSegmentTags": ["opening", "easy", "medium"],
+  "ActiveSegmentTags": ["opening", "straight"],
   "ActiveSegmentIds": [],
   "Segments": [],
   "Connections": []

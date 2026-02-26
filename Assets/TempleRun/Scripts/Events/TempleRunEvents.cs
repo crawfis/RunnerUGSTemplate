@@ -49,6 +49,8 @@
         TurnRightRequested = 53,
         TurnRightStarting = 54,
         TurnRightCompleted = 55,
+        SegmentRequested = 56,  // Data: Direction (Left or Right). Fires when player commits direction at an Either junction.
+        // 57: removed (was StraightSegmentCompleted, replaced by SegmentExited)
         //LeftTurnSucceeded = TurnLeftCompleted, // Legacy naming
         //RightTurnSucceeded = TurnRightCompleted, // Legacy naming
 
@@ -159,5 +161,14 @@
 
         // ---------- Distance tracking (for achievements/UGS) ----------
         DistanceUpdated = 330,
+
+        // ---------- Segment lifecycle ----------
+        SegmentEntering = 342,            // Data: TrackSegmentInfo. Player approaching segment entrance.
+        SegmentEntered = 343,             // Data: TrackSegmentInfo. Player entered segment.
+        SegmentExiting = 344,             // Data: TrackSegmentInfo. Player approaching segment exit.
+        SegmentExited = 345,              // Data: TrackSegmentInfo. Player exited segment.
+
+        // ---------- Segment geometry ----------
+        SegmentGeometryReady = 350,       // Data: SegmentGeometryData. Full geometry built for a segment.
     }
 }

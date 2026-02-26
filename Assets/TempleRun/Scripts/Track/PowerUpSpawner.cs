@@ -1,19 +1,20 @@
 using CrawfisSoftware.TempleRun.GameConfig;
 
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Spawns power-ups on track segments based on difficulty settings.
-    /// Uses weighted random selection from a list of PowerUpDefinition ScriptableObjects.
-    ///    Dependencies: Blackboard, DifficultyConfig, PowerUpDefinition[]
-    ///    Subscribes: TempleRunEvents.SplineSegmentCreated (spawn power-ups on new segments)
-    ///    Subscribes: TempleRunEvents.TeleportEnded (clean up old power-ups)
+    /// Procedural — random placement using DifficultyConfig rates.
+    /// Preset — place power-ups exactly where SpawnSlots dictate.
+    /// Hybrid — place Required SpawnSlots then fill remaining space procedurally.
+    ///
+    ///    Dependencies: Blackboard, DifficultyConfig, PowerUpDefinition[], SpawnPrefabRegistry (optional)
+    ///    Subscribes: TempleRunEvents.SplineSegmentCreated
+    ///    Subscribes: TempleRunEvents.TeleportEnded
     /// </summary>
-    internal class PowerUpSpawner : MonoBehaviour
+    internal class PowerUpSpawner : SpawnerBase
     {
         [Header("Power-Up Definitions")]
         [Tooltip("Available power-up types. Weighted random selection chooses from this list.")]
@@ -29,85 +30,95 @@ namespace CrawfisSoftware.TempleRun
         [Tooltip("Height above the track surface to place power-ups.")]
         [SerializeField] private float _platformHeight = 2.0f;
 
-        private Transform _parentTransform;
-        private readonly Dictionary<int, List<GameObject>> _powerUpsBySegment = new();
-        private int _currentSegmentID = -1;
-        private int _segmentNumber = 0;
-        private System.Random _random;
+        // -----------------------------------------------------------------
+        // SpawnerBase overrides
+        // -----------------------------------------------------------------
 
-        private void Awake()
+        protected override string ContainerName => "Generated PowerUps";
+
+        protected override bool HandlesSlotType(string slotType)
+            => slotType == "PowerUp";
+
+        protected override void SpawnProcedural(SplineSegmentData data)
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.SplineSegmentCreated, OnSplineSegmentCreated);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.TeleportEnded, OnTeleportEnded);
-
-            _parentTransform = new GameObject("Generated PowerUps").transform;
-            _random = new System.Random(Blackboard.Instance.MasterRandom.Next());
-        }
-
-        private void OnDestroy()
-        {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.SplineSegmentCreated, OnSplineSegmentCreated);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.TeleportEnded, OnTeleportEnded);
-        }
-
-        private void OnSplineSegmentCreated(string eventName, object sender, object data)
-        {
-            if (_random == null || _powerUpDefinitions == null || _powerUpDefinitions.Length == 0) return;
-
-            var (point1, point2, turnDirection) = ((Vector3, Vector3, Direction))data;
+            if (_powerUpDefinitions == null || _powerUpDefinitions.Length == 0) return;
 
             float spawnRate = Blackboard.Instance.GameConfig.PowerUpSpawnRate;
-            float roll = (float)_random.NextDouble();
+            if ((float)_random.NextDouble() > spawnRate) return;
 
-            if (roll > spawnRate)
-            {
-                _segmentNumber++;
-                return;
-            }
+            float usableLength = data.SegmentLength
+                                 - _minDistanceFromSegmentStart
+                                 - _minDistanceFromSegmentEnd;
+            if (usableLength <= 0f) return;
 
-            Vector3 segmentDirection = point2 - point1;
-            float segmentLength = segmentDirection.magnitude;
-            Vector3 unitDirection = segmentDirection.normalized;
+            float distanceAlongSegment = _minDistanceFromSegmentStart
+                                         + (float)_random.NextDouble() * usableLength;
+            Vector3 spawnPosition = data.Point1
+                                    + data.UnitDirection * distanceAlongSegment
+                                    + _platformHeight * Vector3.up;
 
-            float usableLength = segmentLength - _minDistanceFromSegmentStart - _minDistanceFromSegmentEnd;
-            if (usableLength <= 0f)
-            {
-                _segmentNumber++;
-                return;
-            }
+            int lane = RandomLane();
+            spawnPosition -= data.Perpendicular * (lane * GetLaneWidth());
 
-            // Pick a random position along the usable portion
-            float spawnT = (float)_random.NextDouble();
-            float distanceAlongSegment = _minDistanceFromSegmentStart + spawnT * usableLength;
-            Vector3 spawnPosition = point1 + unitDirection * distanceAlongSegment + _platformHeight * Vector3.up;
-
-            // Pick a random lane
-            LaneConfig laneConfig = Blackboard.Instance.LaneConfig;
-            float laneWidth = laneConfig != null ? laneConfig.LaneWidth : 2f;
-            int laneCount = laneConfig != null ? laneConfig.LaneCount : 3;
-            int halfLanes = (laneCount - 1) / 2;
-            int lane = _random.Next(-halfLanes, halfLanes + 1);
-
-            Vector3 perpendicular = Vector3.Cross(unitDirection, Vector3.up).normalized;
-            spawnPosition -= perpendicular * (lane * laneWidth);
-
-            // Weighted random selection of power-up type
-            PowerUpDefinition definition = SelectWeightedRandom();
-            GameObject powerUp = SpawnPowerUp(spawnPosition, unitDirection, definition);
-
-            if (powerUp != null)
-            {
-                if (!_powerUpsBySegment.ContainsKey(_segmentNumber))
-                    _powerUpsBySegment[_segmentNumber] = new List<GameObject>();
-                _powerUpsBySegment[_segmentNumber].Add(powerUp);
-            }
-
-            _segmentNumber++;
+            PowerUpDefinition powerUpDef = SelectWeightedRandom();
+            Track(SpawnPowerUp(spawnPosition, data.UnitDirection, powerUpDef));
         }
+
+        protected override GameObject SpawnFromSlot(SplineSegmentData data, SpawnSlotDefinition slot)
+        {
+            Vector3 pos = SlotWorldPosition(data, slot, _platformHeight, GetLaneWidth());
+
+            // Try to match a PowerUpDefinition by PrefabTag
+            PowerUpDefinition matchedDef = null;
+            GameObject prefab = ResolvePrefab(slot, null);
+
+            if (!string.IsNullOrWhiteSpace(slot.PrefabTag) && _powerUpDefinitions != null)
+            {
+                foreach (var def in _powerUpDefinitions)
+                {
+                    if (def.PowerUpId == slot.PrefabTag)
+                    {
+                        matchedDef = def;
+                        if (prefab == null) prefab = def.Prefab;
+                        break;
+                    }
+                }
+            }
+
+            if (matchedDef == null && _powerUpDefinitions != null && _powerUpDefinitions.Length > 0)
+                matchedDef = SelectWeightedRandom();
+
+            Quaternion rotation = Quaternion.LookRotation(data.UnitDirection);
+            GameObject powerUp;
+
+            if (prefab != null)
+            {
+                powerUp = Instantiate(prefab, pos, rotation, _parentTransform);
+            }
+            else
+            {
+                Color tint = matchedDef != null ? matchedDef.TintColor : Color.cyan;
+                powerUp = CreateDefaultPowerUpPrefab(tint);
+                powerUp.transform.SetParent(_parentTransform, false);
+                powerUp.transform.SetLocalPositionAndRotation(pos, rotation);
+            }
+
+            powerUp.name = $"SlotPowerUp_{_segmentNumber}_{slot.PrefabTag}";
+            powerUp.tag = "PowerUp";
+
+            if (matchedDef != null)
+            {
+                var identifier = powerUp.GetComponent<PowerUpIdentifier>();
+                if (identifier == null) identifier = powerUp.AddComponent<PowerUpIdentifier>();
+                identifier.Definition = matchedDef;
+            }
+
+            return powerUp;
+        }
+
+        // -----------------------------------------------------------------
+        // PowerUp-specific helpers
+        // -----------------------------------------------------------------
 
         private PowerUpDefinition SelectWeightedRandom()
         {
@@ -128,9 +139,8 @@ namespace CrawfisSoftware.TempleRun
         private GameObject SpawnPowerUp(Vector3 position, Vector3 forward, PowerUpDefinition definition)
         {
             GameObject prefab = definition.Prefab;
-            GameObject powerUp;
-
             Quaternion rotation = Quaternion.LookRotation(forward);
+            GameObject powerUp;
 
             if (prefab != null)
             {
@@ -147,12 +157,9 @@ namespace CrawfisSoftware.TempleRun
             powerUp.name = $"PowerUp_{definition.PowerUpId}_{_segmentNumber}";
             powerUp.tag = "PowerUp";
 
-            // Ensure the power-up has an identifier component
             var identifier = powerUp.GetComponent<PowerUpIdentifier>();
             if (identifier == null)
-            {
                 identifier = powerUp.AddComponent<PowerUpIdentifier>();
-            }
             identifier.Definition = definition;
 
             return powerUp;
@@ -172,25 +179,9 @@ namespace CrawfisSoftware.TempleRun
 
             Renderer renderer = powerUp.GetComponent<Renderer>();
             if (renderer != null)
-            {
                 renderer.material.color = tintColor;
-            }
 
             return powerUp;
-        }
-
-        private void OnTeleportEnded(string eventName, object sender, object data)
-        {
-            if (_currentSegmentID >= 0 && _powerUpsBySegment.TryGetValue(_currentSegmentID, out var powerUps))
-            {
-                foreach (var powerUp in powerUps)
-                {
-                    if (powerUp != null)
-                        Destroy(powerUp);
-                }
-                _powerUpsBySegment.Remove(_currentSegmentID);
-            }
-            _currentSegmentID++;
         }
     }
 }

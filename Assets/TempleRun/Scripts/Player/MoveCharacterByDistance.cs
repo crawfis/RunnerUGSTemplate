@@ -5,8 +5,15 @@ namespace CrawfisSoftware.TempleRun
     /// <summary>
     /// Moves the player along the current spline with lateral lane offset, jump height, and slide height.
     ///    Dependencies: Blackboard, DistanceTracker, LaneChangeController, EventsPublisherTempleRun
-    ///    Subscribes: CurrentSplineChanged
+    ///    Subscribes: CurrentSplineChanging — re-anchors at the START of each new sub-spline
     /// </summary>
+    /// <remarks>
+    /// CurrentSplineChanging (not CurrentSplineChanged) is intentional: Changing fires at the
+    /// start of each sub-spline with point1 = sub-spline start and distance ≈ start distance,
+    /// giving a correct anchor. Changed fires at segment END with point1 = segment start but
+    /// distance = exit distance, which would reset the anchor backward. For turn segments,
+    /// Changing fires twice (approach + exit); each call correctly re-anchors to the new sub-spline.
+    /// </remarks>
     public class MoveCharacterByDistance : MonoBehaviour
     {
         [SerializeField] private Transform _objectToMove;
@@ -19,14 +26,13 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.CurrentSplineChanged, OnSplineChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.CurrentSplineChanging, OnSplineChanging);
             _yPosition = transform.localPosition.y;
         }
 
-        private void OnSplineChanged(string eventName, object sender, object data)
+        private void OnSplineChanging(string eventName, object sender, object data)
         {
-            // Create prefab from the two points.
-            var (point1, point2, direction) = ((Vector3 point1, Vector3 point2, Direction direction))(data);
+            var (point1, point2, direction, _) = ((Vector3, Vector3, Direction, float))data;
             _currentDirection = (point2 - point1).normalized;
             _lastAnchorPoint = point1;
             _lastAnchorDistance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
@@ -75,7 +81,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.CurrentSplineChanged, OnSplineChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.CurrentSplineChanging, OnSplineChanging);
         }
     }
 }

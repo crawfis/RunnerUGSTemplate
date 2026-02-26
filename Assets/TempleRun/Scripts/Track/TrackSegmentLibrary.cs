@@ -4,26 +4,113 @@ using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
+    // =========================================================================
+    // String constants (JSON-compatible — used by JsonUtility serialization)
+    // =========================================================================
+
+    /// <summary>Values for <see cref="TrackSegmentDefinition.SpawnMode"/>.</summary>
+    public static class SpawnModes
+    {
+        public const string Procedural = "Procedural";
+        public const string Preset     = "Preset";
+        public const string Hybrid     = "Hybrid";
+    }
+
+    /// <summary>Values for <see cref="TrackSegmentDefinition.Role"/>.</summary>
+    public static class SegmentRoles
+    {
+        public const string Normal     = "Normal";
+        public const string Opening    = "Opening";
+        public const string Checkpoint = "Checkpoint";
+        public const string Challenge  = "Challenge";
+        public const string Reward     = "Reward";
+        public const string Boss       = "Boss";
+        public const string Tutorial   = "Tutorial";
+    }
+
+    // =========================================================================
+    // Data classes (JSON-serializable)
+    // =========================================================================
+
+    /// <summary>
+    /// Defines where a specific object (obstacle, coin, power-up) should spawn
+    /// within a track segment.  Used by <see cref="SpawnModes.Preset"/>
+    /// and <see cref="SpawnModes.Hybrid"/> spawn modes.
+    /// </summary>
+    [Serializable]
+    public class SpawnSlotDefinition
+    {
+        public float  NormalizedPosition;           // 0–1 fraction along segment length
+        public int    Lane;                         // 0 = centre, negative = left, positive = right
+        public float  Height;                       // height offset above track surface
+        public string Type     = "Obstacle";        // Obstacle | Coin | PowerUp | Hazard
+        public string PrefabTag;                    // maps to SpawnPrefabRegistry
+        public float  Weight   = 1f;                // selection weight (Hybrid mode)
+        public bool   Required = true;              // true = always spawns; false = probabilistic
+    }
+
     /// <summary>
     /// A single track segment definition stored in the segment registry.
-    ///   Id:               Unique identifier referenced by connection rules and level files.
-    ///   Direction:        "Left", "Right", "Both", or "Straight".
-    ///   Length:           Physical segment length in Unity units.
-    ///   Weight:           Relative selection weight (higher = more frequent).
-    ///   MaxRepeat:        Max consecutive appearances (0 = unlimited).
-    ///   DifficultyRating: 0–10 continuous difficulty scale (shorter = harder).
-    ///   Tags:             Category labels used by level files to filter segments.
     /// </summary>
     [Serializable]
     public class TrackSegmentDefinition
     {
-        public string Id;
-        public string Direction;
-        public float Length = 5f;
-        public float Weight = 1f;
-        public int MaxRepeat = 0;
-        public float DifficultyRating = 0f;
-        public List<string> Tags = new List<string>();
+        // ----- Core -----
+        public string       Id;
+        public Direction    Direction; // Calculated in Normalize from the DirectionString
+        public float        Length           = 5f;
+        public float        Weight           = 1f;
+        public int          MaxRepeat        = 0;
+        public float        DifficultyRating = 0f;
+        public List<string> Tags             = new List<string>();
+
+        // ----- Role & speed -----
+        public string Role             = SegmentRoles.Normal;
+        public float  SpeedMultiplier  = 1f;
+
+        // ----- Lane overrides -----
+        public List<int>   BlockedLanes = new List<int>();
+        public List<float> LaneHeights  = new List<float>();
+        public List<int>   ActiveLanes  = new List<int>();
+
+        // ----- Spawn slots -----
+        public string                   SpawnMode  = SpawnModes.Procedural;
+        public List<SpawnSlotDefinition> SpawnSlots = new List<SpawnSlotDefinition>();
+
+        // ----- Visual / determinism -----
+        public string VisualTheme;
+        public int    SpawnSeed;
+
+        // ----- 3-point segment geometry (Entrance → Pivot → Exit) -----
+
+        /// <summary>
+        /// Distance from Entrance to Pivot (the turn / placeholder point).
+        /// For Straight segments Pivot coincides with Exit so this equals Length.
+        /// Set by NormalizeSegments() when 0.
+        /// </summary>
+        public float ToPivotDistance = 0f;
+
+        /// <summary>
+        /// Distance from Entrance to Pivot (the turn / placeholder point).
+        /// For Straight segments Pivot coincides with Exit so this equals Length.
+        /// Set by NormalizeSegments() when 0.
+        /// </summary>
+        public float TurnFailureDistance = 0f;
+
+        /// <summary>
+        /// Distance from Pivot to Exit in the post-turn direction.
+        /// Applies to ALL segment types: Left/Right/Either have a non-zero exit
+        /// section the player runs through after turning.
+        /// For Straight segments this is 0 (Pivot == Exit).
+        /// </summary>
+        public float ExitDistance = 0f;
+
+        /// <summary>
+        /// Distance from Pivot where the player lands after turning animation (in exit direction).
+        /// Must be less than ExitDistance. Only meaningful for turn segments.
+        /// Defaults to ExitDistance * 0.5 in NormalizeSegments().
+        /// </summary>
+        public float TeleportDistance = 0f;
     }
 
     [Serializable]
@@ -36,7 +123,6 @@ namespace CrawfisSoftware.TempleRun
     /// <summary>
     /// Standalone registry of all available track segments.
     /// Loaded once and shared across multiple level rulesets.
-    /// File lives in: Assets/TempleRun/Resources/TrackSegments_Registry.json
     /// </summary>
     [Serializable]
     public class TrackSegmentRegistryDefinition
@@ -46,54 +132,76 @@ namespace CrawfisSoftware.TempleRun
     }
 
     /// <summary>
-    /// Level-specific ruleset: describes which segments are active and how they connect.
-    ///
-    /// Two-file usage (recommended):
-    ///   Set SegmentRegistryFile to the registry resource name.
-    ///   Set ActiveSegmentTags to filter which registry segments apply to this level.
-    ///   Leave Segments and Connections empty — they are populated at runtime.
-    ///
-    /// Single-file usage (legacy / standalone):
-    ///   Populate Segments and Connections directly, leave SegmentRegistryFile empty.
-    ///
-    /// Connection graph:
-    ///   If Connections is empty, all active segments are candidates after every turn
-    ///   (all-to-all fallback). Define explicit Connections only when you need to
-    ///   restrict which segments may follow which.
+    /// Level-specific ruleset: which segments are active and how they connect.
     /// </summary>
     [Serializable]
     public class TrackSegmentLibraryDefinition
     {
         public string Version;
         public string LevelName;
-        public int LevelNumber;
-        public float DifficultyRating;
-        public int LaneCount = 3;
-        public float LaneWidth = 2f;
+        public int    LevelNumber;
+        public float  DifficultyRating;
+        public int    LaneCount = 3;
+        public float  LaneWidth = 2f;
         public string StartSegmentId;
 
         // --- Two-file split ---
-        public string SegmentRegistryFile;                            // Resources path of the shared registry
-        public List<string> ActiveSegmentTags = new List<string>();  // Include segments with any of these tags
-        public List<string> ActiveSegmentIds  = new List<string>();  // Include segments with exactly these IDs
+        public string       SegmentRegistryFile;
+        public List<string> ActiveSegmentTags = new List<string>();
+        public List<string> ActiveSegmentIds  = new List<string>();
 
         // --- Segment data (populated directly or merged from registry at load time) ---
-        public List<TrackSegmentDefinition> Segments = new List<TrackSegmentDefinition>();
-        public List<TrackSegmentConnection> Connections = new List<TrackSegmentConnection>();
+        public List<TrackSegmentDefinition> Segments    = new List<TrackSegmentDefinition>();
+        public List<TrackSegmentConnection> Connections  = new List<TrackSegmentConnection>();
     }
+
+    // =========================================================================
+    // SplineSegmentData — event payload for SplineSegmentCreated
+    // =========================================================================
+
+    /// <summary>
+    /// Data payload published with <c>TempleRunEvents.SplineSegmentCreated</c>.
+    /// Carries spline geometry plus the full segment definition so spawners
+    /// can access SpawnSlots, BlockedLanes, SpeedMultiplier, etc.
+    /// </summary>
+    [Serializable]
+    public struct SplineSegmentData
+    {
+        public Vector3                  Point1;
+        public Vector3                  Point2;
+        public Direction                EndDirection;
+        public TrackSegmentDefinition   Definition;
+
+        public SplineSegmentData(Vector3 point1, Vector3 point2, Direction endDirection,
+                                  TrackSegmentDefinition definition)
+        {
+            Point1       = point1;
+            Point2       = point2;
+            EndDirection = endDirection;
+            Definition   = definition;
+        }
+
+        public override string ToString()
+        {
+            return $"SplineSegmentData: Point1={Point1}, Point2={Point2}, EndDirection={EndDirection}, Definition={Definition}";
+        }
+
+        // ----- Computed geometry (avoids duplicate math in every spawner) -----
+
+        public Vector3 SegmentVector  => Point2 - Point1;
+        public float   SegmentLength  => SegmentVector.magnitude;
+        public Vector3 UnitDirection  => SegmentVector.normalized;
+        public Vector3 Perpendicular  => Vector3.Cross(UnitDirection, Vector3.up).normalized;
+    }
+
+    // =========================================================================
+    // TrackSegmentLibrary — runtime selection engine
+    // =========================================================================
 
     /// <summary>
     /// Runtime library for selecting track segments during gameplay.
-    ///
-    ///   Dependencies: UnityEngine (Resources, JsonUtility, Mathf)
-    ///   Usage: Call LoadFromResources() or LoadFromJson() once per level, then call
-    ///          GetStartSegment() and SelectNext() on each turn.
-    ///
-    /// Selection algorithm:
-    ///   1. If Connections are defined for the previous segment, limit candidates to those.
-    ///   2. Otherwise all active segments are candidates (all-to-all fallback).
-    ///   3. MaxRepeat filters out a segment if it has appeared consecutively too many times.
-    ///   4. Weighted random selection picks from the remaining candidates.
+    ///   Call <see cref="LoadFromResources"/> once per level, then call
+    ///   <see cref="GetStartSegment"/> and <see cref="SelectNext"/> each turn.
     /// </summary>
     public class TrackSegmentLibrary
     {
@@ -103,23 +211,22 @@ namespace CrawfisSoftware.TempleRun
         private readonly Dictionary<string, List<string>> _connectionsByFromId
             = new Dictionary<string, List<string>>();
 
-        // Expose level metadata for UI and TrackManagerLibrary
-        public string LevelName       => _definition.LevelName;
-        public int    LevelNumber     => _definition.LevelNumber;
+        public string LevelName        => _definition.LevelName;
+        public int    LevelNumber      => _definition.LevelNumber;
         public float  DifficultyRating => _definition.DifficultyRating;
-        public int    LaneCount       => _definition.LaneCount > 0 ? _definition.LaneCount : 3;
-        public float  LaneWidth       => _definition.LaneWidth > 0f ? _definition.LaneWidth : 2f;
-        public int    SegmentCount    => _definition.Segments.Count;
+        public int    LaneCount        => _definition.LaneCount > 0 ? _definition.LaneCount : 3;
+        public float  LaneWidth        => _definition.LaneWidth > 0f ? _definition.LaneWidth : 2f;
+        public int    SegmentCount     => _definition.Segments.Count;
 
         public TrackSegmentLibrary(TrackSegmentLibraryDefinition definition)
         {
             _definition = definition ?? throw new ArgumentNullException(nameof(definition));
 
+            NormalizeSegments(_definition.Segments);
+
             foreach (var segment in _definition.Segments)
-            {
                 if (!string.IsNullOrWhiteSpace(segment.Id))
                     _segmentsById[segment.Id] = segment;
-            }
 
             foreach (var connection in _definition.Connections)
             {
@@ -136,24 +243,48 @@ namespace CrawfisSoftware.TempleRun
             }
         }
 
-        // -------------------------------------------------------------------------
-        // Factory methods
-        // -------------------------------------------------------------------------
+        /// <summary>
+        /// Pre-computes derived fields on each segment so runtime code reads clean data.
+        /// Called once at library construction — never inline in runtime callbacks.
+        ///
+        /// 3-point model: EntranceDistance (→ Pivot) + ExitDistance (→ Exit) = Length.
+        /// For Straight: Pivot == Exit, so EntranceDistance = Length, ExitDistance = 0.
+        /// For Left/Right/Either: both EntranceDistance and ExitDistance should be > 0.
+        /// TeleportDistance defaults to ExitDistance * 0.5 when not specified.
+        /// </summary>
+        private static void NormalizeSegments(List<TrackSegmentDefinition> segments)
+        {
+            foreach (var seg in segments)
+            {
+                // EntranceDistance: default to Length (covers full segment for Straight)
+                if (seg.ToPivotDistance <= 0f)
+                    seg.ToPivotDistance = seg.Length;
 
-        /// <summary>Load a combined (standalone / legacy) library from a single JSON string.</summary>
+                // Recompute Length from parts when ExitDistance is specified
+                if (seg.ExitDistance > 0f)
+                    seg.Length = seg.ToPivotDistance + seg.ExitDistance;
+                //seg.Direction = Enum.Parse<Direction>(seg.DirectionString);
+                if (seg.Direction == Direction.Straight)
+                    seg.TurnFailureDistance = float.MaxValue;
+                else if (seg.TurnFailureDistance <= 0)
+                    seg.TurnFailureDistance = seg.ToPivotDistance + 1; // + Width/2 ;
+                // Default TeleportDistance for segments that have an exit section
+                if (seg.TeleportDistance <= 0f && seg.ExitDistance > 0f)
+                    seg.TeleportDistance = seg.ExitDistance * 0.5f;
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // Factory methods
+        // ---------------------------------------------------------------------
+
         public static TrackSegmentLibrary LoadFromJson(string json)
         {
             if (string.IsNullOrWhiteSpace(json)) return null;
-            var definition = JsonUtility.FromJson<TrackSegmentLibraryDefinition>(json);
-            return definition == null ? null : new TrackSegmentLibrary(definition);
+            var def = JsonUtility.FromJson<TrackSegmentLibraryDefinition>(json);
+            return def == null ? null : new TrackSegmentLibrary(def);
         }
 
-        /// <summary>
-        /// Load a level file and merge segments from a separate registry JSON string.
-        /// Segments are filtered by ActiveSegmentTags or ActiveSegmentIds.
-        /// The StartSegmentId is always included regardless of filters.
-        /// If levelDef already has Segments, the registry is ignored.
-        /// </summary>
         public static TrackSegmentLibrary LoadFromJson(string levelJson, string registryJson)
         {
             if (string.IsNullOrWhiteSpace(levelJson)) return null;
@@ -166,10 +297,6 @@ namespace CrawfisSoftware.TempleRun
             return new TrackSegmentLibrary(levelDef);
         }
 
-        /// <summary>
-        /// Build a runtime library from an already-deserialized level definition.
-        /// If registryJson is provided and levelDef has no Segments, merges from registry.
-        /// </summary>
         public static TrackSegmentLibrary LoadFromDefinition(
             TrackSegmentLibraryDefinition levelDef, string registryJson = null)
         {
@@ -179,11 +306,6 @@ namespace CrawfisSoftware.TempleRun
             return new TrackSegmentLibrary(levelDef);
         }
 
-        /// <summary>
-        /// Load a level from Unity Resources. If the level definition specifies a
-        /// SegmentRegistryFile, that registry is automatically loaded and merged.
-        /// Example: LoadFromResources("TrackLevel_01_Beginner")
-        /// </summary>
         public static TrackSegmentLibrary LoadFromResources(string levelResourcePath)
         {
             var levelAsset = Resources.Load<TextAsset>(levelResourcePath);
@@ -213,9 +335,9 @@ namespace CrawfisSoftware.TempleRun
             return LoadFromJson(levelAsset.text);
         }
 
-        // -------------------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Selection
-        // -------------------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
         public TrackSegmentDefinition GetStartSegment(System.Random random)
         {
@@ -227,36 +349,47 @@ namespace CrawfisSoftware.TempleRun
         }
 
         /// <summary>
-        /// Select the next segment after previousSegmentId.
-        /// previousRepeatCount is how many times that same segment has appeared consecutively.
+        /// Select the next segment.  When <paramref name="targetDifficulty"/> >= 0,
+        /// only segments within ± <paramref name="difficultyRange"/> are considered.
+        /// Falls back to ungated selection when no matches.
         /// </summary>
         public TrackSegmentDefinition SelectNext(
             string previousSegmentId,
-            int previousRepeatCount,
-            System.Random random)
+            int    previousRepeatCount,
+            System.Random random,
+            float  targetDifficulty = -1f,
+            float  difficultyRange  = 2f)
         {
+            bool  gated   = targetDifficulty >= 0f && difficultyRange >= 0f;
+            float diffMin = targetDifficulty - difficultyRange;
+            float diffMax = targetDifficulty + difficultyRange;
+
             var candidates = new List<TrackSegmentDefinition>();
 
             if (!string.IsNullOrWhiteSpace(previousSegmentId) &&
                 _connectionsByFromId.TryGetValue(previousSegmentId, out var allowedIds))
             {
-                // Use explicit connection graph
                 foreach (var id in allowedIds)
                 {
                     if (_segmentsById.TryGetValue(id, out var seg) &&
-                        IsAllowed(seg, previousSegmentId, previousRepeatCount))
+                        IsAllowed(seg, previousSegmentId, previousRepeatCount) &&
+                        (!gated || IsInDifficultyRange(seg, diffMin, diffMax)))
                         candidates.Add(seg);
                 }
             }
             else
             {
-                // No explicit connections — all active segments are candidates
                 foreach (var seg in _definition.Segments)
                 {
-                    if (IsAllowed(seg, previousSegmentId, previousRepeatCount))
+                    if (IsAllowed(seg, previousSegmentId, previousRepeatCount) &&
+                        (!gated || IsInDifficultyRange(seg, diffMin, diffMax)))
                         candidates.Add(seg);
                 }
             }
+
+            // Fall back to ungated if difficulty filter left us empty
+            if (candidates.Count == 0 && gated)
+                return SelectNext(previousSegmentId, previousRepeatCount, random);
 
             if (candidates.Count == 0)
                 candidates.AddRange(_definition.Segments);
@@ -264,23 +397,18 @@ namespace CrawfisSoftware.TempleRun
             return SelectWeighted(candidates, random);
         }
 
-        // -------------------------------------------------------------------------
+        // ---------------------------------------------------------------------
         // Private helpers
-        // -------------------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
-        /// <summary>
-        /// Filter registry segments into levelDef.Segments based on ActiveSegmentTags/Ids.
-        /// The StartSegmentId is always included regardless of filters.
-        /// </summary>
         private static void MergeRegistrySegments(
-            TrackSegmentLibraryDefinition levelDef,
-            string registryJson)
+            TrackSegmentLibraryDefinition levelDef, string registryJson)
         {
             var registry = JsonUtility.FromJson<TrackSegmentRegistryDefinition>(registryJson);
             if (registry?.Segments == null || registry.Segments.Count == 0) return;
 
-            bool filterByIds  = levelDef.ActiveSegmentIds  != null && levelDef.ActiveSegmentIds.Count  > 0;
-            bool filterByTags = levelDef.ActiveSegmentTags != null && levelDef.ActiveSegmentTags.Count > 0;
+            bool filterByIds  = levelDef.ActiveSegmentIds?.Count  > 0;
+            bool filterByTags = levelDef.ActiveSegmentTags?.Count > 0;
 
             foreach (var seg in registry.Segments)
             {
@@ -289,74 +417,50 @@ namespace CrawfisSoftware.TempleRun
                 bool include;
 
                 if (seg.Id == levelDef.StartSegmentId)
-                {
-                    include = true; // start segment is always included
-                }
+                    include = true;
                 else if (filterByIds)
-                {
                     include = levelDef.ActiveSegmentIds.Contains(seg.Id);
-                }
                 else if (filterByTags)
-                {
-                    include = false;
-                    if (seg.Tags != null)
-                    {
-                        foreach (var tag in seg.Tags)
-                        {
-                            if (levelDef.ActiveSegmentTags.Contains(tag))
-                            {
-                                include = true;
-                                break;
-                            }
-                        }
-                    }
-                }
+                    include = seg.Tags != null && seg.Tags.Exists(t => levelDef.ActiveSegmentTags.Contains(t));
                 else
-                {
-                    include = true; // no filter: include every registry segment
-                }
+                    include = true;
 
                 if (include) levelDef.Segments.Add(seg);
             }
         }
 
         private static bool IsAllowed(
-            TrackSegmentDefinition segment,
-            string previousSegmentId,
-            int previousRepeatCount)
+            TrackSegmentDefinition segment, string previousSegmentId, int previousRepeatCount)
         {
             if (segment == null) return false;
-
             if (!string.IsNullOrWhiteSpace(previousSegmentId) &&
                 segment.Id == previousSegmentId &&
                 segment.MaxRepeat > 0)
                 return previousRepeatCount < segment.MaxRepeat;
-
             return true;
         }
 
+        private static bool IsInDifficultyRange(TrackSegmentDefinition segment, float min, float max)
+            => segment.DifficultyRating >= min && segment.DifficultyRating <= max;
+
         private static TrackSegmentDefinition SelectWeighted(
-            List<TrackSegmentDefinition> candidates,
-            System.Random random)
+            List<TrackSegmentDefinition> candidates, System.Random random)
         {
             if (candidates.Count == 0) return null;
 
             float totalWeight = 0f;
-            foreach (var c in candidates)
-                totalWeight += Mathf.Max(0f, c.Weight);
+            foreach (var c in candidates) totalWeight += Mathf.Max(0f, c.Weight);
 
-            if (totalWeight <= 0f)
-                return candidates[random.Next(candidates.Count)];
+            if (totalWeight <= 0f) return candidates[random.Next(candidates.Count)];
 
-            float pick       = (float)random.NextDouble() * totalWeight;
-            float cumulative = 0f;
+            float pick = (float)random.NextDouble() * totalWeight;
+            float cum  = 0f;
             foreach (var c in candidates)
             {
-                cumulative += Mathf.Max(0f, c.Weight);
-                if (pick <= cumulative) return c;
+                cum += Mathf.Max(0f, c.Weight);
+                if (pick <= cum) return c;
             }
-
-            return candidates[candidates.Count - 1];
+            return candidates[^1];
         }
     }
 }

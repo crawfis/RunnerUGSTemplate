@@ -1,10 +1,11 @@
-﻿namespace CrawfisSoftware.TempleRun
+namespace CrawfisSoftware.TempleRun
 {
-    // For many directions this should be made a flag. All test then need to mask it.
+    // For many directions this should be made a flag. All tests then need to mask it.
     public enum Direction
     {
-        Left,
-        Right,
-        Both
+        Left     = 0,
+        Right    = 1,
+        Straight = 2,  // No turn — track continues forward (subway-style)
+        Either     = 3,  // T-junction — direction deferred until player swipes
     }
 }

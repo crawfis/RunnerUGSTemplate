@@ -1,21 +1,20 @@
 using CrawfisSoftware.TempleRun.GameConfig;
 
-using System.Collections;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Spawns obstacles on track segments based on difficulty settings.
-    /// Listens for new spline segments and randomly places full-width or lane-specific barriers.
-    ///    Dependencies: Blackboard, DifficultyConfig, LaneConfig
-    ///    Subscribes: TempleRunEvents.SplineSegmentCreated (spawn obstacles on new segments)
-    ///    Subscribes: TempleRunEvents.TeleportEnded (clean up old obstacles)
-    ///    Subscribes: TempleRunEvents.TempleRunStarted (reset state)
+    /// Procedural — random placement using DifficultyConfig rates.
+    /// Preset — place obstacles exactly where SpawnSlots dictate.
+    /// Hybrid — place Required SpawnSlots then fill remaining space procedurally.
+    ///
+    ///    Dependencies: Blackboard, DifficultyConfig, LaneConfig, SpawnPrefabRegistry (optional)
+    ///    Subscribes: TempleRunEvents.SplineSegmentCreated
+    ///    Subscribes: TempleRunEvents.TeleportEnded
     /// </summary>
-    internal class ObstacleSpawner : MonoBehaviour
+    internal class ObstacleSpawner : SpawnerBase
     {
         [Header("Obstacle Prefabs")]
         [Tooltip("Obstacle that spans the full track width — player must jump to clear it.")]
@@ -44,106 +43,79 @@ namespace CrawfisSoftware.TempleRun
         [Tooltip("Initial height the obstacle should be placed.")]
         [SerializeField] private float _platformHeight = 1.5f;
 
-        private Transform _parentTransform;
-        private readonly Dictionary<int, List<GameObject>> _obstaclesBySegment = new();
-        private int _currentSegmentID = -1;
-        private int _segmentNumber = 0;
-        private System.Random _random;
+        // -----------------------------------------------------------------
+        // SpawnerBase overrides
+        // -----------------------------------------------------------------
 
-        private void Awake()
+        protected override string ContainerName => "Generated Obstacles";
+
+        protected override bool HandlesSlotType(string slotType)
+            => slotType == "Obstacle" || slotType == "Hazard";
+
+        protected override void SpawnProcedural(SplineSegmentData data)
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.SplineSegmentCreated, OnSplineSegmentCreated);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.TeleportEnded, OnTeleportEnded);
-
-            _parentTransform = new GameObject("Generated Obstacles").transform;
-            _random = new System.Random(Blackboard.Instance.MasterRandom.Next());
-        }
-
-        private void OnDestroy()
-        {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.SplineSegmentCreated, OnSplineSegmentCreated);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.TeleportEnded, OnTeleportEnded);
-        }
-
-        private void OnSplineSegmentCreated(string eventName, object sender, object data)
-        {
-            if (_random == null) return;
-
-            var (point1, point2, turnDirection) = ((Vector3, Vector3, Direction))data;
-
             float spawnRate = Blackboard.Instance.GameConfig.ObstacleSpawnRate;
-            float roll = (float)_random.NextDouble();
+            if ((float)_random.NextDouble() > spawnRate) return;
 
-            // Skip spawning if the roll exceeds the spawn rate
-            if (roll > spawnRate)
-            {
-                _segmentNumber++;
-                return;
-            }
+            float usableLength = data.SegmentLength
+                                 - _minDistanceFromSegmentStart
+                                 - _minDistanceFromSegmentEnd;
+            if (usableLength <= 0f) return;
 
-            Vector3 segmentDirection = (point2 - point1);
-            float segmentLength = segmentDirection.magnitude;
-            Vector3 unitDirection = segmentDirection.normalized;
+            float distanceAlongSegment = _minDistanceFromSegmentStart
+                                         + (float)_random.NextDouble() * usableLength;
+            Vector3 spawnPosition = data.Point1
+                                    + data.UnitDirection * distanceAlongSegment
+                                    + _platformHeight * Vector3.up;
 
-            // Only spawn if the segment is long enough to have safe margins
-            float usableLength = segmentLength - _minDistanceFromSegmentStart - _minDistanceFromSegmentEnd;
-            if (usableLength <= 0f)
-            {
-                _segmentNumber++;
-                return;
-            }
-
-            // Pick a random position along the usable portion of the segment
-            float spawnT = (float)_random.NextDouble();
-            float distanceAlongSegment = _minDistanceFromSegmentStart + spawnT * usableLength;
-            Vector3 spawnPosition = point1 + unitDirection * distanceAlongSegment + _platformHeight * Vector3.up;
-
-            // Determine obstacle type
             bool isFullWidth = (float)_random.NextDouble() < _fullWidthProbability;
 
-            GameObject obstacle;
-            if (isFullWidth)
-            {
-                obstacle = SpawnFullWidthObstacle(spawnPosition, unitDirection);
-            }
-            else
-            {
-                obstacle = SpawnLaneObstacle(spawnPosition, unitDirection);
-            }
+            GameObject obstacle = isFullWidth
+                ? SpawnFullWidthObstacle(spawnPosition, data.UnitDirection)
+                : SpawnLaneObstacle(spawnPosition, data.UnitDirection);
 
-            if (obstacle != null)
-            {
-                if (!_obstaclesBySegment.ContainsKey(_segmentNumber))
-                    _obstaclesBySegment[_segmentNumber] = new List<GameObject>();
-                _obstaclesBySegment[_segmentNumber].Add(obstacle);
-            }
-
-            _segmentNumber++;
+            Track(obstacle);
         }
+
+        protected override GameObject SpawnFromSlot(SplineSegmentData data, SpawnSlotDefinition slot)
+        {
+            Vector3 pos = SlotWorldPosition(data, slot, _platformHeight, GetLaneWidth());
+            GameObject prefab = ResolvePrefab(slot, _laneObstaclePrefab);
+
+            if (prefab != null)
+            {
+                Quaternion rotation = Quaternion.LookRotation(data.UnitDirection);
+                GameObject obstacle = Instantiate(prefab, pos, rotation, _parentTransform);
+                obstacle.name = $"SlotObstacle_{_segmentNumber}_{slot.PrefabTag}";
+                return obstacle;
+            }
+
+            // Absolute fallback: default primitive
+            float laneWidth = GetLaneWidth();
+            var defaultObj = CreateDefaultObstaclePrefab(laneWidth * 0.8f, _obstacleHeight, _obstacleDepth);
+            Quaternion rot = Quaternion.LookRotation(data.UnitDirection);
+            defaultObj.transform.SetParent(_parentTransform, false);
+            defaultObj.transform.SetLocalPositionAndRotation(pos, rot);
+            defaultObj.name = $"SlotObstacle_{_segmentNumber}_default";
+            return defaultObj;
+        }
+
+        // -----------------------------------------------------------------
+        // Obstacle-specific helpers
+        // -----------------------------------------------------------------
 
         private GameObject SpawnFullWidthObstacle(Vector3 position, Vector3 forward)
         {
             GameObject prefab = _fullWidthObstaclePrefab;
             if (prefab == null)
-            {
-                // Create a primitive if no prefab assigned
                 prefab = CreateDefaultObstaclePrefab(GetFullTrackWidth(), _obstacleHeight, _obstacleDepth);
-            }
 
             Quaternion rotation = Quaternion.LookRotation(forward);
             GameObject obstacle = Instantiate(prefab, position, rotation, _parentTransform);
             obstacle.name = $"FullWidthBarrier_{_segmentNumber}";
 
-            // Scale to span the full track width
             if (_fullWidthObstaclePrefab == null)
-            {
-                // Only set scale for default primitives; user prefabs handle their own scale
                 Destroy(prefab);
-            }
 
             return obstacle;
         }
@@ -151,41 +123,29 @@ namespace CrawfisSoftware.TempleRun
         private GameObject SpawnLaneObstacle(Vector3 position, Vector3 forward)
         {
             GameObject prefab = _laneObstaclePrefab;
-            LaneConfig laneConfig = Blackboard.Instance.LaneConfig;
-            float laneWidth = laneConfig != null ? laneConfig.LaneWidth : 2f;
-            int laneCount = laneConfig != null ? laneConfig.LaneCount : 3;
-            int halfLanes = (laneCount - 1) / 2;
+            float laneWidth = GetLaneWidth();
+            int lane = RandomLane();
 
-            // Pick a random lane
-            int lane = _random.Next(-halfLanes, halfLanes + 1);
-
-            // Offset position to the chosen lane
             Vector3 perpendicular = Vector3.Cross(forward, Vector3.up).normalized;
             Vector3 lanePosition = position - perpendicular * (lane * laneWidth);
 
             if (prefab == null)
-            {
                 prefab = CreateDefaultObstaclePrefab(laneWidth * 0.8f, _obstacleHeight, _obstacleDepth);
-            }
 
             Quaternion rotation = Quaternion.LookRotation(forward);
             GameObject obstacle = Instantiate(prefab, lanePosition, rotation, _parentTransform);
             obstacle.name = $"LaneBarrier_{_segmentNumber}_Lane{lane}";
 
             if (_laneObstaclePrefab == null)
-            {
                 Destroy(prefab);
-            }
 
             return obstacle;
         }
 
         private float GetFullTrackWidth()
         {
-            LaneConfig laneConfig = Blackboard.Instance.LaneConfig;
-            if (laneConfig != null)
-                return laneConfig.LaneWidth * laneConfig.LaneCount;
-            return 6f; // Default: 3 lanes × 2 units
+            LaneConfig lc = Blackboard.Instance.LaneConfig;
+            return lc != null ? lc.LaneWidth * lc.LaneCount : 6f;
         }
 
         /// <summary>
@@ -196,37 +156,17 @@ namespace CrawfisSoftware.TempleRun
             GameObject obstacle = GameObject.CreatePrimitive(PrimitiveType.Cube);
             obstacle.transform.localScale = new Vector3(width, height, depth);
 
-            // Replace the default collider with a trigger collider
             Collider defaultCollider = obstacle.GetComponent<Collider>();
             if (defaultCollider != null)
                 defaultCollider.isTrigger = true;
 
-            // Tag it so the collision detector can identify it
             obstacle.tag = "Obstacle";
 
-            // Tint it red for visibility
             Renderer renderer = obstacle.GetComponent<Renderer>();
             if (renderer != null)
-            {
                 renderer.material.color = Color.red;
-            }
 
             return obstacle;
-        }
-
-        private void OnTeleportEnded(string eventName, object sender, object data)
-        {
-            // Clean up obstacles from the previous segment
-            if (_currentSegmentID >= 0 && _obstaclesBySegment.TryGetValue(_currentSegmentID, out var obstacles))
-            {
-                foreach (var obstacle in obstacles)
-                {
-                    if (obstacle != null)
-                        Destroy(obstacle);
-                }
-                _obstaclesBySegment.Remove(_currentSegmentID);
-            }
-            _currentSegmentID++;
         }
     }
 }

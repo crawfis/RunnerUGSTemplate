@@ -23,9 +23,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnTeleportStarted(string eventName, object sender, object data)
         {
             var (teleportTime, splineData) = ((float, object))data;
-            var (point1, point2, _) = ((Vector3 point1, Vector3 point2, Direction direction))splineData;
-            // Create prefab from the two points.
-            //var (point1, point2, _) = ((Vector3 point1, Vector3 point2, Direction direction))(splineData);
+            var (point1, point2, _, _) = ((Vector3, Vector3, Direction, float))splineData;
             Vector3 targetDirection = (point2 - point1).normalized;
             var targetPosition = new Vector3(point1.x, _yPosition, point1.z);
             Quaternion targetRotation = Quaternion.LookRotation(targetDirection);

@@ -26,16 +26,17 @@ namespace CrawfisSoftware.TempleRun
         protected void SubscribeToEvents()
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SplineSegmentCreated, OnSplineCreated);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportEnded, OnActiveSplineChanged);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanged, OnActiveSplineChanged);
             var parent = new GameObject("Generated Level");
             _parentTransform = parent.transform;
         }
 
         private void OnSplineCreated(string eventName, object sender, object data)
         {
-            var splineCreator = sender as SplineCreator2D;
-            // Create prefab from the last two points.
-            (Vector3 point1, Vector3 point2, Direction turnDirection) = ((Vector3, Vector3, Direction))data;
+            var splineSegment = (SplineSegmentData)data;
+            Vector3 point1 = splineSegment.Point1;
+            Vector3 point2 = splineSegment.Point2;
+            Direction turnDirection = splineSegment.EndDirection;
             Vector3 direction = (point2 - point1);
             Vector3 unitDirection = direction.normalized;
             // Rotation to look at point 2
@@ -69,7 +70,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SplineSegmentCreated, OnSplineCreated);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportEnded, OnActiveSplineChanged);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanged, OnActiveSplineChanged);
         }
     }
 }

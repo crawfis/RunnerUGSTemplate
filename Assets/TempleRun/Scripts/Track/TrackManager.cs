@@ -10,9 +10,11 @@ namespace CrawfisSoftware.TempleRun
     ///       when needed (either to create visuals or to determine the currently active track).
     ///    Dependencies: EventsPublisherTempleRun, Blackboard.GameConfig, Blackboard.MasterRandom,
     ///                  Blackboard.TrackLevelDefinition (set by level selection)
-    ///    Subscribes to the Turn Succeeded events (LeftTurnSucceeded, RightTurnSucceeded)
+    ///    Subscribes to SegmentExited for all segment types (single advancement path)
+    ///    Subscribes to SegmentRequested to resume lookahead after an Either (T-junction) segment
     ///    Publishes: TrackSegmentCreated. Useful for creating prefabs. Several of these will be created at the start. Data is a TrackSegmentInfo
     ///    Publishes: ActiveTrackChanging. The track that we are transitioning to. Data is a TrackSegmentInfo
+    ///    Publishes: ActiveTrackChanged. The track segment that was just fully exited. Data is a TrackSegmentInfo. Fires before ActiveTrackChanging.
     /// </summary>
     /// <remarks> Obstacle and gap distances should be in a separate class(es).
     /// Random distances (_random) could be replaced with a list of possible distances, but a better / cleaner solution would
@@ -34,25 +36,31 @@ namespace CrawfisSoftware.TempleRun
         private int _lastSegmentRepeatCount;
         private bool _isInitialized = false;
 
+        // Set when an Either (T-junction) segment is at the tail of the lookahead queue.
+        // No further segments are generated until SegmentRequested fires with the chosen direction.
+        private bool _awaitingEitherDirection = false;
+
+
         protected virtual void Awake()
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunScenesReady, OnGameStarting);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SegmentRequested, OnSegmentRequested);
         }
 
         protected virtual void OnDestroy()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunScenesReady, OnGameStarting);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SegmentExited, OnSegmentCompleted);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SegmentRequested, OnSegmentRequested);
         }
 
         private void Start()
         {
             _trackSegments = new(_numberOfLookAheadTracks);
-
         }
+
         private void OnGameConfigured(string eventName, object sender, object data)
         {
             Initialize();
@@ -78,7 +86,8 @@ namespace CrawfisSoftware.TempleRun
         public override void AdvanceToNextSegment()
         {
             _ = _trackSegments.Dequeue();
-            AddTrackSegment();
+            if (!_awaitingEitherDirection)
+                AddTrackSegment();
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.ActiveTrackChanging, this, _trackSegments.Peek());
         }
 
@@ -88,6 +97,7 @@ namespace CrawfisSoftware.TempleRun
             _minDistance = minDistance;
             _maxDistance = maxDistance;
             _random = random;
+            _awaitingEitherDirection = false;
 
             // Build runtime library from Blackboard's level definition + registry
             var levelDef = Blackboard.Instance.TrackLevelDefinition;
@@ -101,35 +111,31 @@ namespace CrawfisSoftware.TempleRun
                 }
                 _segmentLibrary = TrackSegmentLibrary.LoadFromDefinition(levelDef, registryJson);
             }
-
-            // Fall back to single-file loading (legacy / inspector-assigned TextAsset)
-            if (_segmentLibrary == null)
-            {
-                if (_trackSegmentLibraryJson == null)
-                {
-                    _trackSegmentLibraryJson = Resources.Load<TextAsset>("TrackSegments");
-                }
-                _segmentLibrary = TrackSegmentLibrary.LoadFromJson(_trackSegmentLibraryJson?.text);
-            }
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnSucceeded);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnSucceeded);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SegmentExited, OnSegmentCompleted);
         }
 
         protected virtual void CreateInitialTrack()
         {
             _maxDistance = Mathf.Max(_minDistance, _maxDistance);
+            _awaitingEitherDirection = false;
             var newTrackSegment = CreateTrackSegment(isStartSegment: true);
             _trackSegments.Enqueue(newTrackSegment);
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
             for (int i = 1; i < _numberOfLookAheadTracks; i++)
             {
                 AddTrackSegment();
+                if (_awaitingEitherDirection) break;
             }
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.ActiveTrackChanging, this, _trackSegments.Peek());
         }
 
-        protected virtual void OnTurnSucceeded(string eventName, object sender, object data)
+        /// <summary>
+        /// Handles SegmentExited for ALL segment types (the single advancement path).
+        /// Advancement always waits for the player to fully exit the segment.
+        /// </summary>
+        protected virtual void OnSegmentCompleted(string eventName, object sender, object data)
         {
+            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.ActiveTrackChanged, this, _trackSegments.Peek());
             AdvanceToNextSegment();
         }
 
@@ -138,6 +144,21 @@ namespace CrawfisSoftware.TempleRun
             var newTrackSegment = CreateTrackSegment(isStartSegment: false);
             _trackSegments.Enqueue(newTrackSegment);
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
+            if (newTrackSegment.Direction == Direction.Either)
+                _awaitingEitherDirection = true;
+        }
+
+        /// <summary>
+        /// Fires when the player commits a direction at an Either junction.
+        /// Resumes lookahead generation using the normal fill logic.
+        /// PathProvider (execution order -10) processes this event first, updating _anchorPoint
+        /// before the TrackSegmentCreated events fired here reach PathProvider.
+        /// </summary>
+        private void OnSegmentRequested(string eventName, object sender, object data)
+        {
+            _awaitingEitherDirection = false;
+            while (!_awaitingEitherDirection && _trackSegments.Count < _numberOfLookAheadTracks)
+                AddTrackSegment();
         }
 
         protected virtual TrackSegmentInfo CreateTrackSegment(bool isStartSegment)
@@ -151,14 +172,21 @@ namespace CrawfisSoftware.TempleRun
                 if (segmentDefinition != null)
                 {
                     UpdateRepeatTracking(segmentDefinition.Id);
-                    var direction = ParseDirection(segmentDefinition.Direction, GetNewDirection());
-                    return new TrackSegmentInfo(segmentDefinition.Id, direction.ToString(), (int)direction, segmentDefinition.Length);
+                    var direction = segmentDefinition.Direction;
+                    return new TrackSegmentInfo(segmentDefinition, direction);
                 }
             }
 
             float segmentLength = isStartSegment ? _startDistance : GetNewSegmentLength();
             var fallbackDirection = GetNewDirection();
-            return new TrackSegmentInfo("random", fallbackDirection.ToString(), (int)fallbackDirection, segmentLength);
+            var fallbackDef = new TrackSegmentDefinition
+            {
+                Id             = "random",
+                Direction      = fallbackDirection,
+                Length         = segmentLength,
+                ToPivotDistance = segmentLength  // ensure normalization is correct for inline defs
+            };
+            return new TrackSegmentInfo(fallbackDef, fallbackDirection);
         }
 
         private static Direction ParseDirection(string directionValue, Direction fallback)
@@ -170,7 +198,6 @@ namespace CrawfisSoftware.TempleRun
 
             return fallback;
         }
-
 
         private void UpdateRepeatTracking(string segmentId)
         {

@@ -135,7 +135,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &756380250
 Transform:
   m_ObjectHideFlags: 0
@@ -166,7 +166,7 @@ MonoBehaviour:
   _prefab: {fileID: 2515103981258710022, guid: 35233d84e3420b64295fc145b9d6c0e8, type: 3}
   _widthScale: 2
   _heightScale: 4
-  _debugDestroyDelayTime: 0.1
+  _debugDestroyDelayTime: 1
 --- !u!1 &1634100393
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,7 +183,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1634100394
 Transform:
   m_ObjectHideFlags: 0
