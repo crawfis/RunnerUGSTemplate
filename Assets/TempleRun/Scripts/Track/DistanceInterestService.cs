@@ -14,14 +14,8 @@ namespace CrawfisSoftware.TempleRun
     {
         public static DistanceInterestService Instance { get; private set; }
 
-        private struct DistanceInterest
-        {
-            public float Distance;
-            public Action Callback;
-        }
-
         // Sorted by distance ascending for efficient front-removal.
-        private readonly List<DistanceInterest> _interests = new();
+        private readonly List<float> _interests = new();
 
         private void Awake()
         {
@@ -31,38 +25,29 @@ namespace CrawfisSoftware.TempleRun
                 return;
             }
             Instance = this;
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
         }
 
         private void OnDestroy()
         {
+            Clear();
             if (Instance == this)
                 Instance = null;
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
         }
 
         /// <summary>
         /// Register a one-shot callback that fires when the player's cumulative
         /// distance reaches or exceeds <paramref name="distance"/>.
         /// </summary>
-        public void Register(float distance, Action callback)
+        public void Register(float distance)
         {
-            var interest = new DistanceInterest { Distance = distance, Callback = callback };
             // Insert in sorted order.
-            int index = _interests.FindIndex(i => i.Distance > distance);
+            int index = _interests.FindIndex(i => i >= distance);
             if (index < 0)
-                _interests.Add(interest);
-            else
-                _interests.Insert(index, interest);
+                _interests.Add(distance);
+            else if (Mathf.Abs(_interests[index] - distance) <= 0.0001f) // Avoid duplicates
+                _interests.Insert(index, distance);
         }
 
-        /// <summary>
-        /// Remove all registered interests matching the given callback.
-        /// </summary>
-        public void Unregister(Action callback)
-        {
-            _interests.RemoveAll(i => i.Callback == callback);
-        }
 
         /// <summary>
         /// Remove all registered interests.
@@ -72,29 +57,17 @@ namespace CrawfisSoftware.TempleRun
             _interests.Clear();
         }
 
-        private void OnDistanceUpdated(string eventName, object sender, object data)
-        {
-            float currentDistance = (float)data;
-            // Fire all interests whose threshold has been reached.
-            while (_interests.Count > 0 && _interests[0].Distance <= currentDistance)
-            {
-                var interest = _interests[0];
-                _interests.RemoveAt(0);
-                interest.Callback?.Invoke();
-            }
-        }
-
         /// <summary>
-        /// Check interests against the current distance without waiting for DistanceUpdated.
-        /// Called by SegmentAdvanceTrigger in Update() for frame-accurate checking.
+        /// Check interests against the current distance
         /// </summary>
-        public void CheckNow(float currentDistance)
+        public void Update()
         {
-            while (_interests.Count > 0 && _interests[0].Distance <= currentDistance)
+            float currentDistance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
+            while (_interests.Count > 0 && _interests[0] <= currentDistance)
             {
                 var interest = _interests[0];
                 _interests.RemoveAt(0);
-                interest.Callback?.Invoke();
+                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.DistanceUpdated, this, currentDistance);
             }
         }
     }

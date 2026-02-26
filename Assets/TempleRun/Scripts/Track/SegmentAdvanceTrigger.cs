@@ -31,6 +31,7 @@ namespace CrawfisSoftware.TempleRun
         private void Awake()
         {
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerDied, OnGameEnding);
         }
@@ -38,15 +39,16 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnGameStarted);
             EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerDied, OnGameEnding);
         }
 
-        private void Update()
+        private void OnDistanceUpdated(string eventName, object sender, object data)
         {
             if (!_isRunning || !_gameStarted) return;
 
-            float distance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
+            float distance = (float)data;
 
             // Fire SegmentExiting once when the player approaches the exit.
             if (!_exitingFired && distance >= _currentExitDistance - TempleRunConstants.SegmentExitingTriggerDistance)
@@ -70,7 +72,10 @@ namespace CrawfisSoftware.TempleRun
             _exitingFired = false;
             _currentExitDistance += _currentSegment.Length;
 
+            DistanceInterestService.Instance.Register(_currentExitDistance - TempleRunConstants.SegmentExitingTriggerDistance);
+            DistanceInterestService.Instance.Register(_currentExitDistance);
             // Publish lifecycle: entering/entered (synchronous, immediate on track change).
+            // Move to AutoFire based on ActiveTrackChanging if we want to decouple from track changes and allow other triggers (e.g. teleport).
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.SegmentEntering, this, _currentSegment);
             EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.SegmentEntered, this, _currentSegment);
         }
