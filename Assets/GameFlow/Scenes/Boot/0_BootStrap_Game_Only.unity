@@ -164,8 +164,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e90b90efb9448ce42998d726476a36cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Test.Test_AutoFireEvent
-  _eventNameToListenFor: GameEnded
-  _eventNameToFire: GameplayReady
+  _eventNameToListenFor: GameFlowEvents/GameEnded
+  _eventNameToFire: GameFlowEvents/GameplayReady
 --- !u!1 &542629271
 GameObject:
   m_ObjectHideFlags: 0
@@ -210,7 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65f042f3a63759247846cda8b0ecbfb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.Test.Test_AutoFireEventOnStart
-  _eventName: GameplayReady
+  _eventName: GameFlowEvents/GameplayReady
 --- !u!1 &811702129
 GameObject:
   m_ObjectHideFlags: 0

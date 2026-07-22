@@ -5,16 +5,18 @@ namespace CrawfisSoftware.TempleRun.UI
 {
     /// <summary>
     /// Manages countdown UI display in the TempleRun domain.
-    ///    Dependencies: UIDocument (countdown panel)
+    ///    Dependencies: PanelRenderer (countdown panel)
     ///    Subscribes: TempleRunEvents.CountdownStarting
     ///    Subscribes: TempleRunEvents.CountdownTick
     ///    Subscribes: TempleRunEvents.CountdownEnded
     /// </summary>
     internal class CountdownUIController : MonoBehaviour
     {
-        [SerializeField] private UIDocument _countdownUI;
+        [SerializeField] private PanelRenderer _countdownPanel;
 
+        private VisualElement _root;
         private Label _countdownLabel;
+        private bool _visible;
 
         private void Awake()
         {
@@ -24,6 +26,21 @@ namespace CrawfisSoftware.TempleRun.UI
                 TempleRunEvents.CountdownTick, OnCountdownTick);
             EventsPublisherTempleRun.Instance.SubscribeToEvent(
                 TempleRunEvents.CountdownEnded, OnCountdownEnded);
+        }
+
+        private void OnEnable()
+        {
+            if (_countdownPanel == null) return;
+            _countdownPanel.RegisterUIReloadCallback(OnUIReload);
+            // Keep the PanelRenderer enabled (visibility is via style.display); the scene may author
+            // it disabled. See MainMenuPanelController for the rationale.
+            _countdownPanel.enabled = true;
+        }
+
+        private void OnDisable()
+        {
+            if (_countdownPanel != null)
+                _countdownPanel.UnregisterUIReloadCallback(OnUIReload);
         }
 
         private void OnDestroy()
@@ -36,12 +53,20 @@ namespace CrawfisSoftware.TempleRun.UI
                 TempleRunEvents.CountdownEnded, OnCountdownEnded);
         }
 
+        // Show/hide via the root's style.display; the PanelRenderer stays enabled at all times so
+        // its tree is never torn down (avoids Unity bug UUM-146174). The callback re-caches the
+        // label on every reload and re-applies the current visibility.
+        private void OnUIReload(PanelRenderer renderer, VisualElement root)
+        {
+            _root = root;
+            _countdownLabel = root.Q<Label>("Countdown");
+            ApplyVisibility();
+        }
+
         private void OnCountdownStarting(string eventName, object sender, object data)
         {
-            if (_countdownUI == null) return;
-
-            SetActive(true);
-            _countdownLabel = _countdownUI.rootVisualElement.Q<Label>("Countdown");
+            _visible = true;
+            ApplyVisibility();
         }
 
         private void OnCountdownTick(string eventName, object sender, object data)
@@ -55,15 +80,14 @@ namespace CrawfisSoftware.TempleRun.UI
 
         private void OnCountdownEnded(string eventName, object sender, object data)
         {
-            SetActive(false);
+            _visible = false;
+            ApplyVisibility();
         }
 
-        private void SetActive(bool on)
+        private void ApplyVisibility()
         {
-            if (_countdownUI == null) return;
-            _countdownUI.gameObject.SetActive(on);
-            if (_countdownUI.rootVisualElement != null)
-                _countdownUI.rootVisualElement.visible = on;
+            if (_root != null)
+                _root.style.display = _visible ? DisplayStyle.Flex : DisplayStyle.None;
         }
     }
 }
