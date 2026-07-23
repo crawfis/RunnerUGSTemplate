@@ -30,18 +30,13 @@ namespace CrawfisSoftware.TempleRun.UI
 
         private void OnEnable()
         {
-            if (_countdownPanel == null) return;
             _countdownPanel.RegisterUIReloadCallback(OnUIReload);
             // Keep the PanelRenderer enabled (visibility is via style.display); the scene may author
             // it disabled. See MainMenuPanelController for the rationale.
             _countdownPanel.enabled = true;
         }
 
-        private void OnDisable()
-        {
-            if (_countdownPanel != null)
-                _countdownPanel.UnregisterUIReloadCallback(OnUIReload);
-        }
+        private void OnDisable() => _countdownPanel.UnregisterUIReloadCallback(OnUIReload);
 
         private void OnDestroy()
         {
