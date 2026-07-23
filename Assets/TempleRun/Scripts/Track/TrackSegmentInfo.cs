@@ -29,7 +29,7 @@ namespace CrawfisSoftware.TempleRun
 
         public override string ToString()
         {
-            return $"TrackSegmentInfo: Id={SegmentId}, Length={Length}, EntranceDistance={ToPivotDistance}, ExitDistance={ExitDistance}, TeleportDistance={TeleportDistance}, Direction={Direction}";
+            return $"TrackSegmentInfo: Id={SegmentId}, Length={Length}, ToPivotDistance={ToPivotDistance}, ExitDistance={ExitDistance}, TeleportDistance={TeleportDistance}, Direction={Direction}";
         }
     }
 }
