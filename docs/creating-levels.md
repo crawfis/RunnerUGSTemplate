@@ -10,12 +10,12 @@ This guide walks through the complete workflow for creating a new level in Runne
 2. [Track Manager Variants](#2-track-manager-variants)
 3. [Step 1 — Prepare Your Prefabs](#step-1--prepare-your-prefabs)
 4. [Step 2 — Register Prefabs in SpawnPrefabRegistry](#step-2--register-prefabs-in-spawnprefabregistry)
-5. [Step 3 — Add Segments to the Registry JSON](#step-3--add-segments-to-the-registry-json)
-6. [Step 4 — Create the Level with the Track Level Editor](#step-4--create-the-level-with-the-track-level-editor)
+5. [Step 3 — Author Segment Assets and Register Them](#step-3--author-segment-assets-and-register-them)
+6. [Step 4 — Create the Level Asset](#step-4--create-the-level-asset)
 7. [Step 5 — Wire the Spawners in the Scene](#step-5--wire-the-spawners-in-the-scene)
 8. [Step 6 — Set the Active Level at Runtime](#step-6--set-the-active-level-at-runtime)
 9. [Step 7 — Playtest and Iterate](#step-7--playtest-and-iterate)
-10. [Reference: JSON Schema](#reference-json-schema)
+10. [Reference: Track Data Model](#reference-track-data-model)
 11. [Reference: SpawnMode Guide](#reference-spawnmode-guide)
 12. [Reference: Difficulty Config](#reference-difficulty-config)
 
@@ -26,29 +26,40 @@ This guide walks through the complete workflow for creating a new level in Runne
 The track generation system has three layers:
 
 ```
-JSON Data Layer
-  TrackSegments_Registry.json   ← shared library of all segment definitions
-  TrackLevel_*.json             ← level-specific filter + settings
+ScriptableObject Data Layer (authoring — edited in the Inspector)
+  TrackSegmentSO                ← one asset per segment definition
+  TrackSegmentRegistrySO        ← shared pool of all segments
+  TrackLevelSO                  ← per-level ruleset: filters the pool by tag/id
+  TrackLevelRegistrySO          ← maps a level number to its ruleset
 
 Runtime Selection Layer
+  TrackLibraryLoader            ← reads the SO assets into runtime definitions
   TrackManager                  ← picks the next segment from the library
   TrackSegmentLibrary           ← weighted selection engine
 
 3D Geometry + Spawning Layer
-  SplineCreator2D               ← converts segment data to Vector3 splines
+  PathProvider                  ← converts segment data to Entrance→Pivot→Exit splines
   ObstacleSpawner               ← places obstacles on each spline segment
   CoinSpawner                   ← places coin lines
   PowerUpSpawner                ← places power-ups
   PrefabSpawnerAbstract         ← places visual track tiles
 ```
 
-A **segment** is a straight piece of track with a turn at the end. Each segment defines:
-- Its **length** (distance before the turn)
-- Its **direction** (Left, Right, or Both)
+A **segment** is a run of track built on three points — **Entrance → Pivot → Exit**. Each
+segment defines:
+- Its **geometry** — `ToPivotDistance` (Entrance to the turn point) and `ExitDistance`
+  (post-turn run-out); total length is the sum of the two
+- Its **direction** (`Straight`, `Left`, `Right`, or `Either` — a T-junction resolved by the
+  player's swipe)
 - Its **spawn mode** (how obstacles/coins/power-ups are placed on it)
 - Optional **spawn slots** (exact positions for Preset or Hybrid modes)
 
-A **level** is a JSON file that selects a subset of segments from the registry using **tags** and configures lane count, lane width, and difficulty.
+A **level** is a `TrackLevelSO` asset that selects a subset of segments from the registry
+using **tags** (or explicit ids) and configures lane count, lane width, and difficulty.
+
+The SO assets are pure data. At `TrackManager` initialization, `TrackLibraryLoader` reads
+them into fresh runtime definitions and normalizes them — the authored assets are never
+mutated at runtime.
 
 ---
 
@@ -57,7 +68,10 @@ A **level** is a JSON file that selects a subset of segments from the registry u
 The TrackManager is the component on the `TrackManager` GameObject in the `TempleRunTrackPCG` scene. Three variants are available:
 
 ### `TrackManager` (default)
-The general-purpose manager. Reads segment definitions from JSON. Segment lengths come from the definition's `Length` field (or a random value between `MinTrackLength` and `MaxTrackLength` for the fallback path).
+The general-purpose manager. Reads segment definitions from the ScriptableObject library
+(resolved by `TrackLibraryLoader` at init). Segment lengths come from the definition's
+geometry (or a random value between `MinTrackLength` and `MaxTrackLength` for the fallback
+path when no level is selected).
 
 **Direction logic:** 40% Left, 40% Right, 20% Left (randomised when no definition overrides it).
 
@@ -67,7 +81,7 @@ The general-purpose manager. Reads segment definitions from JSON. Segment length
 | Field | Description |
 |-------|-------------|
 | `_numberOfLookAheadTracks` | How many segments to keep in the queue ahead of the player (default 12) |
-| `_trackSegmentLibraryJson` | Optional fallback TextAsset if `Blackboard.TrackLevelDefinition` is not set |
+| `_trackLevels` | The `TrackLevelRegistrySO` asset that maps the selected level number to its ruleset |
 
 ---
 
@@ -134,7 +148,7 @@ Assets/TempleRun/Prefabs/Track/
 
 ## Step 2 — Register Prefabs in SpawnPrefabRegistry
 
-The `SpawnPrefabRegistry` ScriptableObject decouples JSON `PrefabTag` strings from Unity asset GUIDs. Spawners look up prefabs here at runtime.
+The `SpawnPrefabRegistry` ScriptableObject decouples the `PrefabTag` strings authored in segment spawn slots from Unity asset GUIDs. Spawners look up prefabs here at runtime.
 
 ### Creating a registry asset
 1. In the Project window: **right-click → Create → TempleRun → Spawn Prefab Registry**
@@ -159,59 +173,33 @@ Tags must match the `PrefabTag` values you put in segment `SpawnSlots` (see Step
 
 ---
 
-## Step 3 — Add Segments to the Registry JSON
+## Step 3 — Author Segment Assets and Register Them
 
-Open `Assets/TempleRun/Resources/TrackSegments_Registry.json` in any text editor or the Unity Inspector.
+Segments are `TrackSegmentSO` assets in `Assets/TempleRun/Scriptables/Track/Segments/`,
+edited directly in the Inspector.
 
-Each entry in `"Segments"` is one track segment. Here is a complete annotated example:
+### Creating a segment
 
-```json
-{
-  "Id": "desert_left_20",
-  "Direction": "Left",
-  "Length": 20.0,
-  "Weight": 1.5,
-  "MaxRepeat": 2,
-  "DifficultyRating": 3.0,
-  "Tags": ["desert", "medium"],
-  "Role": "Normal",
-  "SpeedMultiplier": 1.0,
-  "SpawnMode": "Hybrid",
-  "VisualTheme": "desert",
-  "SpawnSeed": 0,
-  "BlockedLanes": [],
-  "LaneHeights": [],
-  "ActiveLanes": [],
-  "SpawnSlots": [
-    {
-      "NormalizedPosition": 0.35,
-      "Lane": -1,
-      "Height": 0,
-      "Type": "Obstacle",
-      "PrefabTag": "rock_low",
-      "Weight": 1.0,
-      "Required": true
-    },
-    {
-      "NormalizedPosition": 0.65,
-      "Lane": 0,
-      "Height": 0,
-      "Type": "Coin",
-      "PrefabTag": "coin_gold",
-      "Weight": 0.8,
-      "Required": false
-    }
-  ]
-}
-```
+1. In the Project window: **right-click → Create → CrawfisSoftware → TempleRun → Track Segment**
+2. Name the asset after its `Id` (e.g., `desert_left_20`)
+3. Place it in `Assets/TempleRun/Scriptables/Track/Segments/`
+4. Fill in the fields in the Inspector (see reference below)
+5. **Add it to the shared pool**: select
+   `Assets/TempleRun/Scriptables/Track/TrackSegmentRegistry.asset` and add the new segment
+   to its `Segments` array — a segment that isn't in the registry can never be selected
+
+Example values for a medium-difficulty desert left turn of total length 20:
+`Direction = Left`, `ToPivotDistance = 19`, `ExitDistance = 1`, `Weight = 1.5`,
+`MaxRepeat = 2`, `DifficultyRating = 3`, `Tags = [desert, medium]`, `SpawnMode = Hybrid`.
 
 ### Field reference
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `Id` | string | Unique identifier — no spaces, use underscores |
-| `Direction` | string | `"Left"`, `"Right"`, or `"Both"` |
-| `Length` | float | Segment length in world units |
+| `Direction` | enum | `Straight`, `Left`, `Right`, or `Either` (T-junction — player chooses); Inspector dropdown |
+| `ToPivotDistance` | float | Entrance → Pivot (the turn point). For a `Straight`, this is the whole segment |
+| `ExitDistance` | float | Pivot → Exit run-out after the turn. `0` for Straight; `> 0` for turns. Total length = `ToPivotDistance + ExitDistance` — there is no separate `Length` field |
 | `Weight` | float | Relative selection probability (higher = more common) |
 | `MaxRepeat` | int | Max consecutive appearances before it's excluded (0 = unlimited) |
 | `DifficultyRating` | float | 0–10 difficulty gate; used with `targetDifficulty` param |
@@ -224,6 +212,7 @@ Each entry in `"Segments"` is one track segment. Here is a complete annotated ex
 | `BlockedLanes` | int[] | Lane indices the player cannot use on this segment |
 | `ActiveLanes` | int[] | Force only these lanes to be available |
 | `SpawnSlots` | object[] | Exact object placements — see below |
+| `TeleportDistance`, `TurnFailureDistance`, `TurnRadius` | float | Leave at 0 — derived automatically at load (normalization) |
 
 ### SpawnSlot fields
 
@@ -239,87 +228,47 @@ Each entry in `"Segments"` is one track segment. Here is a complete annotated ex
 
 ### Using the `/generate-segments` skill
 
-Instead of hand-editing JSON you can run:
+Instead of hand-authoring assets one at a time you can run:
 
 ```
 /generate-segments
 ```
 
-The skill prompts you for direction, length range, difficulty range, and tags, then generates and appends well-formed entries to the registry.
+The skill prompts you for direction, length range, difficulty range, and tags, then generates well-formed `TrackSegmentSO` assets and registers them in the `TrackSegmentRegistrySO`.
 
 ---
 
-## Step 4 — Create the Level with the Track Level Editor
+## Step 4 — Create the Level Asset
 
-### Opening the editor
-**Menu:** `CrawfisSoftware > Track Level Editor`
-
-The window is split into three panels:
-
-```
-┌─────────────┬────────────────────────────┬──────────────────┐
-│  LEVELS     │  LEVEL PROPERTIES          │  SEGMENT PREVIEW │
-│             │                            │                  │
-│ [Level 01]  │  Level Name: Desert Run    │  difficulty bar  │
-│ [Level 02]  │  Level Number: 6           │                  │
-│ > Level 06  │  Difficulty: ──●──── 4.5   │  [L] left_20 ... │
-│             │                            │  [R] right_14 .. │
-│ + New Level │  Lane Count: 3             │  ...             │
-│             │  Lane Width: 2.0           │                  │
-│             │                            │                  │
-│             │  Registry File: TrackSeg.. │                  │
-│             │  Start Segment: start      │                  │
-│             │                            │                  │
-│             │  ☑ opening                 │                  │
-│             │  ☑ desert                  │                  │
-│             │  ☐ temple                  │                  │
-│             │  ☐ beginner                │                  │
-│             │                            │                  │
-│             │  [Save] [Revert]  [Dupl]   │                  │
-└─────────────┴────────────────────────────┴──────────────────┘
-```
+A level is a `TrackLevelSO` asset — a thin ruleset that selects segments from the shared
+registry. The existing levels
+(`Assets/TempleRun/Scriptables/Track/TrackLevel_01_Beginner.asset` …
+`TrackLevel_05_Expert.asset`) are the best starting reference.
 
 ### Creating a new level
 
-1. Click **+ New Level** — a file named `TrackLevel_NN_New.json` is created in `Assets/TempleRun/Resources/`
+1. In the Project window: **right-click → Create → CrawfisSoftware → TempleRun → Track Level**
+   (or duplicate an existing `TrackLevel_*` asset with Ctrl+D to start from a known baseline)
 2. Set **Level Name** (shown in game menus)
-3. Set **Level Number** (used for progression ordering)
+3. Set **Level Number** — this is how the level is found at runtime; it must match the
+   `LevelNumber` of the GameFlow `LevelConfig` that selects it (see Step 6)
 4. Set **Difficulty Rating** (0–10, informational — actual spawn rates come from `DifficultyConfig`)
-5. Set **Registry File** — filename without extension, e.g. `TrackSegments_Registry`
-6. Set **Start Segment ID** — the `Id` of the segment that always plays first (e.g., `"start"`)
-7. **Tick Active Tags** — any segment whose `Tags` list contains at least one ticked tag will be included in this level
-8. Click **Save**
-
-The file is written immediately to the Resources folder and imported by AssetDatabase.
-
-### Reading the preview panel
-
-The right panel shows every segment that would be active for this level, colour-coded by difficulty (green = easy, red = hard).
-
-Each row:
-```
-[L] desert_left_20   d=3.0  L=  20 [H] (Challenge) S=3
- ↑  ↑                ↑       ↑    ↑   ↑              ↑
-dir id               diff   len  mode  role        slot count
-```
-
-- **`[L]`** / **`[R]`** / **`[B]`** = turn direction
-- **`[P]`** = Preset, **`[H]`** = Hybrid (absent = Procedural)
-- **`(Challenge)`** = Role, if not Normal
-- **`S=3`** = 3 spawn slots defined
-
-Below the segment list:
-- **Difficulty histogram** — bar chart of segments per difficulty bucket (0–9)
-- **L= R= B=** — direction balance count
-- **Preset/Hybrid count** — how many segments have pre-authored layouts
-- **Roles summary** — e.g., `Challenge:4  Reward:2`
+5. Set **Lane Count** and **Lane Width**
+6. Assign **Registry** — the shared `TrackSegmentRegistry.asset`
+7. Set **Start Segment Id** — the `Id` of the segment that always plays first (e.g., `"start"`)
+8. Fill **Active Segment Tags** — any segment whose `Tags` list contains at least one listed
+   tag is included in this level. (Alternatively, list exact ids in **Active Segment Ids** —
+   when non-empty, it takes precedence over tags. Leave both empty to include the whole pool.)
+9. **Register the level**: select
+   `Assets/TempleRun/Scriptables/Track/TrackLevelRegistry.asset` and add the new
+   `TrackLevelSO` to its `Levels` array
 
 ### Tips
 
 - **Balance Left/Right** — aim for equal counts to prevent the track feeling biased.
-- **Cover the full difficulty range** — a histogram with even coverage allows smooth ramping.
-- **Duplicate an existing level** to start from a known baseline — use the **Duplicate** button.
-- **Revert** discards unsaved changes and reloads from disk.
+- **Cover the full difficulty range** — even coverage allows smooth ramping.
+- **Check your tag spelling** — tags are matched case-sensitively against segment `Tags`;
+  a typo silently produces an empty (or fallback) pool.
 
 ---
 
@@ -389,21 +338,33 @@ The visual track tiles are placed by components extending `PrefabSpawnerAbstract
 
 ## Step 6 — Set the Active Level at Runtime
 
-`TrackManager` reads the level from `Blackboard.Instance.TrackLevelDefinition`. This is set by whatever level-selection flow your game uses. Two common approaches:
+The level is selected by a plain **`int` level number** that travels through the event
+system — GameFlow never references a track type, and the track system never references
+GameFlow:
 
-### A. Assign directly from a MonoBehaviour
-```csharp
-// In a level-selection controller, before the game scene loads:
-var levelJson  = Resources.Load<TextAsset>("TrackLevel_06_Desert");
-var level      = JsonUtility.FromJson<TrackSegmentLibraryDefinition>(levelJson.text);
-Blackboard.Instance.TrackLevelDefinition = level;
+```
+GameFlow: LevelConfigApplier publishes LevelApplied(int LevelNumber)
+    ↓  TempleRunGameFlowBridge
+TempleRun: TempleRunLevelApplied → stored on Blackboard.SelectedLevel
+    ↓  at TrackManager init
+TrackLibraryLoader.Load(_trackLevels, Blackboard.Instance.SelectedLevel)
+    → finds the TrackLevelSO with a matching LevelNumber
+    → merges the registry pool filtered by its tags/ids
+    → returns the runtime TrackSegmentLibrary
 ```
 
-### B. Let TrackManager fall back to an Inspector TextAsset
-Drag a level JSON `TextAsset` directly onto `TrackManager._trackSegmentLibraryJson` in the Inspector. This is the quickest setup for prototyping a single level.
+To make your new level playable:
 
-### C. Use the fallback resource name
-If neither of the above is set, `TrackManager` loads `Resources/TrackSegments.json` as a legacy single-file fallback. This is a catch-all for testing only.
+1. **Assign the level registry** — in the `TempleRunTrackPCG` scene, the `TrackManager`
+   component's `_trackLevels` field must reference
+   `Assets/TempleRun/Scriptables/Track/TrackLevelRegistry.asset` (which must contain your
+   `TrackLevelSO` — Step 4.9)
+2. **Match the level number** — the GameFlow `LevelConfig` used by level selection must have
+   the same `LevelNumber` as your `TrackLevelSO`
+
+If no level is selected (or no `TrackLevelSO` matches the number), `TrackManager` falls back
+to purely procedural segments using `MinTrackLength` / `MaxTrackLength` — handy for quick
+testing, but none of your authored segments will appear.
 
 ---
 
@@ -423,7 +384,7 @@ Turn on `CrawfisSoftware > Events > Event Logging Enabled`. Every `TrackSegmentC
 | Problem | Likely cause | Fix |
 |---------|-------------|-----|
 | No obstacles on a segment | `ObstacleSpawnRate` = 0, or SpawnMode = Preset with no slots | Check `DifficultyConfig.ObstacleSpawnRate`; add slots or switch to Procedural |
-| Tag ticked but segment not appearing | Tag mismatch (case-sensitive) | Verify tag strings match exactly in both registry and editor |
+| Tag listed but segment not appearing | Tag mismatch (case-sensitive), or segment missing from the registry | Verify tag strings match exactly in the `TrackSegmentSO` and `TrackLevelSO`, and that the segment is in `TrackSegmentRegistry.asset` |
 | Segments repeating too much | `MaxRepeat` too high or too few segments with that tag | Increase `MaxRepeat` gate or add more segments |
 | Track turning same direction repeatedly | `GetNewDirection()` not seeded or only one direction in library | Ensure both Left and Right segments are tagged and ticked |
 | Wrong prefab spawning | PrefabTag not in registry or wrong registry assigned | Add entry to `SpawnPrefabRegistry` and confirm the asset is assigned to the spawner |
@@ -431,38 +392,42 @@ Turn on `CrawfisSoftware > Events > Event Logging Enabled`. Every `TrackSegmentC
 
 ---
 
-## Reference: JSON Schema
+## Reference: Track Data Model
 
-### TrackSegments_Registry.json (top level)
-```json
-{
-  "Version": "2.0",
-  "Segments": [ /* array of TrackSegmentDefinition */ ]
-}
-```
+Four ScriptableObject types in `Assets/TempleRun/Scriptables/Track/`:
 
-### TrackLevel_*.json (top level)
-```json
-{
-  "Version": "2.0",
-  "LevelName": "Desert Run",
-  "LevelNumber": 6,
-  "DifficultyRating": 4.5,
-  "LaneCount": 3,
-  "LaneWidth": 2.0,
-  "SegmentRegistryFile": "TrackSegments_Registry",
-  "StartSegmentId": "start",
-  "ActiveSegmentTags": ["desert", "opening"],
-  "ActiveSegmentIds": [],
-  "Segments": [],
-  "Connections": []
-}
-```
+### `TrackSegmentSO` (one asset per segment)
 
-`ActiveSegmentTags` — OR logic. A segment is included if it has **any** of the listed tags.
-`ActiveSegmentIds` — Include specific segments by ID regardless of tags.
-`Connections` — Optional graph edges: `[{ "FromId": "seg_a", "ToId": "seg_b" }]`. If defined for a segment, only listed `ToId` segments can follow it.
-`Segments` — Leave empty in the file. Populated at runtime by merging the registry.
+The authored fields for a single segment — see the
+[field reference in Step 3](#step-3--author-segment-assets-and-register-them).
+
+### `TrackSegmentRegistrySO` (`TrackSegmentRegistry.asset`)
+
+A single `Segments` array of `TrackSegmentSO` references — the shared pool every level
+draws from.
+
+### `TrackLevelSO` (`TrackLevel_*.asset`)
+
+| Field | Description |
+|-------|-------------|
+| `LevelNumber` | How the level is resolved at runtime — must match the GameFlow `LevelConfig.LevelNumber` |
+| `LevelName` | Shown in menus |
+| `DifficultyRating` | 0–10, informational |
+| `LaneCount`, `LaneWidth` | Lane configuration for this level |
+| `Registry` | Reference to the shared `TrackSegmentRegistrySO` |
+| `StartSegmentId` | The segment that always plays first |
+| `ActiveSegmentTags` | OR logic — a segment is included if it has **any** of the listed tags |
+| `ActiveSegmentIds` | Include specific segments by id; when non-empty, takes precedence over tags. Both empty = whole pool |
+
+### `TrackLevelRegistrySO` (`TrackLevelRegistry.asset`)
+
+A single `Levels` array of `TrackLevelSO` references. Assigned to
+`TrackManager._trackLevels`; this is the asset that maps the selected level number to a
+track ruleset.
+
+> **Segment connections:** the runtime `TrackSegmentDefinition` supports optional
+> `Connections` (graph edges restricting which segments may follow which). These are not
+> currently exposed on the authoring SOs.
 
 ---
 
@@ -495,4 +460,4 @@ Spawn rates and movement parameters come from `DifficultyConfig` ScriptableObjec
 | `PowerUpSpawnRate` | 0.15 | Per-segment probability of spawning a power-up |
 | `NumberOfLives` | 2 | Player lives before game over |
 
-> **Note:** `MinTrackLength` and `MaxTrackLength` only affect the **fallback** path in `TrackManager` (when no segment library is loaded). When using JSON segments, the length comes directly from the segment definition's `Length` field.
+> **Note:** `MinTrackLength` and `MaxTrackLength` only affect the **fallback** path in `TrackManager` (when no segment library is loaded). When using authored segments, the length comes from the segment's geometry (`ToPivotDistance + ExitDistance`).
