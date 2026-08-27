@@ -15,6 +15,9 @@ namespace CrawfisSoftware.UGS.Authentication
         }
         public void UnityServicesInitializationFailed(Exception ex)
         {
+            // ServicesInitialization swallows the InitializeAsync exception (empty catch) and no
+            // subscriber logs this event, so without this line a failed initialization is silent.
+            Debug.LogError($"Unity Services initialization FAILED: {ex}");
             EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.UnityServicesInitializationFailed, this, ex);
         }
         public void SignedIn()
