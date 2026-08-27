@@ -118,7 +118,9 @@ Each domain's code may ONLY reference events from its own domain. Cross-domain e
 
 3. **GameFlow code referencing UGS_EventsEnum:**
    - Grep for `UGS_EventsEnum\.` in `Assets/GameFlow/**/*.cs`
-   - Any match is a violation (UGS bridging lives in `UGSGameFlowBridge.cs` under `Assets/UGS/`)
+   - Exclude `TempleRunGameFlowBridge.cs` — it legitimately holds the TempleRun -> UGS
+     passthrough dictionary (see `/add-bridge-mapping`)
+   - Any other match is a violation (UGS <-> GameFlow bridging lives in `UGSGameFlowBridge.cs` under `Assets/UGS/`)
 
 4. **UGS code referencing GameFlowEvents (outside bridges):**
    - Grep for `GameFlowEvents\.` in `Assets/UGS/**/*.cs`
@@ -128,7 +130,17 @@ Each domain's code may ONLY reference events from its own domain. Cross-domain e
 5. **Any code referencing TempleRunEvents in UGS or UGS_EventsEnum in TempleRun:**
    - Grep for `TempleRunEvents\.` in `Assets/UGS/**/*.cs`
    - Grep for `UGS_EventsEnum\.` in `Assets/TempleRun/**/*.cs`
-   - Any match is a violation (no direct TempleRun <-> UGS communication)
+   - Any match is a violation (TempleRun -> UGS crossings are allowed only via the
+     passthrough dictionary in `TempleRunGameFlowBridge`, which lives under GameFlow)
+
+6. **Additional domains** (added via `/add-event-domain`): run the same check for each —
+   the domain's enum name may appear outside its own `Assets/<Domain>/` folder ONLY in
+   bridge files. The authoritative domain list is the set of `EventsPublisher*` singleton
+   subclasses.
+
+7. **Registry drift:** compare the `EventsPublisher*` subclasses found in `Assets/`
+   against the Domain Registry table in `CLAUDE.md` (Architecture Overview). Flag any
+   domain missing from the table, or any table row with no matching publisher.
 
 **Report format:**
 ```
@@ -148,6 +160,7 @@ Event System Audit Results:
   Circular chains: [count]
   Publish/subscribe mismatches: [count]
   Domain isolation violations: [count]
+  Registry drift: [count]
 
   Total issues: [count]
   Severity: [CLEAN / WARNINGS / CRITICAL]
@@ -157,5 +170,6 @@ Event System Audit Results:
 
 - Event enums: `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs`, `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs`, `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs`
 - Auto-flows: `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Assets/UGS/Scripts/Events/UGSAutoEventFlow.cs`
-- Bridges: `Assets/GameFlow/Scripts/Events/TempleRunGameFlowBridge.cs`, `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`
+- Bridges: `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`
+- Any additional `EventsPublisher*` subclasses, `*AutoEventFlow` classes, and `*Bridge` classes from domains added later
 - All C# scripts: `Assets/**/*.cs`

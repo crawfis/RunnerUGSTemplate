@@ -24,6 +24,10 @@ Display a comprehensive view of all events in the event system.
 | UserInitiated | `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs` |
 | UGS | `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` |
 
+> The authoritative domain list is the set of `EventsPublisher*` singleton subclasses
+> (one per enum). If a domain exists that isn't in this table (added via
+> `/add-event-domain`), include it in the listing and update this table.
+
 ### Step 2: Read auto-chain mappings
 
 Read the relevant auto-flow file(s) and extract all dictionary entries.
@@ -37,7 +41,8 @@ Read the relevant auto-flow file(s) and extract all dictionary entries.
 ### Step 3: Read bridge mappings
 
 Read bridge files and extract cross-domain mappings:
-- `Assets/GameFlow/Scripts/Events/TempleRunGameFlowBridge.cs`
+- `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (includes the
+  TempleRun -> UGS passthrough dictionary)
 - `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`
 
 ### Step 4: Format output
