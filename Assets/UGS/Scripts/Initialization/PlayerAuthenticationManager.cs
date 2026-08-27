@@ -24,7 +24,7 @@ namespace CrawfisSoftware.UGS
         
         public void Awake()
         {
-            // SwitchProfile is deferred to EnsureProfileSwitched(): AuthenticationService.Instance
+            // SwitchProfile is deferred to EnsureUnityServicesInitialized(): AuthenticationService.Instance
             // throws ServicesInitializationException until UnityServices.InitializeAsync() completes,
             // and this scene can finish loading before that async init does. Every entry into a
             // sign-in flow funnels through SignInCachedPlayerAsync, which is only reached via the
@@ -70,7 +70,7 @@ namespace CrawfisSoftware.UGS
         /// <returns>A task that represents the asynchronous sign-in operation.</returns>
         public void SignInCachedPlayerAsync()
         {
-            EnsureProfileSwitched();
+            EnsureUnityServicesInitialized();
             if (!AuthenticationService.Instance.SessionTokenExists)
             {
                 Logger.LogDemo($"{k_KeyEmoji} No cached session found");
@@ -123,7 +123,7 @@ namespace CrawfisSoftware.UGS
         /// Must only run after UnityServices.InitializeAsync() has completed, and SwitchProfile
         /// itself is only legal while signed out — both guarded here.
         /// </summary>
-        private void EnsureProfileSwitched()
+        private void EnsureUnityServicesInitialized()
         {
             if (_profileSwitched || AuthenticationService.Instance.IsSignedIn) return;
             AuthenticationService.Instance.SwitchProfile(UGS_State.UGS_Environment);
