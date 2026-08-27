@@ -24,7 +24,12 @@ namespace CrawfisSoftware.UGS
         
         public void Awake()
         {
-            AuthenticationService.Instance.SwitchProfile(UGS_State.UGS_Environment);
+            // SwitchProfile is deferred to EnsureProfileSwitched(): AuthenticationService.Instance
+            // throws ServicesInitializationException until UnityServices.InitializeAsync() completes,
+            // and this scene can finish loading before that async init does. Every entry into a
+            // sign-in flow funnels through SignInCachedPlayerAsync, which is only reached via the
+            // CheckForExistingSession event (auto-chained from UnityServicesInitialized) or the
+            // UGS_State.IsCheckForExistingSession fallback — both guaranteed post-initialization.
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
             EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
@@ -65,6 +70,7 @@ namespace CrawfisSoftware.UGS
         /// <returns>A task that represents the asynchronous sign-in operation.</returns>
         public void SignInCachedPlayerAsync()
         {
+            EnsureProfileSwitched();
             if (!AuthenticationService.Instance.SessionTokenExists)
             {
                 Logger.LogDemo($"{k_KeyEmoji} No cached session found");
@@ -108,6 +114,20 @@ namespace CrawfisSoftware.UGS
         private void HandleCheckForExistingSession(string eventName, object sender, object data)
         {
             SignInCachedPlayerAsync();
+        }
+
+        private bool _profileSwitched;
+
+        /// <summary>
+        /// Switches to the environment-specific credentials profile before the first sign-in.
+        /// Must only run after UnityServices.InitializeAsync() has completed, and SwitchProfile
+        /// itself is only legal while signed out — both guarded here.
+        /// </summary>
+        private void EnsureProfileSwitched()
+        {
+            if (_profileSwitched || AuthenticationService.Instance.IsSignedIn) return;
+            AuthenticationService.Instance.SwitchProfile(UGS_State.UGS_Environment);
+            _profileSwitched = true;
         }
 
         private void HandleSuccessfulSignIn(string eventName, object sender, object data)
