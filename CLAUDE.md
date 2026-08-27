@@ -24,8 +24,9 @@ Event Logging:      CrawfisSoftware > Events > Log Events   (same menu: Clear No
                     List Current Subscribers, Clear Events on Exiting Play Mode);
                     or add a DebugEventFileLogger for a file dump
 List Domains:       CrawfisSoftware > Events > List Domains (EventsPublisher 2.5.0+).
-                    This repo's enums carry no [EventEnum] attribute, so they register
-                    lazily — run it in PLAY MODE to see all four domains listed
+                    All four domain enums are marked [EventEnum], so the menu sweeps and
+                    lists them in EDIT MODE — per domain: prefix, enum, member / payload /
+                    sticky / replay counts
 Track Import:       CrawfisSoftware > Track > Import JSON -> ScriptableObjects (one-shot)
 Cloud Code:         Services > Cloud Code > Generate All Modules Bindings
 Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_GameOnly_Windows]
@@ -134,7 +135,8 @@ Unity 6 endless runner demonstrating **event-driven architecture** with Unity Ga
 Two invariants keep this registry trustworthy:
 - **Placement:** domain enums live only in `Assets/*/Scripts/Events/` folders, each with an
   `EventsPublisher*` singleton subclass beside it — the set of those subclasses IS the
-  authoritative domain list.
+  authoritative domain list. All four are marked `[EventEnum]`, so **List Domains** reports
+  the same four from the registry: a domain in one list and not the other is drift.
 - **Registration:** `/add-event-domain` adds a row here as part of its checklist, and
   `/audit-events` flags drift between this table and the code.
 
