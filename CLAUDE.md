@@ -20,8 +20,12 @@ complete documentation, see [README.md](README.md).
 Play in Editor:     CrawfisSoftware > Play Scene 0 Always (toggle ON)
 Entry Scene:        Assets/UGS/Scenes/Boot/0_BootStrap (build index 0);
                     game-only variant: Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only
-Event Logging:      CrawfisSoftware > Events > Event Logging Enabled (menu ships with the
-                    EventsPublisher package), or add a DebugEventFileLogger for a file dump
+Event Logging:      CrawfisSoftware > Events > Log Events   (same menu: Clear Now,
+                    List Current Subscribers, Clear Events on Exiting Play Mode);
+                    or add a DebugEventFileLogger for a file dump
+List Domains:       CrawfisSoftware > Events > List Domains (EventsPublisher 2.5.0+).
+                    This repo's enums carry no [EventEnum] attribute, so they register
+                    lazily — run it in PLAY MODE to see all four domains listed
 Track Import:       CrawfisSoftware > Track > Import JSON -> ScriptableObjects (one-shot)
 Cloud Code:         Services > Cloud Code > Generate All Modules Bindings
 Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_GameOnly_Windows]
@@ -407,7 +411,7 @@ internal class MyController : MonoBehaviour
 Or open the game-only bootstrap directly: `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only`.
 
 ### Enable Event Logging
-`CrawfisSoftware > Events > Event Logging Enabled`
+`CrawfisSoftware > Events > Log Events` (or add a `DebugEventFileLogger` for a file dump)
 
 ### Build Profiles
 | Profile | Purpose |

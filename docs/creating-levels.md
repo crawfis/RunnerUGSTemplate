@@ -377,7 +377,7 @@ testing, but none of your authored segments will appear.
 4. Press Play
 
 ### Enable event logging
-Turn on `CrawfisSoftware > Events > Event Logging Enabled`. Every `TrackSegmentCreated` and `SplineSegmentCreated` event will be printed to the Console, showing the segment ID, direction, length, and spawn mode. Good for verifying the correct segments are selected.
+Turn on `CrawfisSoftware > Events > Log Events`. Every `TrackSegmentCreated` and `SplineSegmentCreated` event will be printed to the Console, showing the segment ID, direction, length, and spawn mode. Good for verifying the correct segments are selected.
 
 ### Common iteration checklist
 
