@@ -298,7 +298,7 @@ CrawfisSoftware → Play Scene 0 Always (toggle ON)
 ### 5. Enable Event Logging (Optional)
 
 ```
-CrawfisSoftware → Events → Event Logging Enabled
+CrawfisSoftware → Events → Log Events
 ```
 
 ### 6. Link to Unity Gaming Services

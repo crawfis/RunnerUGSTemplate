@@ -1,15 +1,15 @@
-# GitHub Copilot instructions
+# GEMINI.md
 
-> Thin pointer, kept in sync with `GEMINI.md`. The real guidance lives in the two files
-> below — extend those, not this file.
+> Thin pointer, kept in sync with `.github/copilot-instructions.md`. The real guidance
+> lives in the two files below — extend those, not this file.
 
 This repository keeps its AI-agent guidance in two root files, written for **any** coding
 agent (not just the tools they are named after):
 
-1. **[AGENTS.md](../AGENTS.md)** — how to approach work here (design-first, docs are part
-   of the change).
-2. **[CLAUDE.md](../CLAUDE.md)** — the mandatory concrete guide: event-system rules,
-   coding conventions, key file paths.
+1. **[AGENTS.md](AGENTS.md)** — how to approach work here (design-first, docs are part of
+   the change).
+2. **[CLAUDE.md](CLAUDE.md)** — the mandatory concrete guide: event-system rules, coding
+   conventions, key file paths.
 
 Read both before changing code. The non-negotiable core:
 

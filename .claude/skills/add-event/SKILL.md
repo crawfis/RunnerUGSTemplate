@@ -26,6 +26,11 @@ Ask the user if not obvious from context:
 | **UserInitiated** | `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs` | Raw input: new player-triggered actions |
 | **UGS** | `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` | Unity Gaming Services: auth, leaderboards, achievements, remote config |
 
+> This table lists the domains that exist today. The authoritative list is the set of
+> `EventsPublisher*` singleton subclasses (one per domain enum) — update this table when a
+> domain is added. If the feature genuinely needs a domain that doesn't exist yet (rare),
+> run `/add-event-domain` first — its decision gate tells you whether you really do.
+
 ### Step 2: Read the target enum file
 
 Read the enum file to find:
@@ -55,6 +60,9 @@ Choose the appropriate subset. Not all features need all states. For example:
 - Find the next available value range (gaps of 10 between categories)
 - Values within a group are sequential
 - Add a category comment header: `// ---------- Feature Name ----------`
+- Exceptions — `UserInitiatedEvents` (implicit values, `User` prefix, no categories;
+  append at the end) and `UGS_EventsEnum` (implicit values; append inside the right
+  category block)
 
 ### Step 5: Edit the enum file
 

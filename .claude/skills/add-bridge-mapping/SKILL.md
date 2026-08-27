@@ -28,6 +28,10 @@ After adding a bridge mapping, remind the user that any existing code that direc
 
 Note: TempleRun -> UGS passthrough mappings live in `TempleRunGameFlowBridge` as a third dictionary. This avoids routing through GameFlow when a TempleRun event maps directly to a UGS event (e.g., `DistanceUpdated`, `CoinCollected`).
 
+If you are adding a whole new integration domain (analytics, another backend), create it
+with `/add-event-domain` — it walks through the enum, the publisher singleton, scene
+hosting, and the bridge class — then add the new bridge to the table above.
+
 ## CRITICAL: Always use dictionaries
 
 **NEVER add individual `SubscribeToEvent` / `UnsubscribeToEvent` calls in bridge or auto-flow classes.** All event mappings MUST go into the appropriate dictionary. The `SubscribeToAllEnumEvents` handler will pick them up automatically. Individual subscriptions break the declarative pattern and create maintenance burden.
