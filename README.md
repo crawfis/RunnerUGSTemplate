@@ -52,7 +52,7 @@ Student teams can replace the Temple Run gameplay with their own game, add new U
 
 ## Codebase Statistics
 
-> Assembly-CSharp only — excludes `Blocks/`, `ThirdParty/`, `CloudCode/`, and generated bindings.
+> Assembly-CSharp only — excludes `UGS/ThirdParty/Blocks/`, `ThirdParty/`, `CloudCode/`, and generated bindings.
 
 | Metric | Count |
 |--------|-------|
@@ -1078,13 +1078,10 @@ RunnerUGSTemplate/
 │   │   ├── CloudCode/
 │   │   │   └── TempleRunUGSCloud~/       # .NET 6.0 Cloud Code project (30+ cloud functions)
 │   │   ├── Editor/                       # RemoteConfig editor data
-│   │   └── Prefabs/                      # UGS-related prefabs
-│   │
-│   ├── Blocks/                           # Unity Building Blocks (legacy - gradually being migrated to UGS/)
-│   │   ├── Achievements/                 # Achievement definitions, prefabs, scripts
-│   │   ├── Common/                       # Shared UGS utilities
-│   │   ├── Leaderboards/                 # Leaderboard config, clients, UI
-│   │   └── PlayerAccount/                # Authentication UI and logic
+│   │   ├── Prefabs/                      # UGS-related prefabs
+│   │   ├── UI/                           # UGS-only PanelSettings + the login modal UXML/USS
+│   │   └── ThirdParty/Blocks/            # Vendored Unity Building Blocks, pruned to what UGS uses
+│   │                                     #   (see THIRD-PARTY-NOTICES.md)
 │   │
 │   ├── CloudCode/                        # Cloud Code generated bindings (top-level for Unity)
 │   │   └── GeneratedModulesBindings/
@@ -1280,7 +1277,7 @@ Default leaderboard (`DailyDistance`):
 
 ### Achievement Configuration
 
-Achievements are defined in `Assets/Blocks/Achievements/Deployment/Achievements.ach`:
+Achievements are defined in `Assets/UGS/ThirdParty/Blocks/Achievements/Deployment/Achievements.ach`:
 
 ```json
 [{
