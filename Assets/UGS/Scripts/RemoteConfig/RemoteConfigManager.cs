@@ -6,6 +6,8 @@ using Unity.Services.RemoteConfig;
 
 using UnityEngine;
 
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS
 {
     public class RemoteConfigManager : MonoBehaviour, IDisposable
@@ -34,14 +36,14 @@ namespace CrawfisSoftware.UGS
             }
             else
             {
-                EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
-                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
+                UGSBus.Unsubscribe(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
+                UGSBus.Subscribe(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
             }
         }
 
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
+            UGSBus.Unsubscribe(UGS_EventsEnum.RemoteConfigFetching, OnFetchRemoteConfig);
 
         }
         private void OnFetchRemoteConfig(string eventName, object sender, object data)
@@ -118,7 +120,7 @@ namespace CrawfisSoftware.UGS
             if (response.status == ConfigRequestStatus.Success)
             {
                 Debug.Log($"Remote config fetched with response: {response.status}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.RemoteConfigFetched, this, response.status);
+                UGSBus.Publish(UGS_EventsEnum.RemoteConfigFetched, this, response.status);
                 ApplyRemoteConfig();
                 if (_logRemoteConfigValues)
                 {
@@ -128,7 +130,7 @@ namespace CrawfisSoftware.UGS
             else
             {
                 Debug.LogWarning($"Remote Config fetch failed: {response.status}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.RemoteConfigFailed, this, response.status);
+                UGSBus.Publish(UGS_EventsEnum.RemoteConfigFailed, this, response.status);
             }
         }
 
@@ -140,12 +142,12 @@ namespace CrawfisSoftware.UGS
                 //_featureFlagsManager?.UpdateFromRemoteConfig();
                 //_gameBalanceManager?.UpdateFromRemoteConfig();
                 //_eventConfigManager?.UpdateFromRemoteConfig();
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.RemoteConfigUpdated, this, UnityEngine.Time.time);
+                UGSBus.Publish(UGS_EventsEnum.RemoteConfigUpdated, this, UnityEngine.Time.time);
             }
             catch (Exception e)
             {
                 Debug.LogError($"Failed to apply remote configuration: {e.Message}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.RemoteConfigFailed, this, e.Message);
+                UGSBus.Publish(UGS_EventsEnum.RemoteConfigFailed, this, e.Message);
             }
         }
 

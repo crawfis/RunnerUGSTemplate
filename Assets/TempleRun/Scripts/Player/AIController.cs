@@ -1,6 +1,10 @@
-﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.Events;
 
 using UnityEngine;
+
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
+using UserInputBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Events.UserInitiatedEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -23,7 +27,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
+            TempleRunBus.Subscribe(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
         }
 
         private void OnTempleRunStarted(string eventName, object sender, object data)
@@ -38,16 +42,16 @@ namespace CrawfisSoftware.TempleRun
             switch (_turnController.TurnDirection)
             {
                 case Direction.Left:
-                    EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserLeftTurnRequested, this, distance);
+                    UserInputBus.Publish(UserInitiatedEvents.UserLeftTurnRequested, this, distance);
                     break;
                 default:
-                    EventsPublisherUserInitiated.Instance.PublishEvent(UserInitiatedEvents.UserRightTurnRequested, this, distance);
+                    UserInputBus.Publish(UserInitiatedEvents.UserRightTurnRequested, this, distance);
                     break;
             }
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
         }
     }
 }

@@ -5,6 +5,8 @@ using CrawfisSoftware.UGS.Events;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS.Authentication
 {
     /// <summary>
@@ -29,9 +31,9 @@ namespace CrawfisSoftware.UGS.Authentication
         {
             m_AuthenticationObserver = new AuthenticationObserver();
 
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnSignIn);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerAuthenticated, OnSignIn);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
 
             if (UGS_State.IsPlayerSigningIn)
             {
@@ -57,9 +59,9 @@ namespace CrawfisSoftware.UGS.Authentication
 
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnSignIn);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerAuthenticated, OnSignIn);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSignedOut, OnPlayerSignOut);
         }
 
         // The PanelRenderer surfaces its visual tree only through this callback (it has no
@@ -82,7 +84,7 @@ namespace CrawfisSoftware.UGS.Authentication
         {
             _signedIn = false;
             SetHidden(false);
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSigningOut, this, null);
+            UGSBus.Publish(UGS_EventsEnum.PlayerSigningOut, this, null);
         }
 
         private void OnPlayerSigningIn(string eventName, object sender, object data)

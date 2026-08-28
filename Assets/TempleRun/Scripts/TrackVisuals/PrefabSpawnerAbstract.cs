@@ -1,7 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -37,9 +39,9 @@ namespace CrawfisSoftware.TempleRun
 
         protected void SubscribeToEvents()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SplineSegmentCreated, OnSplineCreated);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SegmentGeometryReady, OnSegmentGeometryReady);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanged, OnActiveSplineChanged);
+            TempleRunBus.Subscribe(TempleRunEvents.SplineSegmentCreated, OnSplineCreated);
+            TempleRunBus.Subscribe(TempleRunEvents.SegmentGeometryReady, OnSegmentGeometryReady);
+            TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanged, OnActiveSplineChanged);
             var parent = new GameObject("Generated Level");
             _parentTransform = parent.transform;
         }
@@ -110,9 +112,9 @@ namespace CrawfisSoftware.TempleRun
         }
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SplineSegmentCreated, OnSplineCreated);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SegmentGeometryReady, OnSegmentGeometryReady);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanged, OnActiveSplineChanged);
+            TempleRunBus.Unsubscribe(TempleRunEvents.SplineSegmentCreated, OnSplineCreated);
+            TempleRunBus.Unsubscribe(TempleRunEvents.SegmentGeometryReady, OnSegmentGeometryReady);
+            TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanged, OnActiveSplineChanged);
         }
     }
 }

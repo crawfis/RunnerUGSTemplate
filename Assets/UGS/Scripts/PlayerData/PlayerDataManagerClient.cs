@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.UGS;
+using CrawfisSoftware.UGS;
 using CrawfisSoftware.UGS.Events;
 using CrawfisSoftware.Utilities;
 
@@ -11,6 +11,8 @@ using Unity.Services.CloudCode.GeneratedBindings;
 using Unity.Services.CloudCode.GeneratedBindings.TempleRunUGSCloud.Models;
 
 using Task = System.Threading.Tasks.Task;
+
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
 
 namespace CrawfisSoftware.PlayerDataManagement
 {
@@ -50,7 +52,7 @@ namespace CrawfisSoftware.PlayerDataManagement
             
             m_GameManagerUGS.GameplayLevelWon += HandleLevelWon;
             m_GameManagerUGS.GameplayReplayLevelLost += HandleReplayLevelLost;
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, HandleSignInInitialization);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSignedIn, HandleSignInInitialization);
             //m_AuthenticationManager.SignedIn += HandleSignInInitialization;
             m_NetworkHandler.OnlineStatusChanged += HandleConnectivityChanged;
             
@@ -333,7 +335,7 @@ namespace CrawfisSoftware.PlayerDataManagement
             m_GameManagerUGS.GameplayLevelWon -= HandleLevelWon;
             m_GameManagerUGS.GameplayReplayLevelLost -= HandleReplayLevelLost;
             //m_AuthenticationManager.SignedIn -= HandleSignInInitialization;
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, HandleSignInInitialization);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSignedIn, HandleSignInInitialization);
             m_NetworkHandler.OnlineStatusChanged -= HandleConnectivityChanged;
             m_CloudPlayerData = null;
         }

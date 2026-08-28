@@ -2,6 +2,8 @@ using CrawfisSoftware.Events;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+using UserInputBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Events.UserInitiatedEvents>;
+
 namespace CrawfisSoftware.TempleRun.Input
 {
     /// <summary>
@@ -77,13 +79,13 @@ namespace CrawfisSoftware.TempleRun.Input
 
         private void LeftLaneChangeAction_performed()
         {
-            EventsPublisherUserInitiated.Instance.PublishEvent(
+            UserInputBus.Publish(
                 UserInitiatedEvents.UserLeftLaneChangeRequested, this, PlayerNumber);
         }
 
         private void RightLaneChangeAction_performed()
         {
-            EventsPublisherUserInitiated.Instance.PublishEvent(
+            UserInputBus.Publish(
                 UserInitiatedEvents.UserRightLaneChangeRequested, this, PlayerNumber);
         }
     }

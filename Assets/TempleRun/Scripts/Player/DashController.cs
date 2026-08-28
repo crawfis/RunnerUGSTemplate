@@ -1,16 +1,16 @@
 using CrawfisSoftware.Events;
 using UnityEngine;
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Validates dash requests and manages dash state.
     /// Blocks dashes while already dashing or on cooldown.
-    /// Does NOT publish events - validation pass-through allows auto-chain to fire DashStarting.
     ///    Dependencies: Blackboard.DashConfig for cooldown configuration
     ///    Subscribes: TempleRunEvents.DashRequested (from bridge translating UserInitiated)
     ///    Subscribes: TempleRunEvents.DashEnded (clear _isDashing, track cooldown)
-    ///    Publishes: (none - auto-flow handles event progression)
+    ///    Publishes: TempleRunEvents.DashStarting (only once validation passes)
     /// </summary>
     internal class DashController : MonoBehaviour
     {
@@ -22,17 +22,17 @@ namespace CrawfisSoftware.TempleRun
             // Subscribe to TempleRun domain events, not UserInitiated
             // This allows dash to be triggered from any source: player input, AI, replay, network, etc.
             // The bridge translates UserInitiated.DashRequested -> TempleRunEvents.DashRequested
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.DashRequested, OnDashRequested);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.DashEnded, OnDashEnded);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.DashRequested, OnDashRequested);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.DashEnded, OnDashEnded);
         }
 
@@ -55,9 +55,15 @@ namespace CrawfisSoftware.TempleRun
                 return;
 
             // Validation passed - mark as dashing and record time
-            // Event auto-chains will handle DashRequested -> DashStarting progression
             _isDashing = true;
             _lastDashTime = Time.time;
+
+            // Published here rather than auto-chained from DashRequested: DashRequested is the
+            // bridge's raw translation of the input, so the old auto-chain fired DashStarting even
+            // when the checks above rejected the request, defeating the cooldown entirely.
+            // DashSpeedController takes it from here.
+            TempleRunBus.Publish(
+                TempleRunEvents.DashStarting, this, null);
         }
 
         private void OnDashEnded(string eventName, object sender, object data)

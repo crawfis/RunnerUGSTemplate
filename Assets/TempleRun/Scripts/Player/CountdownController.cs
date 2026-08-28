@@ -4,6 +4,8 @@ using System.Collections;
 
 using UnityEngine;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
@@ -21,13 +23,13 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.CountdownStarting, OnCountdownStarting);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.CountdownStarting, OnCountdownStarting);
         }
 
@@ -52,17 +54,17 @@ namespace CrawfisSoftware.TempleRun
                 if (currentSecond != lastReportedSecond)
                 {
                     lastReportedSecond = currentSecond;
-                    EventsPublisherTempleRun.Instance.PublishEvent(
+                    TempleRunBus.Publish(
                         TempleRunEvents.CountdownTick, this, currentSecond);
                 }
             }
 
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.CountdownEnding, this, null);
 
             _countdownCoroutine = null;
 
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.CountdownEnded, this, null);
         }
     }

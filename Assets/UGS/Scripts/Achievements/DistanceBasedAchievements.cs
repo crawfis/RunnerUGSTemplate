@@ -1,4 +1,4 @@
-﻿//using Blocks.Achievements;
+//using Blocks.Achievements;
 
 using Blocks.Achievements;
 
@@ -8,6 +8,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
 
 namespace CrawfisSoftware.UGS.Achievements
 {
@@ -34,14 +36,14 @@ namespace CrawfisSoftware.UGS.Achievements
             };
 
             // Subscribe to distance updates from the bridge
-            EventsPublisherUGS.Instance.SubscribeToEvent(
+            UGSBus.Subscribe(
                 UGS_EventsEnum.UGS_DistanceUpdated,
                 OnDistanceUpdated);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(
+            UGSBus.Unsubscribe(
                 UGS_EventsEnum.UGS_DistanceUpdated,
                 OnDistanceUpdated);
         }

@@ -1,4 +1,4 @@
-﻿//using Blocks.Leaderboards;
+//using Blocks.Leaderboards;
 
 using Blocks.Leaderboards;
 
@@ -14,6 +14,8 @@ using Unity.Services.Leaderboards.Models;
 
 using UnityEngine;
 
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS.Leaderboard
 {
     public class LeaderboardPlayerController : MonoBehaviour
@@ -24,13 +26,13 @@ namespace CrawfisSoftware.UGS.Leaderboard
         public bool IsUpdating { get; private set; } = false;
         private void Start()
         {
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnGameEnding);
+            UGSBus.Subscribe(UGS_EventsEnum.ScoreUpdating, OnGameEnding);
             LeaderboardsObserver.Instance.LeaderboardId = LeaderboardId;
             LeaderboardsObserver.Instance.UseTrustedClient = _useTrustedClient;
         }
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnGameEnding);
+            UGSBus.Unsubscribe(UGS_EventsEnum.ScoreUpdating, OnGameEnding);
         }
         private void OnGameEnding(string eventName, object sender, object data)
         {
@@ -42,7 +44,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
             // Use an async lambda to handle the awaiting
             var _ = HandleScoreUpload(LeaderboardId, score);
             //var _ = LeaderboardsService.Instance.AddPlayerScoreAsync("DailyDistance", score);
-            //EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.ScoreUpdated, this, null);
+            //UGSBus.Publish(UGS_EventsEnum.ScoreUpdated, this, null);
         }
 
         private async Task HandleScoreUpload(string leaderboardId, long score)
@@ -51,12 +53,12 @@ namespace CrawfisSoftware.UGS.Leaderboard
             {
                 var playerEntry = await AddPlayerScore(leaderboardId, score);
                 UnityEngine.Debug.Log($"Score {score} uploaded successfully! Player rank: {playerEntry.Rank}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.ScoreUpdated, this, (playerEntry.PlayerName, playerEntry.Score, playerEntry.PlayerId));
+                UGSBus.Publish(UGS_EventsEnum.ScoreUpdated, this, (playerEntry.PlayerName, playerEntry.Score, playerEntry.PlayerId));
             }
             catch (Exception e)
             {
                 UnityEngine.Debug.LogError($"Failed to upload score: {e}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.ScoreFailedToUpdate, this, leaderboardId);
+                UGSBus.Publish(UGS_EventsEnum.ScoreFailedToUpdate, this, leaderboardId);
             }
             finally
             {

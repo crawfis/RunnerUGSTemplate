@@ -5,6 +5,8 @@ using System.Collections;
 
 using UnityEngine;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
@@ -22,17 +24,17 @@ namespace CrawfisSoftware.TempleRun
 
         private void Start()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.LaneChangingLeft, OnLaneChangingLeft);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.LaneChangingRight, OnLaneChangingRight);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.LaneChangingLeft, OnLaneChangingLeft);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.LaneChangingRight, OnLaneChangingRight);
 
             if (_lerpCoroutine != null)
@@ -75,7 +77,7 @@ namespace CrawfisSoftware.TempleRun
             _laneChangeController.LateralLaneOffset = targetOffset;
             _lerpCoroutine = null;
 
-            EventsPublisherTempleRun.Instance.PublishEvent(completionEvent, this, data);
+            TempleRunBus.Publish(completionEvent, this, data);
         }
     }
 }

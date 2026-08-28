@@ -7,6 +7,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS.Achievements
 {
     /// <summary>
@@ -46,8 +48,8 @@ namespace CrawfisSoftware.UGS.Achievements
                 Initialize(UseTrustedClient);
             }
 
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
+            UGSBus.Subscribe(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
+            UGSBus.Subscribe(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
         }
 
         private void OnEnable()
@@ -66,8 +68,8 @@ namespace CrawfisSoftware.UGS.Achievements
 
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
+            UGSBus.Unsubscribe(UGS_EventsEnum.AchievementsOpening, OnAchievementsOpening);
+            UGSBus.Unsubscribe(UGS_EventsEnum.AchievementsClosing, OnAchievementsClosing);
         }
 
         // The PanelRenderer surfaces its visual tree only through this callback (it has no
@@ -90,7 +92,7 @@ namespace CrawfisSoftware.UGS.Achievements
         {
             _visible = false;
             ApplyVisibility();
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.AchievementsClosed, this, null);
+            UGSBus.Publish(UGS_EventsEnum.AchievementsClosed, this, null);
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.UGS.GameConfig;
+using CrawfisSoftware.UGS.GameConfig;
 using CrawfisSoftware.UGS.Events;
 
 using System.Collections;
@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
 
 namespace CrawfisSoftware.UGS.Leaderboard
 {
@@ -23,20 +27,20 @@ namespace CrawfisSoftware.UGS.Leaderboard
 
         private void Start()
         {
-            //EventsPublisherTempleRun.Instance.SubscribeToEvent(GamePlayEvents.GameScenesUnloaded, OnGameOver);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.LeaderboardOpening, LoadLeaderboard);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnScoreUpdating);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreUpdated, OnScoreUpdated);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.ScoreFailedToUpdate, OnScoreUpdateFailed);
+            //TempleRunBus.Subscribe(GamePlayEvents.GameScenesUnloaded, OnGameOver);
+            UGSBus.Subscribe(UGS_EventsEnum.LeaderboardOpening, LoadLeaderboard);
+            UGSBus.Subscribe(UGS_EventsEnum.ScoreUpdating, OnScoreUpdating);
+            UGSBus.Subscribe(UGS_EventsEnum.ScoreUpdated, OnScoreUpdated);
+            UGSBus.Subscribe(UGS_EventsEnum.ScoreFailedToUpdate, OnScoreUpdateFailed);
         }
 
         private void OnDestroy()
         {
-            //EventsPublisherTempleRun.Instance.UnsubscribeToEvent(GamePlayEvents.GameScenesUnloaded, OnGameOver);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.LeaderboardOpening, LoadLeaderboard);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreUpdating, OnScoreUpdating);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreUpdated, OnScoreUpdated);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.ScoreFailedToUpdate, OnScoreUpdateFailed);
+            //TempleRunBus.Unsubscribe(GamePlayEvents.GameScenesUnloaded, OnGameOver);
+            UGSBus.Unsubscribe(UGS_EventsEnum.LeaderboardOpening, LoadLeaderboard);
+            UGSBus.Unsubscribe(UGS_EventsEnum.ScoreUpdating, OnScoreUpdating);
+            UGSBus.Unsubscribe(UGS_EventsEnum.ScoreUpdated, OnScoreUpdated);
+            UGSBus.Unsubscribe(UGS_EventsEnum.ScoreFailedToUpdate, OnScoreUpdateFailed);
         }
 
         private void OnScoreUpdating(string eventName, object sender, object data)
@@ -69,7 +73,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
             if (arg0.name != _sceneToLoad) return;
 
             SceneManager.sceneLoaded -= OnLeaderboardSceneLoaded;
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.LeaderboardOpened, this, LeaderboardId);
+            UGSBus.Publish(UGS_EventsEnum.LeaderboardOpened, this, LeaderboardId);
             StartCoroutine(CloseLeaderboardAfterDelay());
         }
 
@@ -77,7 +81,7 @@ namespace CrawfisSoftware.UGS.Leaderboard
         {
             yield return new WaitUntil(() => !_isUpdating);
             yield return new WaitForSeconds(UGSConstants.LeaderboardDisplayTime);
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.LeaderboardClosing, "Leaderboard Controller", LeaderboardId);
+            UGSBus.Publish(UGS_EventsEnum.LeaderboardClosing, "Leaderboard Controller", LeaderboardId);
         }
     }
 }

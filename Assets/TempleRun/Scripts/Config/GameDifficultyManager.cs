@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
 namespace CrawfisSoftware.TempleRun.GameConfig
 {
     /// <summary>
@@ -40,14 +42,14 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 
         public void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
+            TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+            TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
         }
 
         public void SetDifficulty(string difficultyName)
@@ -56,7 +58,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             if (_difficultyConfigs.ContainsKey(difficultyName))
             {
                 CurrentDifficulty = difficultyName;
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.TempleRunDifficultyChanging, this, _difficultyConfigs[CurrentDifficulty]);
+                TempleRunBus.Publish(TempleRunEvents.TempleRunDifficultyChanging, this, _difficultyConfigs[CurrentDifficulty]);
             }
             else
             {
@@ -88,7 +90,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             string newDifficulty = data as string;
             if (string.IsNullOrEmpty(newDifficulty))
             {
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.DifficultyChangeFailed, this, CurrentDifficultyConfig);
+                TempleRunBus.Publish(TempleRunEvents.DifficultyChangeFailed, this, CurrentDifficultyConfig);
                 return;
             }
             SetDifficulty(newDifficulty);

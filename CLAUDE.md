@@ -7,11 +7,10 @@ conventions, and paths. For detailed architecture diagrams, visual walkthroughs,
 complete documentation, see [README.md](README.md).
 
 > Sibling repo: this is the Unity-Gaming-Services variant of
-> [EndlessRunnerTemplate](https://github.com/crawfis/EndlessRunnerTemplate). The sibling is
-> on a newer EventsPublisher API (static `EventsFor<T>` buses, typed payloads, Sticky
-> delivery); THIS repo uses the singleton-publisher API documented below. Do not port
-> sibling code or guidance verbatim — translate to this API, or propose the upgrade as its
-> own explicit project.
+> [EndlessRunnerTemplate](https://github.com/crawfis/EndlessRunnerTemplate). Both repos now
+> resolve the same EventsPublisher package and use the same static `EventsFor<T>` buses, so
+> code and guidance port between them directly. The differences that remain are real ones:
+> this repo has a fourth domain (UGS) and six dispatch classes rather than four.
 
 ## Quick Reference
 
@@ -39,7 +38,7 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | GameFlow Events | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | TempleRun Events | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
 | UGS Events | `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` |
-| Event Publishers | `Assets/GameFlow/Scripts/Events/EventsPublisherGameFlow.cs`, `Assets/TempleRun/Scripts/Events/EventsPublisherTempleRun.cs`, `Assets/UGS/Scripts/Events/EventsPublisherUGS.cs` |
+| Event Buses | `EventsFor<T>` from the `com.crawfissoftware.eventspublisher` package, aliased per file as `GameFlowBus` / `TempleRunBus` / `UserInputBus` / `UGSBus`. The `EventsPublisher*.cs` singleton subclasses are retired — nothing references them; delete their scene objects, then the scripts |
 | Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Assets/UGS/Scripts/Events/UGSAutoEventFlow.cs` |
 | Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (incl. the TempleRun → UGS passthrough), `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`, `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` |
 | Game State | `Assets/GameFlow/Scripts/Config/GameState.cs`, `Assets/TempleRun/Scripts/Config/Blackboard.cs` |
@@ -62,15 +61,16 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 
 | Code Location | May Reference |
 |---------------|---------------|
-| `Assets/TempleRun/**/*.cs` | `TempleRunEvents`, `UserInitiatedEvents` only |
+| `Assets/TempleRun/**/*.cs` (non-bridge) | `TempleRunEvents` only |
 | `Assets/GameFlow/**/*.cs` (non-bridge) | `GameFlowEvents` only |
 | `Assets/UGS/**/*.cs` (non-bridge) | `UGS_EventsEnum` only |
+| `Input2TempleRunAutoEventBridge.cs` | `UserInitiatedEvents` + `TempleRunEvents` (bridge duty) |
 | `TempleRunGameFlowBridge.cs` | `TempleRunEvents` + `GameFlowEvents` + `UGS_EventsEnum` (bridge duty; the last via the TempleRun → UGS passthrough dictionary) |
 | `UGSGameFlowBridge.cs` | `UGS_EventsEnum` + `GameFlowEvents` (bridge duty) |
 
 **Violations — what NOT to do:**
-- TempleRun scripts subscribing to or publishing `GameFlowEvents` (e.g., `EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, ...)` in a TempleRun file)
-- GameFlow scripts subscribing to or publishing `TempleRunEvents` (e.g., `EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.CountdownTick, ...)` in a GameFlow file)
+- TempleRun scripts subscribing to or publishing `GameFlowEvents` (e.g., `GameFlowBus.Subscribe(GameFlowEvents.GameStarted, ...)` in a TempleRun file)
+- GameFlow scripts subscribing to or publishing `TempleRunEvents` (e.g., `TempleRunBus.Publish(TempleRunEvents.CountdownTick, ...)` in a GameFlow file)
 - UGS scripts subscribing to or publishing `GameFlowEvents` directly (should go through `UGSGameFlowBridge`)
 - GameFlow scripts subscribing to or publishing `UGS_EventsEnum` directly (should go through `UGSGameFlowBridge`)
 
@@ -127,10 +127,10 @@ Unity 6 endless runner demonstrating **event-driven architecture** with Unity Ga
 
 | Domain | Enum | Publisher (singleton) | Purpose | Publisher hosted in | Bridges |
 |--------|------|----------------------|---------|--------------------|---------|
-| **GameFlow** | `GameFlowEvents` | `EventsPublisherGameFlow.Instance` | App lifecycle: loading, menus, sessions, pause, config/difficulty, save/load, quit | all three bootstraps (`0_BootStrap`, `0_BootStrap_Game_Only`, `0_BootStrap_UGS_Only`) | ↔ TempleRun via `TempleRunGameFlowBridge`; ↔ UGS via `UGSGameFlowBridge` |
-| **TempleRun** | `TempleRunEvents` | `EventsPublisherTempleRun.Instance` | Gameplay: player lifecycle, countdown, movement, collisions, coins/power-ups, track/spline generation, teleportation | `Game_Boot_2_Play` | ↔ GameFlow, plus a TempleRun → UGS **passthrough dictionary**, both in `TempleRunGameFlowBridge` |
-| **UserInitiated** | `UserInitiatedEvents` | `EventsPublisherUserInitiated.Instance` | Raw input requests (turns, lanes, jump, slide, dash, pause, quit) | all three bootstraps | → TempleRun via `Input2TempleRunAutoEventBridge` |
-| **UGS** | `UGS_EventsEnum` | `EventsPublisherUGS.Instance` | Unity Gaming Services: init, auth, remote config, leaderboards, achievements, economy, rewarded ads | `UGS_Boot_0_Initialization` (+ the UGS-only test boot) | ↔ GameFlow via `UGSGameFlowBridge` |
+| **GameFlow** | `GameFlowEvents` | `GameFlowBus` | App lifecycle: loading, menus, sessions, pause, config/difficulty, save/load, quit | all three bootstraps (`0_BootStrap`, `0_BootStrap_Game_Only`, `0_BootStrap_UGS_Only`) | ↔ TempleRun via `TempleRunGameFlowBridge`; ↔ UGS via `UGSGameFlowBridge` |
+| **TempleRun** | `TempleRunEvents` | `TempleRunBus` | Gameplay: player lifecycle, countdown, movement, collisions, coins/power-ups, track/spline generation, teleportation | `Game_Boot_2_Play` | ↔ GameFlow, plus a TempleRun → UGS **passthrough dictionary**, both in `TempleRunGameFlowBridge` |
+| **UserInitiated** | `UserInitiatedEvents` | `UserInputBus` | Raw input requests (turns, lanes, jump, slide, dash, pause, quit) | all three bootstraps | → TempleRun via `Input2TempleRunAutoEventBridge` |
+| **UGS** | `UGS_EventsEnum` | `UGSBus` | Unity Gaming Services: init, auth, remote config, leaderboards, achievements, economy, rewarded ads | `UGS_Boot_0_Initialization` (+ the UGS-only test boot) | ↔ GameFlow via `UGSGameFlowBridge` |
 
 Two invariants keep this registry trustworthy:
 - **Placement:** domain enums live only in `Assets/*/Scripts/Events/` folders, each with an
@@ -147,7 +147,7 @@ Two invariants keep this registry trustworthy:
 ```csharp
 private void Awake()
 {
-    EventsPublisherGameFlow.Instance.SubscribeToEvent(
+    GameFlowBus.Subscribe(
         GameFlowEvents.GameStarting,
         OnGameStarting
     );
@@ -155,7 +155,7 @@ private void Awake()
 
 private void OnDestroy()
 {
-    EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+    GameFlowBus.Unsubscribe(
         GameFlowEvents.GameStarting,
         OnGameStarting
     );
@@ -173,7 +173,7 @@ private void OnGameStarting(string eventName, object sender, object data)
 
 ```csharp
 // Without data
-EventsPublisherGameFlow.Instance.PublishEvent(
+GameFlowBus.Publish(
     GameFlowEvents.MainMenuShown,
     this,
     null
@@ -181,14 +181,14 @@ EventsPublisherGameFlow.Instance.PublishEvent(
 
 // With data payload
 float score = Blackboard.Instance.DistanceTracker.DistanceTravelled;
-EventsPublisherTempleRun.Instance.PublishEvent(
+TempleRunBus.Publish(
     TempleRunEvents.PlayerDied,
     this,
     score
 );
 
 // With a struct payload (ActiveTrackChanging carries a TrackSegmentInfo)
-EventsPublisherTempleRun.Instance.PublishEvent(
+TempleRunBus.Publish(
     TempleRunEvents.ActiveTrackChanging,
     this,
     _trackSegments.Peek()
@@ -220,11 +220,21 @@ When `GameScenesLoaded` fires, it automatically triggers `GameStartRequested` �
 
 Note: Countdown events (`CountdownStartRequested`, `CountdownTick`, etc.) are now in `TempleRunEvents` since they are gameplay-specific.
 
-> Note: `AutoEventFlowBase.cs` under `Assets/_Common/Events/` is an empty (zero-byte)
-> placeholder — nothing derives from it. The six dispatch classes (three auto-flows, three
-> bridges) each re-implement the same subscribe-to-all-then-dictionary-dispatch pattern
-> inline. Consolidating that shared logic into `AutoEventFlowBase` is a good,
-> self-contained refactoring exercise.
+> **Chains are declared as a flat list of pairs, not a dictionary.** All six dispatch classes
+> (three auto-flows, three bridges) share one implementation in
+> `Assets/_Common/Events/AutoEventFlowBase.cs`: `EventChainDispatcher<TSource, TDest>` does
+> subscribe-to-all, lookup and publish; `AutoEventFlowBase<TSource, TDest>` is the
+> MonoBehaviour wrapper for a single direction. A bridge covering several directions cannot
+> inherit repeatedly, so `TempleRunGameFlowBridge` (TempleRun↔GameFlow plus the TempleRun→UGS
+> passthrough) holds three dispatchers and `UGSGameFlowBridge` holds two.
+>
+> The pair list exists so **one event may declare several consequences** — a dictionary
+> allowed exactly one successor each. That ceiling never produced bugs directly; it produced
+> workarounds, where a developer finding a source event's slot taken published the second
+> consequence by hand inside a controller. Targets fire in declaration order, synchronously.
+>
+> **Never chain a `*Requested` that arrives raw from input to its `*Starting`** — chaining runs
+> before any controller validates, which silently defeats cooldowns and boundary checks.
 
 ### Adding New Events
 
@@ -358,7 +368,7 @@ internal class MyController : MonoBehaviour
 | Economy / Player Data | `Assets/UGS/Scripts/Economy/PlayerEconomyManager.cs` + `PlayerEconomyManagerClient.cs`; `Assets/UGS/Scripts/PlayerData/PlayerDataManager.cs` + `PlayerDataManagerClient.cs`; `Assets/UGS/Scripts/Config/UGSConstants.cs` |
 | Cloud Code | `Assets/UGS/CloudCode/TempleRunUGSCloud~/` (.NET Cloud Code project: models + 15 services) |
 | **Shared/Common** | |
-| Auto-Event Base | `Assets/_Common/Events/AutoEventFlowBase.cs` (empty placeholder — see note above) |
+| Auto-Event Base | `Assets/_Common/Events/AutoEventFlowBase.cs` — `EventChainDispatcher<TSource, TDest>` + `AutoEventFlowBase<TSource, TDest>`; the one dispatch implementation, shared by all six flow/bridge classes |
 | Shared Config | `Assets/_Common/Config/DifficultyConfig.cs` (namespace `CrawfisSoftware.Config` — the LIVE difficulty config) |
 | Test Utilities | `Assets/_Common/Test/Test_AutoFireEvent.cs`, `Test_AutoFireEventOnStart.cs`, `Test_SubmitLeaderboardScore.cs` |
 | Utilities | `Assets/_Common/Utility/Logger.cs`, `EventLoggerDump.cs`, `DebugEventFileLogger.cs`, `DebugLog.cs`, `TimedEvent.cs`, `TextureExtensions.cs`; `Assets/_Common/Events/EventHistory.cs` |
@@ -395,8 +405,8 @@ internal class MyController : MonoBehaviour
   them.
 
 ### Dead / Placeholder Files (don't be misled by grep hits)
-- `Assets/_Common/Events/AutoEventFlowBase.cs` - empty file (the consolidation exercise
-  noted above)
+- (`Assets/_Common/Events/AutoEventFlowBase.cs` was an empty placeholder until the dispatch
+  consolidation; it now holds the shared implementation and all six flow/bridge classes use it.)
 - `Assets/GameFlow/Scripts/Config/BlackboardGameFlow.cs` - fully commented out; there is
   no GameFlow blackboard — `Blackboard` lives in TempleRun
 - `Assets/TempleRun/Scripts/Config/DifficultyConfig.cs` - fully commented out; the live
@@ -443,7 +453,7 @@ Or open the game-only bootstrap directly: `Assets/GameFlow/Scenes/Boot/0_BootStr
 5. Create scene in `Assets/TempleRun/Scenes/Gameplay/`
 6. Add to Build Profile
 7. Subscribe to relevant events in `Awake()`, unsubscribe in `OnDestroy()`
-8. Publish state changes as events via `EventsPublisherTempleRun.Instance`
+8. Publish state changes as events via `TempleRunBus`
 9. Keep visuals/audio separate from logic
 10. **`/audit-events`** — Verify compliance
 
@@ -451,7 +461,7 @@ Or open the game-only bootstrap directly: `Assets/GameFlow/Scenes/Boot/0_BootStr
 1. **`/list-events GameFlow`** — Review existing GameFlow events
 2. **`/add-event`** — Add events to `GameFlowEvents`
 3. **`/add-auto-chain`** — Wire auto-progressions
-4. Implement the feature, subscribing/publishing via `EventsPublisherGameFlow.Instance`
+4. Implement the feature, subscribing/publishing via `GameFlowBus`
 5. **`/audit-events`** — Verify compliance
 
 ### Modifying UI Panels
@@ -471,7 +481,7 @@ plus vendored packages outside the domain rule:
 Assets/
 ├── _Common/                          # Shared infrastructure
 │   ├── Config/                       # DifficultyConfig (domain-neutral, namespace CrawfisSoftware.Config — the LIVE one)
-│   ├── Events/                       # AutoEventFlowBase (empty placeholder), EventHistory
+│   ├── Events/                       # AutoEventFlowBase + EventChainDispatcher, EventHistory
 │   ├── Test/                         # Test_AutoFireEvent, Test_AutoFireEventOnStart, Test_SubmitLeaderboardScore
 │   └── Utility/                      # Logger, EventLoggerDump, DebugEventFileLogger, DebugLog, TimedEvent, TextureExtensions
 │

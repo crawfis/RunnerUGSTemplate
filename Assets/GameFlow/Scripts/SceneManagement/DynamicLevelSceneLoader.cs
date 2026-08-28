@@ -3,6 +3,8 @@ using CrawfisSoftware.GameFlow.Events;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
+
 namespace CrawfisSoftware.GameFlow.SceneManagement
 {
     /// <summary>
@@ -19,13 +21,13 @@ namespace CrawfisSoftware.GameFlow.SceneManagement
 
         private void Start()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(
+            GameFlowBus.Subscribe(
                 GameFlowEvents.GameScenesLoading, OnScenesLoading);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+            GameFlowBus.Unsubscribe(
                 GameFlowEvents.GameScenesLoading, OnScenesLoading);
         }
 

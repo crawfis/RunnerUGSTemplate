@@ -136,7 +136,7 @@ PHASE 5: TEMPLERUN APPLIES SETTINGS
 **Code Flow:**
 ```csharp
 // Player successfully authenticates
-EventsPublisherUGS.Instance.PublishEvent(
+UGSBus.Publish(
     UGS_EventsEnum.PlayerAuthenticated,
     this,
     null
@@ -174,7 +174,7 @@ async Task GetDifficultySettingsAsync()
     RuntimeDifficultySettings = difficulties;
 
     // Publish event with fetched configs
-    EventsPublisherUGS.Instance.PublishEvent(
+    UGSBus.Publish(
         UGS_EventsEnum.DifficultySettingsFetched,
         this,
         difficulties  // List<DifficultyConfig>
@@ -328,10 +328,10 @@ private void AutoFireTempleRunEventFromGameFlowEvent(
 // In GameDifficultyManager.cs (TempleRun domain)
 public void Awake()
 {
-    EventsPublisherTempleRun.Instance.SubscribeToEvent(
+    TempleRunBus.Subscribe(
         TempleRunEvents.DifficultyChanging,
         OnDifficultyChanging);
-    EventsPublisherTempleRun.Instance.SubscribeToEvent(
+    TempleRunBus.Subscribe(
         TempleRunEvents.DifficultySettingsApplied,
         OnDifficultySettingsChanged);
 }

@@ -1,10 +1,12 @@
-﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 using CrawfisSoftware.GameFlow.GameConfig;
 
 using System.Collections;
 
 using UnityEngine;
+
+using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
 
 namespace CrawfisSoftware.GameFlow
 {
@@ -17,12 +19,12 @@ namespace CrawfisSoftware.GameFlow
     {
         private void Start()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.Quitting, OnQuitted);
+            GameFlowBus.Subscribe(GameFlowEvents.Quitting, OnQuitted);
         }
 
         private void OnQuitted(string EventName, object sender, object data)
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.Quitting, OnQuitted);
+            GameFlowBus.Unsubscribe(GameFlowEvents.Quitting, OnQuitted);
             StartCoroutine(Quit());
         }
         private IEnumerator Quit()

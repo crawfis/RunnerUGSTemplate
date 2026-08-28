@@ -5,6 +5,10 @@ using System.Collections;
 
 using UnityEngine;
 
+using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
+
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS.Leaderboard.Test
 {
     public class Test_SubmitLeaderboardScore : MonoBehaviour
@@ -17,12 +21,12 @@ namespace CrawfisSoftware.UGS.Leaderboard.Test
         [SerializeField] private bool _endGameAfterSubmissions = true;
         void Start()
         {
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            GameFlowBus.Subscribe(GameFlowEvents.GameStarted, OnGameStarted);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(GameFlowEvents.GameStarted, OnGameStarted);
+            GameFlowBus.Unsubscribe(GameFlowEvents.GameStarted, OnGameStarted);
         }
         private void OnGameStarted(string eventName, object sender, object data)
         {
@@ -35,13 +39,13 @@ namespace CrawfisSoftware.UGS.Leaderboard.Test
             for (int i = 0; i < _numberOfTimesToSubmit; i++)
             {
                 float randomScore = UnityEngine.Random.Range((int)_minValue, (int)_maxValue + 1);
-                EventsPublisherUGS.Instance.PublishEvent(Events.UGS_EventsEnum.ScoreUpdating, this, randomScore);
+                UGSBus.Publish(Events.UGS_EventsEnum.ScoreUpdating, this, randomScore);
                 yield return new WaitForSeconds(_delayBetweenSubmissionsInSeconds);
             }
             if(_endGameAfterSubmissions)
             {
                 Debug.Log("All scores submitted. Ending game.");
-                EventsPublisherGameFlow.Instance.PublishEvent(GameFlowEvents.GameEnded, this, null);
+                GameFlowBus.Publish(GameFlowEvents.GameEnded, this, null);
             }
         }
     }

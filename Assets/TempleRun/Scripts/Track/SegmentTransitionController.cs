@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
@@ -34,20 +36,20 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SegmentGeometryReady, OnGeometryReady);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnCompleted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnCompleted);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.SegmentExited, OnSegmentExited);
+            TempleRunBus.Subscribe(TempleRunEvents.SegmentGeometryReady, OnGeometryReady);
+            TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            TempleRunBus.Subscribe(TempleRunEvents.TurnLeftCompleted, OnTurnCompleted);
+            TempleRunBus.Subscribe(TempleRunEvents.TurnRightCompleted, OnTurnCompleted);
+            TempleRunBus.Subscribe(TempleRunEvents.SegmentExited, OnSegmentExited);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SegmentGeometryReady, OnGeometryReady);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnLeftCompleted, OnTurnCompleted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TurnRightCompleted, OnTurnCompleted);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.SegmentExited, OnSegmentExited);
+            TempleRunBus.Unsubscribe(TempleRunEvents.SegmentGeometryReady, OnGeometryReady);
+            TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TurnLeftCompleted, OnTurnCompleted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TurnRightCompleted, OnTurnCompleted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.SegmentExited, OnSegmentExited);
         }
 
         private void OnGeometryReady(string eventName, object sender, object data)
@@ -85,7 +87,7 @@ namespace CrawfisSoftware.TempleRun
             // Publish approach sub-spline (Entrance -> Pivot, direction Straight).
             float landingDistance = ComputeLandingDistance(segmentInfo);
             var approachSpline = (_activeGeometry.ApproachStart, _activeGeometry.Pivot, Direction.Straight, landingDistance);
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.CurrentSplineChanging, this, approachSpline);
         }
 
@@ -111,7 +113,7 @@ namespace CrawfisSoftware.TempleRun
                 + _activeGeometry.Definition.TeleportDistance;
 
             var exitSpline = (_activeGeometry.ExitStart, teleportLanding, _activeGeometry.Direction, landingDistance);
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.CurrentSplineChanging, this, exitSpline);
         }
 
@@ -123,7 +125,7 @@ namespace CrawfisSoftware.TempleRun
                 ? (_activeGeometry.ExitStart, _activeGeometry.ExitEnd, _activeGeometry.Direction, landingDistance)
                 : (_activeGeometry.ApproachStart, _activeGeometry.Pivot, Direction.Straight, landingDistance);
 
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.CurrentSplineChanged, this, currentSpline);
 
             _isOnExitSection = false;

@@ -1,15 +1,13 @@
 using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 
-using System;
-using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace CrawfisSoftware.UGS.Events
 {
     /// <summary>
     /// Bridges UGS events to/from GameFlow events. This class connects the two event domains.
+    /// Bidirectional, so it holds two dispatchers rather than inheriting AutoEventFlowBase.
     ///
     /// --- BOOT: UGS to GameFlow ---
     /// [BRIDGE] PlayerAuthenticated -> GameplayReady
@@ -22,63 +20,43 @@ namespace CrawfisSoftware.UGS.Events
     /// </summary>
     internal class UGSGameFlowBridge : MonoBehaviour
     {
-        private Dictionary<UGS_EventsEnum, GameFlowEvents> _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
+        private static readonly (UGS_EventsEnum From, GameFlowEvents To)[] UGSToGameFlow =
         {
-            { UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady },
-            { UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady },
+            (UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady),
+            (UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady),
 
             // Remote config update requests the loading screen to hide; flow auto-fires LoadingScreenHiding.
-            { UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHideRequested },
+            (UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHideRequested),
 
             // Difficulty settings fetched from remote config
-            { UGS_EventsEnum.DifficultySettingsFetched, GameFlowEvents.DifficultySettingsApplied },
+            (UGS_EventsEnum.DifficultySettingsFetched, GameFlowEvents.DifficultySettingsApplied),
         };
 
-        private Dictionary<GameFlowEvents, UGS_EventsEnum> _autoGameFlow2UGSEvents = new Dictionary<GameFlowEvents, UGS_EventsEnum>()
+        private static readonly (GameFlowEvents From, UGS_EventsEnum To)[] GameFlowToUGS =
         {
-            { GameFlowEvents.GameEnding, UGS_EventsEnum.ScoreUpdating },
-            { GameFlowEvents.GameEnded, UGS_EventsEnum.LeaderboardOpening },
+            (GameFlowEvents.GameEnding, UGS_EventsEnum.ScoreUpdating),
+            (GameFlowEvents.GameEnded, UGS_EventsEnum.LeaderboardOpening),
 
             // Alternative: kick leaderboard earlier
-            //{ GameFlowEvents.GameScenesUnloaded, UGS_EventsEnum.LeaderboardOpening },
+            //(GameFlowEvents.GameScenesUnloaded, UGS_EventsEnum.LeaderboardOpening),
         };
+
+        private readonly EventChainDispatcher<UGS_EventsEnum, GameFlowEvents> _ugsToGameFlow =
+            new EventChainDispatcher<UGS_EventsEnum, GameFlowEvents>(UGSToGameFlow);
+
+        private readonly EventChainDispatcher<GameFlowEvents, UGS_EventsEnum> _gameFlowToUGS =
+            new EventChainDispatcher<GameFlowEvents, UGS_EventsEnum>(GameFlowToUGS);
 
         protected virtual void Awake()
         {
-            EventsPublisherUGS.Instance.SubscribeToAllEnumEvents(AutoFireGameFlowEventFromUGSEvent);
-            EventsPublisherGameFlow.Instance.SubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
+            _ugsToGameFlow.Attach();
+            _gameFlowToUGS.Attach();
         }
 
         protected virtual void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToAllEnumEvents(AutoFireGameFlowEventFromUGSEvent);
-            EventsPublisherGameFlow.Instance.UnsubscribeToAllEnumEvents(AutoFireUGSEventFromGameFlowEvent);
-        }
-
-        private void AutoFireGameFlowEventFromUGSEvent(string eventName, object sender, object data)
-        {
-            ReadOnlySpan<char> input = eventName.AsSpan();
-            int index = input.LastIndexOf('/');
-            if (index < 0) return;
-            string result = input.Slice(index + 1).ToString();
-            UGS_EventsEnum uGS_Event = Enum.Parse<UGS_EventsEnum>(result);
-            if (_autoUGS2GameFlowEvents.TryGetValue(uGS_Event, out GameFlowEvents autoEvent))
-            {
-                EventsPublisherGameFlow.Instance.PublishEvent(autoEvent, sender, data);
-            }
-        }
-
-        private void AutoFireUGSEventFromGameFlowEvent(string eventName, object sender, object data)
-        {
-            ReadOnlySpan<char> input = eventName.AsSpan();
-            int index = input.LastIndexOf('/');
-            if (index < 0) return;
-            string result = input.Slice(index + 1).ToString();
-            GameFlowEvents gameFlowEvent = Enum.Parse<GameFlowEvents>(result);
-            if (_autoGameFlow2UGSEvents.TryGetValue(gameFlowEvent, out UGS_EventsEnum autoEvent))
-            {
-                EventsPublisherUGS.Instance.PublishEvent(autoEvent, sender, data); 
-            }
+            _ugsToGameFlow.Detach();
+            _gameFlowToUGS.Detach();
         }
     }
 }

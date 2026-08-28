@@ -1,6 +1,5 @@
-using CrawfisSoftware.Events;
-
 using UnityEngine;
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -8,10 +7,9 @@ namespace CrawfisSoftware.TempleRun
     /// Validates jump requests and publishes TempleRun jump events.
     /// Blocks jumps while already airborne.
     ///    Dependencies: Blackboard
-    ///    Subscribes: UserInitiatedEvents.JumpRequested
+    ///    Subscribes: TempleRunEvents.JumpRequested (from bridge translating UserInitiated)
     ///    Subscribes: TempleRunEvents.JumpLanded (clear _isJumping)
-    ///    Subscribes: TempleRunEvents.TempleRunStarted (reset state)
-    ///    Publishes: TempleRunEvents.JumpRequested
+    ///    Publishes: TempleRunEvents.JumpStarting (only once validation passes)
     /// </summary>
     internal class JumpController : MonoBehaviour
     {
@@ -19,27 +17,34 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherUserInitiated.Instance.SubscribeToEvent(
-                UserInitiatedEvents.UserJumpRequested, OnJumpInputReceived);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            // Subscribe to TempleRun domain events, not UserInitiated.
+            // This allows jump to be triggered from any source: player input, AI, replay, network.
+            // The bridge translates UserInitiated.UserJumpRequested -> TempleRunEvents.JumpRequested
+            TempleRunBus.Subscribe(
+                TempleRunEvents.JumpRequested, OnJumpRequested);
+            TempleRunBus.Subscribe(
                 TempleRunEvents.JumpLanded, OnJumpLanded);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(
-                UserInitiatedEvents.UserJumpRequested, OnJumpInputReceived);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
+                TempleRunEvents.JumpRequested, OnJumpRequested);
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.JumpLanded, OnJumpLanded);
         }
 
-        private void OnJumpInputReceived(string eventName, object sender, object data)
+        private void OnJumpRequested(string eventName, object sender, object data)
         {
             if (_isJumping) return;
 
             _isJumping = true;
-            EventsPublisherTempleRun.Instance.PublishEvent(
-                TempleRunEvents.JumpRequested, this, null);
+
+            // Published here rather than auto-chained from JumpRequested: JumpRequested is the
+            // bridge's raw translation of the input, so an auto-chain would launch a second jump
+            // while one is already in the air. JumpArcController takes it from here.
+            TempleRunBus.Publish(
+                TempleRunEvents.JumpStarting, this, null);
         }
 
         private void OnJumpLanded(string eventName, object sender, object data)

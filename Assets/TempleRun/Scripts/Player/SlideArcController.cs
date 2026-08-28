@@ -1,6 +1,7 @@
 using CrawfisSoftware.TempleRun.GameConfig;
 using System.Collections;
 using UnityEngine;
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -21,14 +22,14 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
-                TempleRunEvents.SlideStarted, OnSlideStarted);
+            TempleRunBus.Subscribe(
+                TempleRunEvents.SlideStarting, OnSlideStarting);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
-                TempleRunEvents.SlideStarted, OnSlideStarted);
+            TempleRunBus.Unsubscribe(
+                TempleRunEvents.SlideStarting, OnSlideStarting);
 
             if (_slideCoroutine != null)
                 StopCoroutine(_slideCoroutine);
@@ -41,7 +42,7 @@ namespace CrawfisSoftware.TempleRun
             }
         }
 
-        private void OnSlideStarted(string eventName, object sender, object data)
+        private void OnSlideStarting(string eventName, object sender, object data)
         {
             // If somehow a slide is already running, stop it first
             if (_slideCoroutine != null)
@@ -57,7 +58,7 @@ namespace CrawfisSoftware.TempleRun
             {
                 Debug.LogError("SlideArcController: SlideConfig is null! Animation cannot proceed.");
                 _slideCoroutine = null;
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.SlideEnded, this, null);
+                TempleRunBus.Publish(TempleRunEvents.SlideEnded, this, null);
                 yield break;
             }
 
@@ -79,9 +80,12 @@ namespace CrawfisSoftware.TempleRun
                 Blackboard.Instance.SlideHeightOffset = curveValue * heightOffset;
                 Blackboard.Instance.CurrentSlideMultiplier = 1.0f + (curveValue * (speedMultiplier - 1.0f));
 
+                // Publish SlideStarted once the animation is actually running
                 if (!startPublished)
                 {
                     startPublished = true;
+                    TempleRunBus.Publish(
+                        TempleRunEvents.SlideStarted, this, null);
                 }
 
                 yield return null;
@@ -92,7 +96,7 @@ namespace CrawfisSoftware.TempleRun
             Blackboard.Instance.CurrentSlideMultiplier = 1.0f;
             _slideCoroutine = null;
 
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.SlideEnded, this, null);
         }
     }

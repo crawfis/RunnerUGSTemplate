@@ -3,6 +3,8 @@ using CrawfisSoftware.GameFlow.Events;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
+
 namespace CrawfisSoftware.GameFlow.UI
 {
     /// <summary>
@@ -25,11 +27,11 @@ namespace CrawfisSoftware.GameFlow.UI
         {
             _visible = false;
 
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(
+            GameFlowBus.Subscribe(
                 GameFlowEvents.LevelSelectorShowing, StartShowPanel);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(
+            GameFlowBus.Subscribe(
                 GameFlowEvents.GameScenesLoading, StartHidePanel);
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(
+            GameFlowBus.Subscribe(
                 GameFlowEvents.MainMenuShowing, StartHidePanel);
         }
 
@@ -45,11 +47,11 @@ namespace CrawfisSoftware.GameFlow.UI
 
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+            GameFlowBus.Unsubscribe(
                 GameFlowEvents.LevelSelectorShowing, StartShowPanel);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+            GameFlowBus.Unsubscribe(
                 GameFlowEvents.GameScenesLoading, StartHidePanel);
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+            GameFlowBus.Unsubscribe(
                 GameFlowEvents.MainMenuShowing, StartHidePanel);
         }
 
@@ -69,7 +71,7 @@ namespace CrawfisSoftware.GameFlow.UI
         {
             _visible = true;
             ApplyVisibility();
-            EventsPublisherGameFlow.Instance.PublishEvent(
+            GameFlowBus.Publish(
                 GameFlowEvents.LevelSelectorShown, this, null);
         }
 
@@ -78,7 +80,7 @@ namespace CrawfisSoftware.GameFlow.UI
             if (!_visible) return;
             _visible = false;
             ApplyVisibility();
-            EventsPublisherGameFlow.Instance.PublishEvent(
+            GameFlowBus.Publish(
                 GameFlowEvents.LevelSelectorHidden, this, null);
         }
 

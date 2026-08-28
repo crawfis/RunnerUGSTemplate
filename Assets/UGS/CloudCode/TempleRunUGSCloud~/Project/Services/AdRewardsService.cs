@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TempleRunUGSCloud.Models;
 using Microsoft.Extensions.Logging;
 
-using TempleRunUGSCloud.Models;
 
 using Unity.Services.CloudCode.Apis;
 using Unity.Services.CloudCode.Core;

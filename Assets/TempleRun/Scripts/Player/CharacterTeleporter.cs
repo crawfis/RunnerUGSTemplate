@@ -1,5 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
+
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
@@ -16,7 +18,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
+            TempleRunBus.Subscribe(TempleRunEvents.TeleportStarted, OnTeleportStarted);
             _yPosition = transform.localPosition.y;
         }
 
@@ -64,7 +66,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.TeleportStarted, OnTeleportStarted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TeleportStarted, OnTeleportStarted);
         }
     }
 }

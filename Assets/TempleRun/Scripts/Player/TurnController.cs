@@ -2,6 +2,9 @@ using CrawfisSoftware.Events;
 
 using UnityEngine;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
+
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
@@ -56,9 +59,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.UserLeftTurnRequested, OnLeftTurnRequested);
-            EventsPublisherUserInitiated.Instance.SubscribeToEvent(UserInitiatedEvents.UserRightTurnRequested, OnRightTurnRequested);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            TempleRunBus.Subscribe(TempleRunEvents.TurnLeftRequested, OnLeftTurnRequested);
+            TempleRunBus.Subscribe(TempleRunEvents.TurnRightRequested, OnRightTurnRequested);
+            TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
             _safeTurnDistance = Blackboard.Instance.GameConfig.SafePreTurnDistance;
         }
 
@@ -68,9 +71,9 @@ namespace CrawfisSoftware.TempleRun
             float distance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
             if (distance > _turnAvailableDistance)
             {
-                EventsPublisherTempleRun.Instance.PublishEvent(startingEvent,  this, distance);
-                //EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.SegmentRequested, this, chosenDirection);
-                EventsPublisherTempleRun.Instance.PublishEvent(completedEvent, this, distance);
+                TempleRunBus.Publish(startingEvent,  this, distance);
+                //TempleRunBus.Publish(TempleRunEvents.SegmentRequested, this, chosenDirection);
+                TempleRunBus.Publish(completedEvent, this, distance);
             }
         }
 
@@ -108,9 +111,9 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnDestroy()
         {
-            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.UserLeftTurnRequested, OnLeftTurnRequested);
-            EventsPublisherUserInitiated.Instance.UnsubscribeToEvent(UserInitiatedEvents.UserRightTurnRequested, OnRightTurnRequested);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TurnLeftRequested, OnLeftTurnRequested);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TurnRightRequested, OnRightTurnRequested);
+            TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
         }
     }
 }

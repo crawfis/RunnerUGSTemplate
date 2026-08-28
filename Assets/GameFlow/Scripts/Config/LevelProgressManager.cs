@@ -2,6 +2,8 @@ using CrawfisSoftware.GameFlow.Events;
 
 using UnityEngine;
 
+using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
+
 namespace CrawfisSoftware.GameFlow.Config
 {
     /// <summary>
@@ -34,13 +36,13 @@ namespace CrawfisSoftware.GameFlow.Config
             LoadProgress();
             InitializeDefaultUnlocks();
 
-            EventsPublisherGameFlow.Instance.SubscribeToEvent(
+            GameFlowBus.Subscribe(
                 GameFlowEvents.GameEnding, OnGameEnding);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+            GameFlowBus.Unsubscribe(
                 GameFlowEvents.GameEnding, OnGameEnding);
 
             if (Instance == this)
@@ -60,7 +62,7 @@ namespace CrawfisSoftware.GameFlow.Config
             string json = JsonUtility.ToJson(_progressData);
             PlayerPrefs.SetString(PROGRESS_KEY, json);
             PlayerPrefs.Save();
-            EventsPublisherGameFlow.Instance.PublishEvent(
+            GameFlowBus.Publish(
                 GameFlowEvents.LevelProgressSaved, this, null);
         }
 
@@ -105,7 +107,7 @@ namespace CrawfisSoftware.GameFlow.Config
                 if (totalBestScore >= level.UnlockScoreThreshold)
                 {
                     _progressData.UnlockLevel(level.LevelName);
-                    EventsPublisherGameFlow.Instance.PublishEvent(
+                    GameFlowBus.Publish(
                         GameFlowEvents.LevelUnlocked, this, level);
                 }
             }

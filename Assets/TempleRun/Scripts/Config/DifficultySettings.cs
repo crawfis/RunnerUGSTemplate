@@ -1,7 +1,9 @@
-﻿using CrawfisSoftware.Config;
+using CrawfisSoftware.Config;
 
 using System;
 using System.Collections.Generic;
+
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun.GameConfig
 {
@@ -22,7 +24,7 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             }
             set {
                 _configs = value;
-                EventsPublisherTempleRun.Instance.PublishEvent(
+                TempleRunBus.Publish(
                     TempleRunEvents.TempleRunDifficultySettingsApplied, this, _configs);
             }
         }
