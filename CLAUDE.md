@@ -77,9 +77,11 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 
 **How to fix a violation:** If TempleRun code needs to react to a GameFlow event, add a bridge mapping in `TempleRunGameFlowBridge.cs` that translates the GameFlow event into a TempleRun event, then subscribe to the TempleRun event in your TempleRun code. The same applies for UGS <-> GameFlow.
 
-> The four domains compile into `Assembly-CSharp` — no `.asmdef` separates them, so the
-> compiler will NOT catch a violation (only the vendored `Assets/Blocks/` samples carry
-> asmdefs). Isolation is enforced by review and `/audit-events`; run it.
+> Each domain now has its own `.asmdef` — `CrawfisSoftware.Common`, `.TempleRun`, `.GameFlow`,
+> `.Contracts`, `.UGS`, `.ThirdParty` — and none of the game assemblies references
+> `CrawfisSoftware.UGS`, so a game-to-UGS reference is a compile error. Everything *within* a
+> domain, and the deliberately asmdef-free `Assets/UGSGlue/`, is still only enforced by review
+> and `/audit-events`; run it.
 
 The rule's purpose is **replaceability**: a domain that talks only through events can be
 swapped for a completely different implementation — or stubbed out with a trivial fake —
@@ -373,7 +375,7 @@ internal class MyController : MonoBehaviour
 | Shared Config | `Assets/_Common/Config/DifficultyConfig.cs` (namespace `CrawfisSoftware.Config` — the LIVE difficulty config) |
 | Test Utilities | `Assets/_Common/Test/Test_AutoFireEvent.cs`, `Test_AutoFireEventOnStart.cs`, `Test_SubmitLeaderboardScore.cs` |
 | Utilities | `Assets/_Common/Utility/Logger.cs`, `EventLoggerDump.cs`, `DebugEventFileLogger.cs`, `DebugLog.cs`, `TimedEvent.cs`, `TextureExtensions.cs`; `Assets/_Common/Events/EventHistory.cs` |
-| Vendored | `Assets/ThirdParty/CrawfisSoftware/` (Random providers used by `Blackboard`, editor tools incl. Play Scene 0 Always); `Assets/Blocks/` (Unity Blocks samples — beware duplicate class names like `AchievementsPrefab`, `PlayerSignInController`); `Assets/CloudCode/` (Blocks cloud-code modules + generated bindings) |
+| Vendored | `Assets/ThirdParty/CrawfisSoftware/` (Random providers used by `Blackboard`, editor tools incl. Play Scene 0 Always); `Assets/UGS/ThirdParty/Blocks/` (the pruned Unity Building Blocks import — see its `THIRD-PARTY-NOTICES.md`; keeps the `Blocks.*` namespaces, so `AchievementsPrefab` and `PlayerSignInController` still exist under two names); `Assets/CloudCode/` (Blocks cloud-code modules + generated bindings) |
 
 ## Gotchas and Warnings
 
@@ -550,10 +552,13 @@ Assets/
 │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards
 │   ├── CloudCode/TempleRunUGSCloud~/ # .NET Cloud Code project (models + 15 services)
 │   ├── Editor/                       # RemoteConfig editor data
-│   └── Prefabs/
+│   ├── Prefabs/
+│   ├── UI/                           # UGS-only UI assets: PS_Login + "New Panel Settings" (PanelSettings),
+│   │                                 #   PlayerAccountLogin.uxml/.uss (the stripped Blocks login modal)
+│   └── ThirdParty/Blocks/            # Vendored Unity Building Blocks, pruned to what UGS uses (81 of 135 files).
+│                                     #   Keeps its upstream directory shape — the theme's USS @imports are RELATIVE
+│                                     #   paths, so moving files inside it breaks styling. See THIRD-PARTY-NOTICES.md.
 │
-├── Blocks/                           # Vendored Unity Blocks samples (Achievements, Leaderboards, PlayerAccount, Common) —
-│                                     #   own asmdefs, duplicate class names; not part of the four domains
 ├── CloudCode/                        # Second cloud-code root: BlocksAdminModule~/, BlocksGameModule~/, GeneratedModuleBindings/
 ├── ThirdParty/CrawfisSoftware/       # Vendored utilities: Random providers (Blackboard depends on them), editor tools
 │                                     #   (Play Scene 0 Always, screenshots, dev-build toggle)
@@ -567,7 +572,7 @@ Assets/
 - **GameFlow**: Application lifecycle - boot, initialization, menus, level select, pause, quit, scene management
 - **TempleRun**: Gameplay mechanics - player movement, track generation, power-ups, input, audio
 - **UGS**: Unity Gaming Services - authentication, leaderboards, achievements, remote config, economy, player data
-- **Vendored** (Blocks, CloudCode bindings, ThirdParty, LevelPlay, …): sample and utility code outside the domain rule
+- **Vendored** (`UGS/ThirdParty/Blocks`, CloudCode bindings, ThirdParty, LevelPlay, …): sample and utility code outside the domain rule
 
 ### Event Flow Architecture
 

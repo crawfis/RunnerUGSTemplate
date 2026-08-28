@@ -214,7 +214,7 @@ PanelRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   serializedVersion: 1
-  m_PanelSettings: {fileID: 11400000, guid: 4c8011be1283eb042ad4a0e7a6f30d4a, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: 55a988285295c404c9a3a324a0aa6411, type: 2}
   sourceAsset: {fileID: 9197481963319205126, guid: 6db55424c43cb8443bcd7716af6372ae,
     type: 3}
   m_ParentUI: {fileID: 0}
