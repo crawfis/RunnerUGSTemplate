@@ -1,15 +1,17 @@
 using CrawfisSoftware.Events;
 using CrawfisSoftware.TempleRun;
-using CrawfisSoftware.UGS.Events;
 
 using UnityEngine;
 
 namespace CrawfisSoftware.GameFlow.Events
 {
     /// <summary>
-    /// Sanctioned crossings out of the TempleRun domain. Three directions, so it holds three
-    /// dispatchers rather than inheriting AutoEventFlowBase, which covers one.
+    /// The sanctioned crossing between the TempleRun and GameFlow domains. Bidirectional, so it
+    /// holds two dispatchers rather than inheriting AutoEventFlowBase, which covers one.
     /// </summary>
+    /// <remarks>The TempleRun -> UGS passthrough that used to live here now sits in
+    /// <c>TempleRunUGSBridge</c>, under <c>Assets/UGS/</c>. A GameFlow file naming
+    /// <c>UGS_EventsEnum</c> made the game fail to compile without the UGS folder.</remarks>
     internal class TempleRunGameFlowBridge : MonoBehaviour
     {
         private static readonly (TempleRunEvents From, GameFlowEvents To)[] TempleRunToGameFlow =
@@ -44,37 +46,22 @@ namespace CrawfisSoftware.GameFlow.Events
             (GameFlowEvents.GameScenesLoaded, TempleRunEvents.TempleRunScenesReady),
         };
 
-        // TempleRun -> UGS passthrough (bypasses GameFlow - this bridge is the authorized crossing point)
-        private static readonly (TempleRunEvents From, UGS_EventsEnum To)[] TempleRunToUGS =
-        {
-            // Distance updates for achievement tracking
-            (TempleRunEvents.DistanceUpdated, UGS_EventsEnum.UGS_DistanceUpdated),
-
-            // Coin collection for economy sync and achievement tracking
-            (TempleRunEvents.CoinCollected, UGS_EventsEnum.UGS_CoinUpdated),
-        };
-
         private readonly EventChainDispatcher<TempleRunEvents, GameFlowEvents> _templeRunToGameFlow =
             new EventChainDispatcher<TempleRunEvents, GameFlowEvents>(TempleRunToGameFlow);
 
         private readonly EventChainDispatcher<GameFlowEvents, TempleRunEvents> _gameFlowToTempleRun =
             new EventChainDispatcher<GameFlowEvents, TempleRunEvents>(GameFlowToTempleRun);
 
-        private readonly EventChainDispatcher<TempleRunEvents, UGS_EventsEnum> _templeRunToUGS =
-            new EventChainDispatcher<TempleRunEvents, UGS_EventsEnum>(TempleRunToUGS);
-
         protected virtual void Awake()
         {
             _templeRunToGameFlow.Attach();
             _gameFlowToTempleRun.Attach();
-            _templeRunToUGS.Attach();
         }
 
         protected virtual void OnDestroy()
         {
             _templeRunToGameFlow.Detach();
             _gameFlowToTempleRun.Detach();
-            _templeRunToUGS.Detach();
         }
     }
 }

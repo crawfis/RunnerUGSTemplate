@@ -40,7 +40,7 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | UGS Events | `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` |
 | Event Buses | `EventsFor<T>` from the `com.crawfissoftware.eventspublisher` package, aliased per file as `GameFlowBus` / `TempleRunBus` / `UserInputBus` / `UGSBus`. The `EventsPublisher*.cs` singleton subclasses are retired — nothing references them; delete their scene objects, then the scripts |
 | Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Assets/UGS/Scripts/Events/UGSAutoEventFlow.cs` |
-| Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (incl. the TempleRun → UGS passthrough), `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`, `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` |
+| Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`, `Assets/UGS/Scripts/Events/TempleRunUGSBridge.cs` (gameplay → UGS, one-way), `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` |
 | Game State | `Assets/GameFlow/Scripts/Config/GameState.cs`, `Assets/TempleRun/Scripts/Config/Blackboard.cs` |
 
 ## MANDATORY: Event System Enforcement
@@ -65,7 +65,8 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | `Assets/GameFlow/**/*.cs` (non-bridge) | `GameFlowEvents` only |
 | `Assets/UGS/**/*.cs` (non-bridge) | `UGS_EventsEnum` only |
 | `Input2TempleRunAutoEventBridge.cs` | `UserInitiatedEvents` + `TempleRunEvents` (bridge duty) |
-| `TempleRunGameFlowBridge.cs` | `TempleRunEvents` + `GameFlowEvents` + `UGS_EventsEnum` (bridge duty; the last via the TempleRun → UGS passthrough dictionary) |
+| `TempleRunGameFlowBridge.cs` | `TempleRunEvents` + `GameFlowEvents` (bridge duty) |
+| `TempleRunUGSBridge.cs` (under `Assets/UGS/`) | `TempleRunEvents` + `UGS_EventsEnum` (bridge duty; one-way, gameplay -> UGS) |
 | `UGSGameFlowBridge.cs` | `UGS_EventsEnum` + `GameFlowEvents` (bridge duty) |
 
 **Violations — what NOT to do:**
