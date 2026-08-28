@@ -1,5 +1,6 @@
 using Blocks.Achievements.UI;
 
+using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
@@ -76,7 +77,21 @@ namespace CrawfisSoftware.UGS.Achievements
         /// <param name="rootElement">UI element to parent to; defaults to the panel's own root.</param>
         public void Init(VisualElement rootElement = null)
         {
-            AchievementBaseElement.Icons = m_Icons.ToList();
+            // AchievementBaseElement.Icons is STATIC and shared with AchievementsPrefab, which
+            // ships four icons while this prefab ships none - in the Blocks original too. Assigning
+            // unconditionally means whichever initialises last wins, so an empty array here wipes
+            // the icons the achievements panel supplied and toasts render blank. Publish ours only
+            // if we actually have any; otherwise just guarantee the list is non-null, since
+            // AchievementBaseElement calls Icons.Find without a null check.
+            if (m_Icons != null && m_Icons.Length > 0)
+            {
+                AchievementBaseElement.Icons = m_Icons.ToList();
+            }
+            else
+            {
+                AchievementBaseElement.Icons ??= new List<Texture2D>();
+            }
+
             AchievementsNotification = new AchievementNotificationElement();
 
             if (rootElement != null)
