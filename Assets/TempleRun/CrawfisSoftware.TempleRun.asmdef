@@ -3,6 +3,7 @@
     "rootNamespace": "CrawfisSoftware.TempleRun",
     "references": [
         "CrawfisSoftware.Common",
+        "CrawfisSoftware.ThirdParty",
         "CrawfisSoftware.EventsPublisher",
         "Unity.InputSystem",
         "audiomanager.gamesthatmoveyou.com"

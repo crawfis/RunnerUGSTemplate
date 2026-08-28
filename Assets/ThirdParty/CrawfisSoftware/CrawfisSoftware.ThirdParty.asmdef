@@ -1,0 +1,6 @@
+{
+    "name": "CrawfisSoftware.ThirdParty",
+    "rootNamespace": "CrawfisSoftware",
+    "references": [],
+    "autoReferenced": true
+}
