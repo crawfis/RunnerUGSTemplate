@@ -1,8 +1,8 @@
-﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.Events;
 
 using UnityEngine;
 
-namespace CrawfisSoftware.GameFlow.SceneManagement
+namespace CrawfisSoftware.SceneManagement
 {
     class FireEventWhenSceneCloses : MonoBehaviour
     {

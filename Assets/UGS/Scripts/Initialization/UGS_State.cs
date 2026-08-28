@@ -1,9 +1,11 @@
-﻿using CrawfisSoftware.UGS.Events;
+using CrawfisSoftware.UGS.Events;
 
 using Unity.Services.Core;
 using Unity.Services.Core.Components;
 
 using UnityEngine;
+
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
 
 namespace CrawfisSoftware.UGS
 {
@@ -39,25 +41,25 @@ namespace CrawfisSoftware.UGS
             }
             else
             {
-                EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
+                UGSBus.Subscribe(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
             }
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnRemoteConfigFetching);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
+            UGSBus.Subscribe(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+            UGSBus.Subscribe(UGS_EventsEnum.RemoteConfigFetching, OnRemoteConfigFetching);
+            UGSBus.Subscribe(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.RemoteConfigFetching, OnRemoteConfigFetching);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
+            UGSBus.Unsubscribe(UGS_EventsEnum.UnityServicesInitialized, OnUnityServicesInitialized);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSigningIn, OnPlayerSigningIn);
+            UGSBus.Unsubscribe(UGS_EventsEnum.RemoteConfigUpdated, OnRemoteConfigUpdated);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerAuthenticated, OnPlayerAuthenticated);
+            UGSBus.Unsubscribe(UGS_EventsEnum.RemoteConfigFetching, OnRemoteConfigFetching);
+            UGSBus.Unsubscribe(UGS_EventsEnum.CheckForExistingSession, OnCheckingForExistingSession);
         }
 
         private void Reset()

@@ -114,3 +114,55 @@ so their scene/prefab components **must stay `UI Document`**:
 - [ ] Repeat on the `Test_GameOnly_Windows` profile if you use it (no UGS): note that without UGS the
       boot and post-game loops are the ones ERT's chains fixed — expect the menu **not** to return
       there; that is pre-existing, not caused by this migration.
+
+---
+
+## Phase 5 — the Blocks-sourced notification panel (outstanding)
+
+Phases 1–4 covered the panels this project authors. Two panels arrive a different way: the
+shipped UGS scenes **instantiate prefabs from `Assets/Blocks/`**, the vendored Unity samples,
+and those still carry `UIDocument`. A grep of `Assets/UGS` finds nothing, because the
+`UIDocument` is inside the prefab, not the scene.
+
+| Blocks prefab | Instantiated by | In Build Settings | State |
+|---|---|---|---|
+| `Blocks/Achievements/Prefabs/AchievementsPrefab.prefab` | `UGS/Scenes/UGS/Achievements.unity` | yes | ✅ already forked → `UGS/Prefabs/UGS/AchievementsPrefab.prefab` |
+| `Blocks/Achievements/Prefabs/AchievementsNotificationPrefab.prefab` | `UGS/Scenes/UGS/AchievementNotifications.unity` | yes | ⬜ **outstanding** |
+| `Blocks/Achievements/TestScenes/AchievementsTestScene.unity` | — | no | ignore: Blocks-only, never built |
+
+### Fork, do not edit
+
+`AchievementsPrefab` set the precedent: the sample was **copied** into `Assets/UGS/` and
+migrated there, leaving `Assets/Blocks/` pristine. Re-importing the Blocks sample would
+silently overwrite an in-place edit, so keep the vendored copy untouched.
+
+### Done in code
+
+`Assets/UGS/Scripts/Achievements/AchievementsNotificationPrefab.cs` — a PanelRenderer fork in
+namespace `CrawfisSoftware.UGS.Achievements`, mirroring the `AchievementsPrefab` fork:
+`PanelRenderer m_UiPanel` replaces `UIDocument m_UiDocument`; the tree is reached through
+`OnUIReload` instead of `rootVisualElement`; `enabled = true` is forced in `OnEnable`
+(UUM-146174); re-parenting is idempotent and repeats on every reload.
+
+### Remaining — in Unity, never by editing YAML
+
+- [ ] Duplicate `Blocks/Achievements/Prefabs/AchievementsNotificationPrefab.prefab` into
+      `Assets/UGS/Prefabs/UGS/`.
+- [ ] On the copy: remove `UI Document`, add `Panel Renderer`, and point its script field at the
+      forked `CrawfisSoftware.UGS.Achievements.AchievementsNotificationPrefab`.
+- [ ] Re-assign, from the original's serialized values:
+
+      | Field | Value |
+      |---|---|
+      | Panel Settings | `Assets/Blocks/Common/BlocksPanelSettings.asset` |
+      | Source Asset | **none** — the notification builds its tree in code (`new AchievementNotificationElement()`), so this was already null |
+      | Sort Order | **1** |
+
+- [ ] Re-assign `m_Icons` (the `Texture2D[]`) and leave `InitOnAwake` as it was.
+- [ ] Wire the new `m_UiPanel` field to the Panel Renderer on the same GameObject.
+- [ ] **Leave `Enabled` ✔.**
+- [ ] Repoint `UGS/Scenes/UGS/AchievementNotifications.unity` at the forked prefab.
+- [ ] Play-test: earn an achievement and confirm the notification appears; no blank panel, no
+      `NullReferenceException`.
+- [ ] Confirm `grep -r "UIDocument" Assets/UGS Assets/GameFlow Assets/TempleRun` is empty — any
+      remaining hits should be inside `Assets/Blocks/` only.

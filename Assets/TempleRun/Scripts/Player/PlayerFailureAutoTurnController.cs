@@ -3,13 +3,15 @@ using CrawfisSoftware.TempleRun.GameConfig;
 using System.Collections;
 
 using UnityEngine;
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Handles auto-turning after a failure that originates from reaching the end of a track segment.
-    ///    Dependencies: TurnController, EventsPublisherTempleRun
-    ///    Subscribes: PlayerFailing
+    ///    Dependencies: TurnController, EventsFor<TempleRunEvents>
+    ///    Subscribes: PlayerFailingAtTurn — deliberately the SPECIFIC failure, not the generic
+    ///                PlayerFailing: only a failed turn should auto-advance the track.
     ///    Publishes: Turn completed events via TurnController
     /// </summary>
     internal class PlayerFailureAutoTurnController : MonoBehaviour
@@ -19,7 +21,7 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(TempleRunEvents.PlayerFailingAtTurn, OnPlayerFailing);
+            TempleRunBus.Subscribe(TempleRunEvents.PlayerFailingAtTurn, OnPlayerFailing);
         }
 
         private void OnPlayerFailing(string eventName, object sender, object data)
@@ -41,7 +43,7 @@ namespace CrawfisSoftware.TempleRun
         private void OnDestroy()
         {
             StopAllCoroutines(); // Saved them so could call individually instead.
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(TempleRunEvents.PlayerFailingAtTurn, OnPlayerFailing);
+            TempleRunBus.Unsubscribe(TempleRunEvents.PlayerFailingAtTurn, OnPlayerFailing);
         }
     }
 }

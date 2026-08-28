@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
@@ -67,7 +69,7 @@ namespace CrawfisSoftware.TempleRun
             {
                 var interest = _interests[0];
                 _interests.RemoveAt(0);
-                EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.DistanceUpdated, this, currentDistance);
+                TempleRunBus.Publish(TempleRunEvents.DistanceUpdated, this, currentDistance);
             }
         }
     }

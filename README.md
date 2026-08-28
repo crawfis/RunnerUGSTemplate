@@ -1389,7 +1389,7 @@ void OnTriggerEnter(Collider col) {
 
 // ✅ GOOD: Event-driven
 void OnTriggerEnter(Collider col) {
-    EventsPublisherTempleRun.Instance.PublishEvent(
+    TempleRunBus.Publish(
         TempleRunEvents.PlayerFailRequested,
         this,
         null
@@ -1443,7 +1443,7 @@ The current implementation places animation logic directly alongside gameplay co
 
 ```csharp
 // CapsuleAnimationLink subscribes to TempleRun domain events
-EventsPublisherTempleRun.Instance.SubscribeToEvent(
+TempleRunBus.Subscribe(
     TempleRunEvents.LaneChangingLeft,
     TriggerLeanLeftAnimation
 );
@@ -1503,7 +1503,7 @@ public enum GameFlowEvents
 
 3. **Publish** using the typed publisher:
 ```csharp
-EventsPublisherGameFlow.Instance.PublishEvent(
+GameFlowBus.Publish(
     GameFlowEvents.MyFeatureStarted,
     this,
     optionalData
@@ -1514,7 +1514,7 @@ EventsPublisherGameFlow.Instance.PublishEvent(
 ```csharp
 private void Awake()
 {
-    EventsPublisherGameFlow.Instance.SubscribeToEvent(
+    GameFlowBus.Subscribe(
         GameFlowEvents.MyFeatureStarted,
         OnMyFeatureStarted
     );
@@ -1522,7 +1522,7 @@ private void Awake()
 
 private void OnDestroy()
 {
-    EventsPublisherGameFlow.Instance.UnsubscribeToEvent(
+    GameFlowBus.Unsubscribe(
         GameFlowEvents.MyFeatureStarted,
         OnMyFeatureStarted
     );

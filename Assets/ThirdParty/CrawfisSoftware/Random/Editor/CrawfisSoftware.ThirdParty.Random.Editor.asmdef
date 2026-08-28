@@ -1,0 +1,11 @@
+{
+    "name": "CrawfisSoftware.ThirdParty.Random.Editor",
+    "rootNamespace": "CrawfisSoftware",
+    "references": [
+        "CrawfisSoftware.ThirdParty"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": true
+}

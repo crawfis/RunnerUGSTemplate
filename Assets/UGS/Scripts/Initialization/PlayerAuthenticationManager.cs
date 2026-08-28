@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.UGS.Events;
+using CrawfisSoftware.UGS.Events;
 
 using System.Threading.Tasks;
 
@@ -8,6 +8,8 @@ using Unity.Services.Core;
 using UnityEngine;
 
 using Logger = CrawfisSoftware.Utilities.Logger;
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS
 {
     /// <summary>
@@ -30,10 +32,10 @@ namespace CrawfisSoftware.UGS
             // sign-in flow funnels through SignInCachedPlayerAsync, which is only reached via the
             // CheckForExistingSession event (auto-chained from UnityServicesInitialized) or the
             // UGS_State.IsCheckForExistingSession fallback — both guaranteed post-initialization.
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
-            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
+            UGSBus.Subscribe(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
+            UGSBus.Subscribe(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
             //AuthenticationService.Instance.SignedIn += HandleSuccessfulSignIn;
             //AuthenticationService.Instance.SignedOut += HandleSignedOut;
             //AuthenticationService.Instance.Expired += HandleSessionExpired;
@@ -41,10 +43,10 @@ namespace CrawfisSoftware.UGS
 
         public void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
+            UGSBus.Unsubscribe(UGS_EventsEnum.CheckForExistingSession, HandleCheckForExistingSession);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerAuthenticating, HandleSuccessfulSignIn);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSigningOut, HandleSignedOut);
+            UGSBus.Unsubscribe(UGS_EventsEnum.PlayerSessionExpired, HandleSessionExpired);
             //AuthenticationService.Instance.SignedIn -= HandleSuccessfulSignIn;
             //AuthenticationService.Instance.SignedOut -= HandleSignedOut;
             //AuthenticationService.Instance.Expired -= HandleSessionExpired;
@@ -74,14 +76,14 @@ namespace CrawfisSoftware.UGS
             if (!AuthenticationService.Instance.SessionTokenExists)
             {
                 Logger.LogDemo($"{k_KeyEmoji} No cached session found");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.CheckForExistingSessionFailed, this, null);
+                UGSBus.Publish(UGS_EventsEnum.CheckForExistingSessionFailed, this, null);
                 return;
             }
             Logger.Log($"{k_KeyEmoji} Existing player returned");
             Debug.Log($"Returning Player ID: {AuthenticationService.Instance.PlayerId}");
             Debug.Log($"Returning Player is Authorized: {AuthenticationService.Instance.IsAuthorized}");
 
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.CheckForExistingSessionSucceeded, this, null);
+            UGSBus.Publish(UGS_EventsEnum.CheckForExistingSessionSucceeded, this, null);
 
         }
         
@@ -107,7 +109,7 @@ namespace CrawfisSoftware.UGS
             catch (RequestFailedException ex) 
             {
                 Logger.LogWarning($"Network error during sign-in: {ex.Message}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+                UGSBus.Publish(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
         }
 
@@ -136,7 +138,7 @@ namespace CrawfisSoftware.UGS
             if (m_IsResumingFromExpiredToken)
             {
                 // An event for handling coming online after being offline for a while (e.g. player progress is validated in and saved to cloud)
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerResumedFromExpiredToken, this, UnityEngine.Time.time);
+                UGSBus.Publish(UGS_EventsEnum.PlayerResumedFromExpiredToken, this, UnityEngine.Time.time);
                 m_IsResumingFromExpiredToken = false;
                 //return;
             }
@@ -148,7 +150,7 @@ namespace CrawfisSoftware.UGS
             if(AuthenticationService.Instance.IsSignedIn)
             {
                 Logger.LogDemo($"{k_KeyEmoji} Player already signed in");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                UGSBus.Publish(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
                 LogPlayerInfo();
                 return;
             }
@@ -157,7 +159,7 @@ namespace CrawfisSoftware.UGS
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
                 if (AuthenticationService.Instance.IsAuthorized)
                 {
-                    EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                    UGSBus.Publish(UGS_EventsEnum.PlayerAuthenticated, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
                     LogPlayerInfo();
                     return;
                 }
@@ -165,14 +167,14 @@ namespace CrawfisSoftware.UGS
             catch (AuthenticationException ex)
             {
                 Logger.LogWarning($"💡 Authentication failed - if testing, try enabling 'Delete Account On Start' in GameInitializer to reset state {ex.Message}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+                UGSBus.Publish(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
             catch (RequestFailedException ex)
             {
                 Logger.LogWarning($"Network error during sign-in: {ex.Message}");
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+                UGSBus.Publish(UGS_EventsEnum.PlayerSignInFailed, this, null);
             }
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignInFailed, this, null);
+            UGSBus.Publish(UGS_EventsEnum.PlayerSignInFailed, this, null);
         }
 
         private void HandleSignedOut(string eventName, object sender, object data)

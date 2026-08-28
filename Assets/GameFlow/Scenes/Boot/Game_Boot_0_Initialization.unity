@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29140eab5ebe4274ea6815d4879a80f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrawfisSoftware.GameControl.UnloadNonActiveScenes
-  _lastSceneIndexToKeep: 10
+  _lastSceneIndexToKeep: 11
   _unloadScenesTriggerEvent: 31
   _scenesUnloadedEvent: 32
   _unsubscribeOnEvent: 0

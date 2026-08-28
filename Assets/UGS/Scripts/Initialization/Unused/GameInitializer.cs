@@ -1,4 +1,4 @@
-﻿////using CrawfisSoftware.AreaUpgradables;
+////using CrawfisSoftware.AreaUpgradables;
 //using CrawfisSoftware.DependencyInjection;
 //using CrawfisSoftware.PlayerDataManagement;
 //using CrawfisSoftware.PlayerEconomyManagement;
@@ -36,7 +36,7 @@
 
 //        private async void Awake()
 //        {
-//            EventsPublisherUGS.Instance.SubscribeToEvent(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
+//            UGSBus.Subscribe(UGS_EventsEnum.PlayerSignedIn, OnPlayerSignedIn);
 //            if (UnityServices.Instance != null && UnityServices.State == ServicesInitializationState.Initialized)
 //            {
 //                InitializeAuthentication();
@@ -57,7 +57,7 @@
 //            _authenticationManager = new PlayerAuthenticationManager();
 //            _gameManager = Instantiate(m_GameManagerUGSPrefab);
 //            DontDestroyOnLoad(_gameManager.gameObject);
-//            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.GameManagerInstantiated, this, null);
+//            UGSBus.Publish(UGS_EventsEnum.GameManagerInstantiated, this, null);
 //            _gameManager.Initialize(_authenticationManager);
 //        }
 

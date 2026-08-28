@@ -1,5 +1,7 @@
 using CrawfisSoftware.TempleRun.GameConfig;
 
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
+
 namespace CrawfisSoftware.TempleRun.PowerUps
 {
     /// <summary>
@@ -25,7 +27,7 @@ namespace CrawfisSoftware.TempleRun.PowerUps
 
         public override bool TryAbsorbObstacle(PowerUpContext ctx)
         {
-            EventsPublisherTempleRun.Instance.PublishEvent(
+            TempleRunBus.Publish(
                 TempleRunEvents.ObstacleRecovered, this, null);
             return true;
         }

@@ -11,6 +11,8 @@ using UnityEngine.SceneManagement;
 
 using Logger = CrawfisSoftware.Utilities.Logger;
 using Random = UnityEngine.Random;
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS
 {
     /// <summary>
@@ -42,7 +44,7 @@ namespace CrawfisSoftware.UGS
 
             if (m_AuthenticationManager.IsSignedIn)
             {
-                EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.PlayerSignedIn, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
+                UGSBus.Publish(UGS_EventsEnum.PlayerSignedIn, this, (AuthenticationService.Instance.PlayerName, AuthenticationService.Instance.PlayerId));
             }
         }
     }

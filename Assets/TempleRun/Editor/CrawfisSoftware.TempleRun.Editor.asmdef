@@ -1,0 +1,14 @@
+{
+    "name": "CrawfisSoftware.TempleRun.Editor",
+    "rootNamespace": "CrawfisSoftware.TempleRun.Editor",
+    "references": [
+        "CrawfisSoftware.TempleRun",
+        "CrawfisSoftware.GameFlow",
+        "CrawfisSoftware.Common",
+        "CrawfisSoftware.EventsPublisher"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": true
+}

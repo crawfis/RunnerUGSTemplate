@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 using Unity.Services.Authentication;
@@ -14,6 +14,8 @@ using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
 
 namespace CrawfisSoftware.UGS.RemoteConfig
 {
@@ -127,7 +129,7 @@ namespace CrawfisSoftware.UGS.RemoteConfig
             //var difficulties = await GetAchievementsAsync(m_AuthenticationService.PlayerId);
             var difficulties = await GetDefinitions();
             RuntimeDifficultySettings = difficulties;
-            EventsPublisherUGS.Instance.PublishEvent(UGS_EventsEnum.DifficultySettingsFetched, this, difficulties);
+            UGSBus.Publish(UGS_EventsEnum.DifficultySettingsFetched, this, difficulties);
 
         }
 

@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
+using UGSBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.UGS.Events.UGS_EventsEnum>;
+
 namespace CrawfisSoftware.UGS.Achievements
 {
     /// <summary>
@@ -27,14 +29,14 @@ namespace CrawfisSoftware.UGS.Achievements
 
         private void Awake()
         {
-            EventsPublisherUGS.Instance.SubscribeToEvent(
+            UGSBus.Subscribe(
                 UGS_EventsEnum.UGS_CoinUpdated,
                 OnCoinUpdated);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherUGS.Instance.UnsubscribeToEvent(
+            UGSBus.Unsubscribe(
                 UGS_EventsEnum.UGS_CoinUpdated,
                 OnCoinUpdated);
         }

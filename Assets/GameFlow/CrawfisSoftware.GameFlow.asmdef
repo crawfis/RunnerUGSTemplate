@@ -1,0 +1,12 @@
+{
+    "name": "CrawfisSoftware.GameFlow",
+    "rootNamespace": "CrawfisSoftware.GameFlow",
+    "references": [
+        "CrawfisSoftware.Common",
+        "CrawfisSoftware.EventsPublisher",
+        "CrawfisSoftware.TempleRun",
+        "Unity.Services.Authentication",
+        "Unity.Services.Authentication.PlayerAccounts"
+    ],
+    "autoReferenced": true
+}

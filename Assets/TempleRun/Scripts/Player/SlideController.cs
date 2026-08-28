@@ -1,16 +1,16 @@
 using CrawfisSoftware.Events;
 using UnityEngine;
+using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Validates slide requests and manages slide state.
     /// Blocks slides while already sliding or on cooldown.
-    /// Does NOT publish events - validation pass-through allows auto-chain to fire SlideStarting.
     ///    Dependencies: Blackboard.SlideConfig for cooldown configuration
     ///    Subscribes: TempleRunEvents.SlideRequested (from bridge translating UserInitiated)
     ///    Subscribes: TempleRunEvents.SlideEnded (clear _isSliding, track cooldown)
-    ///    Publishes: (none - auto-flow handles event progression)
+    ///    Publishes: TempleRunEvents.SlideStarting (only once validation passes)
     /// </summary>
     internal class SlideController : MonoBehaviour
     {
@@ -22,17 +22,17 @@ namespace CrawfisSoftware.TempleRun
             // Subscribe to TempleRun domain events, not UserInitiated
             // This allows slide to be triggered from any source: player input, AI, replay, network, etc.
             // The bridge translates UserInitiated.SlideRequested -> TempleRunEvents.SlideRequested
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.SlideRequested, OnSlideRequested);
-            EventsPublisherTempleRun.Instance.SubscribeToEvent(
+            TempleRunBus.Subscribe(
                 TempleRunEvents.SlideEnded, OnSlideEnded);
         }
 
         private void OnDestroy()
         {
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.SlideRequested, OnSlideRequested);
-            EventsPublisherTempleRun.Instance.UnsubscribeToEvent(
+            TempleRunBus.Unsubscribe(
                 TempleRunEvents.SlideEnded, OnSlideEnded);
         }
 
@@ -55,11 +55,13 @@ namespace CrawfisSoftware.TempleRun
                 return;
 
             // Validation passed - mark as sliding and record time
-            // Event auto-chains will handle SlideRequested -> SlideStarting progression
             _isSliding = true;
             _lastSlideTime = Time.time;
 
-            EventsPublisherTempleRun.Instance.PublishEvent(TempleRunEvents.SlideStarted, this, null);
+            // Published here rather than auto-chained from SlideRequested: SlideRequested is the
+            // bridge's raw translation of the input, so an auto-chain would fire even when the
+            // checks above reject the request. SlideArcController takes it from here.
+            TempleRunBus.Publish(TempleRunEvents.SlideStarting, this, null);
         }
 
         private void OnSlideEnded(string eventName, object sender, object data)
