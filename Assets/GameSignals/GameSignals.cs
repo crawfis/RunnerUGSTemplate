@@ -45,11 +45,31 @@ namespace CrawfisSoftware.Contracts
 
         // ---------- Services -> Game ----------
 
-        /// <summary>Backing services are available; gameplay may proceed.</summary>
+        /// <summary>
+        /// Edge: services just became available. Transient, for the moment itself - a sound, a
+        /// transition. Anything that needs to know the current state reads
+        /// <see cref="ServicesStatusChanged"/> instead.
+        /// </summary>
         ServicesReady = 20,
 
-        /// <summary>Services became unavailable - signed out, offline, or failed to initialise.</summary>
+        /// <summary>Edge: services just became unavailable. Transient, as above.</summary>
         ServicesUnavailable = 21,
+
+        /// <summary>
+        /// The level: what the services state currently IS. Data: <see cref="ServicesStatus"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>Sticky, and that is the whole point. The glue that translates this into the host's
+        /// lifecycle lives in an additively-loaded scene, so it may subscribe long after services
+        /// came up. A transient edge would already be gone and the boot would stall with no menu
+        /// and no error - which is exactly what happened before this existed.</para>
+        /// <para>Sticky is only safe here because this is one event carrying a value, not two
+        /// opposing edges. Marking ServicesReady and ServicesUnavailable Sticky would replay both
+        /// to a late subscriber, independently, in registration order.</para>
+        /// </remarks>
+        [EventPayload(typeof(ServicesStatus))]
+        [EventDelivery(EventDelivery.Sticky)]
+        ServicesStatusChanged = 22,
 
         /// <summary>Remote configuration has arrived and been applied.</summary>
         RemoteConfigApplied = 30,
