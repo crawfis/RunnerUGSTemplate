@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CrawfisSoftware.GameFlow
+namespace CrawfisSoftware.SceneManagement
 {
     /// <summary>
     /// Load the specified scene as an additive scene.

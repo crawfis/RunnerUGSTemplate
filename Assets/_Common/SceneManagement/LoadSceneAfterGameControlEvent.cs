@@ -1,4 +1,4 @@
-﻿using CrawfisSoftware.Events;
+using CrawfisSoftware.Events;
 
 using System;
 using System.Collections;
@@ -8,7 +8,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CrawfisSoftware.GameFlow.SceneManagement
+namespace CrawfisSoftware.SceneManagement
 {
     class LoadSceneAfterGameControlEvent : MonoBehaviour
     {
