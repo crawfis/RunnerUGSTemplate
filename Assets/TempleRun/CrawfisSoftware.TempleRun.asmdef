@@ -1,0 +1,11 @@
+{
+    "name": "CrawfisSoftware.TempleRun",
+    "rootNamespace": "CrawfisSoftware.TempleRun",
+    "references": [
+        "CrawfisSoftware.Common",
+        "CrawfisSoftware.EventsPublisher",
+        "Unity.InputSystem",
+        "audiomanager.gamesthatmoveyou.com"
+    ],
+    "autoReferenced": true
+}

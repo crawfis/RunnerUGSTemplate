@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 using Unity.Services.Core;
 
-using UnityEditor.Localization.Plugins.XLIFF.V20;
 
 using UnityEngine;
 
