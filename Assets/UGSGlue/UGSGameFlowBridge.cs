@@ -1,3 +1,4 @@
+using CrawfisSoftware.Contracts;
 using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 
@@ -6,57 +7,54 @@ using UnityEngine;
 namespace CrawfisSoftware.UGS.Events
 {
     /// <summary>
-    /// Bridges UGS events to/from GameFlow events. This class connects the two event domains.
-    /// Bidirectional, so it holds two dispatchers rather than inheriting AutoEventFlowBase.
-    ///
-    /// --- BOOT: UGS to GameFlow ---
-    /// [BRIDGE] PlayerAuthenticated -> GameplayReady
-    /// [BRIDGE] RemoteConfigUpdated -> LoadingScreenHideRequested
-    /// [BRIDGE] PlayerSignedOut -> GameplayNotReady
-    ///
-    /// --- GAME END: GameFlow to UGS ---
-    /// [BRIDGE] GameEnding -> ScoreUpdating
-    /// [BRIDGE] GameEnded -> LeaderboardOpening
+    /// Maps this application's session lifecycle onto the game-agnostic <see cref="GameSignals"/>
+    /// contract, and the contract's answers back onto GameFlow.
     /// </summary>
+    /// <remarks>
+    /// <para>The host half of the seam. It no longer names a single UGS type: it speaks GameFlow
+    /// and the contract, so swapping UGS for a different backend - or none - changes nothing here.
+    /// The class name is kept because scene components reference it.</para>
+    /// <para>Note what moved. <c>RemoteConfigUpdated -> LoadingScreenHideRequested</c> used to live
+    /// on the UGS side, which meant UGS knew its host had a loading screen. Now UGS announces
+    /// <see cref="GameSignals.RemoteConfigApplied"/> and this file - the host's - decides that
+    /// hiding the loading screen is the right response.</para>
+    /// </remarks>
     internal class UGSGameFlowBridge : MonoBehaviour
     {
-        private static readonly (UGS_EventsEnum From, GameFlowEvents To)[] UGSToGameFlow =
+        private static readonly (GameFlowEvents From, GameSignals To)[] GameFlowToSignals =
         {
-            (UGS_EventsEnum.PlayerAuthenticated, GameFlowEvents.GameplayReady),
-            (UGS_EventsEnum.PlayerSignedOut, GameFlowEvents.GameplayNotReady),
-
-            // Remote config update requests the loading screen to hide; flow auto-fires LoadingScreenHiding.
-            (UGS_EventsEnum.RemoteConfigUpdated, GameFlowEvents.LoadingScreenHideRequested),
-
-            // Difficulty settings fetched from remote config
-            (UGS_EventsEnum.DifficultySettingsFetched, GameFlowEvents.DifficultySettingsApplied),
+            // A run has finished: its score is final, then the session is over.
+            (GameFlowEvents.GameEnding, GameSignals.SessionEnding),
+            (GameFlowEvents.GameEnded, GameSignals.SessionEnded),
         };
 
-        private static readonly (GameFlowEvents From, UGS_EventsEnum To)[] GameFlowToUGS =
+        private static readonly (GameSignals From, GameFlowEvents To)[] SignalsToGameFlow =
         {
-            (GameFlowEvents.GameEnding, UGS_EventsEnum.ScoreUpdating),
-            (GameFlowEvents.GameEnded, UGS_EventsEnum.LeaderboardOpening),
+            (GameSignals.ServicesReady, GameFlowEvents.GameplayReady),
+            (GameSignals.ServicesUnavailable, GameFlowEvents.GameplayNotReady),
 
-            // Alternative: kick leaderboard earlier
-            //(GameFlowEvents.GameScenesUnloaded, UGS_EventsEnum.LeaderboardOpening),
+            // The host's choice, not the service's: config has arrived, so stop showing loading.
+            (GameSignals.RemoteConfigApplied, GameFlowEvents.LoadingScreenHideRequested),
+
+            (GameSignals.DifficultySettingsAvailable, GameFlowEvents.DifficultySettingsApplied),
         };
 
-        private readonly EventChainDispatcher<UGS_EventsEnum, GameFlowEvents> _ugsToGameFlow =
-            new EventChainDispatcher<UGS_EventsEnum, GameFlowEvents>(UGSToGameFlow);
+        private readonly EventChainDispatcher<GameFlowEvents, GameSignals> _gameFlowToSignals =
+            new EventChainDispatcher<GameFlowEvents, GameSignals>(GameFlowToSignals);
 
-        private readonly EventChainDispatcher<GameFlowEvents, UGS_EventsEnum> _gameFlowToUGS =
-            new EventChainDispatcher<GameFlowEvents, UGS_EventsEnum>(GameFlowToUGS);
+        private readonly EventChainDispatcher<GameSignals, GameFlowEvents> _signalsToGameFlow =
+            new EventChainDispatcher<GameSignals, GameFlowEvents>(SignalsToGameFlow);
 
         protected virtual void Awake()
         {
-            _ugsToGameFlow.Attach();
-            _gameFlowToUGS.Attach();
+            _gameFlowToSignals.Attach();
+            _signalsToGameFlow.Attach();
         }
 
         protected virtual void OnDestroy()
         {
-            _ugsToGameFlow.Detach();
-            _gameFlowToUGS.Detach();
+            _gameFlowToSignals.Detach();
+            _signalsToGameFlow.Detach();
         }
     }
 }

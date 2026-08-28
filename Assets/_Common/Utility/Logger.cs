@@ -6,7 +6,7 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 namespace CrawfisSoftware.Utilities
 {
-    internal static class Logger
+    public static class Logger
     {
 
         const string k_VerboseLoggingDefine = "ENABLE_VERBOSE_LOGGING";
