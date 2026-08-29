@@ -36,6 +36,7 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 
 # ...but NOT the Cloud Code C# modules. Those .sln/.csproj files are authored, not

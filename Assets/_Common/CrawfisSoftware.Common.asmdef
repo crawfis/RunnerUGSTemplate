@@ -1,8 +1,0 @@
-{
-    "name": "CrawfisSoftware.Common",
-    "rootNamespace": "CrawfisSoftware",
-    "references": [
-        "CrawfisSoftware.EventsPublisher"
-    ],
-    "autoReferenced": true
-}
