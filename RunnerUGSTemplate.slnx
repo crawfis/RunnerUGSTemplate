@@ -1,14 +1,10 @@
 ﻿<Solution>
-  <Project Path="CrawfisSoftware.UGS.csproj" />
-  <Project Path="CrawfisSoftware.Common.csproj" />
   <Project Path="CrawfisSoftware.TempleRun.csproj" />
   <Project Path="CrawfisSoftware.TempleRun.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.Services.CloudCode.GeneratedBindings.csproj" />
   <Project Path="CrawfisSoftware.GameFlow.csproj" />
   <Project Path="CrawfisSoftware.ThirdParty.Random.Editor.csproj" />
-  <Project Path="CrawfisSoftware.UGS.Editor.csproj" />
-  <Project Path="CrawfisSoftware.Contracts.csproj" />
   <Project Path="CrawfisSoftware.ThirdParty.Editor.csproj" />
   <Project Path="CrawfisSoftware.ThirdParty.csproj" />
 </Solution>

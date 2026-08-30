@@ -131,7 +131,10 @@ public class AllPlayersService
     {
         return new Player
         {
-            PlayerId = result.Id,
+            // Cloud Save now models this id as a OneOf wrapper rather than a bare string.
+            // GetString() is its string case; the null-conditional keeps a null id from
+            // throwing, since PlayerId is nullable anyway.
+            PlayerId = result.Id?.GetString(),
             DisplayName = GetDisplayName(result.Data),
             PlayerPortrait = GetProfilePicture(result.Data)
         };
