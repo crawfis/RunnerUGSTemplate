@@ -8,6 +8,9 @@ namespace Unity.Services.CloudCode.GeneratedBindings
     public class GiftHeartCooldownServiceBindings
     {
         readonly ICloudCodeService k_Service;
+
+        public GiftHeartCooldownServiceBindings() : this(CloudCodeService.Instance) { }
+
         public GiftHeartCooldownServiceBindings(ICloudCodeService service)
         {
             k_Service = service;

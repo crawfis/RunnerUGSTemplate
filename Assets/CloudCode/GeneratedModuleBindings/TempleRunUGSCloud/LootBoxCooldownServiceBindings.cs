@@ -8,6 +8,9 @@ namespace Unity.Services.CloudCode.GeneratedBindings
     public class LootBoxCooldownServiceBindings
     {
         readonly ICloudCodeService k_Service;
+
+        public LootBoxCooldownServiceBindings() : this(CloudCodeService.Instance) { }
+
         public LootBoxCooldownServiceBindings(ICloudCodeService service)
         {
             k_Service = service;

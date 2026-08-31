@@ -8,6 +8,9 @@ namespace Unity.Services.CloudCode.GeneratedBindings
     public class AdRewardsServiceBindings
     {
         readonly ICloudCodeService k_Service;
+
+        public AdRewardsServiceBindings() : this(CloudCodeService.Instance) { }
+
         public AdRewardsServiceBindings(ICloudCodeService service)
         {
             k_Service = service;
