@@ -1,5 +1,15 @@
 # RemoteConfig Flow Documentation
 
+> **Status note (2026-08-31).** The UGS domain is no longer in this repository — it ships as
+> the `com.crawfissoftware.ugs` package, so the paths below read `Runtime/...` rather than
+> `Assets/UGS/Scripts/...`, and the buses are static `EventsFor<T>` aliases rather than
+> `EventsPublisher*` singletons. The cross-domain hop also goes through `GameSignals` now, not
+> directly between UGS and GameFlow.
+>
+> One caveat this document does not yet reflect: `DifficultyObserver` is constructed by
+> nothing in the package, so `GameSignals.DifficultySettingsAvailable` is not published today.
+> The flow described here is the design, not fully live behaviour.
+
 ## Overview
 
 The RunnerUGS RemoteConfig system uses an **event-driven architecture** to decouple the UGS domain from gameplay domains. Difficulty settings are fetched from Unity Gaming Services RemoteConfig and propagated through the event system to TempleRun gameplay logic.
@@ -20,14 +30,14 @@ PHASE 1: USER AUTHENTICATION
 
     ┌─────────────────────────────────────┐
     │ PlayerAuthenticationManager         │
-    │ (Assets/UGS/Scripts/...)            │
+    │ (Runtime/  [ugs package]...)            │
     │                                     │
     │ Authenticates player with UGS       │
     └─────────────────────────────────────┘
                     │
                     ▼
     Publishes: UGS_EventsEnum.PlayerAuthenticated
-    (via EventsPublisherUGS)
+    (via UGSBus)
 
 
 PHASE 2: REMOTE CONFIG FETCH (PARALLEL WITH AUTH)
@@ -35,7 +45,7 @@ PHASE 2: REMOTE CONFIG FETCH (PARALLEL WITH AUTH)
 
     ┌─────────────────────────────────────┐
     │ DifficultyObserver                  │
-    │ (Assets/UGS/Scripts/RemoteConfig/)  │
+    │ (Runtime/RemoteConfig/  [ugs package])  │
     │                                     │
     │ 1. Detects player signed in         │
     │ 2. Calls GetDifficultySettingsAsync()│
@@ -48,7 +58,7 @@ PHASE 2: REMOTE CONFIG FETCH (PARALLEL WITH AUTH)
                     │
                     ▼
     Publishes: UGS_EventsEnum.DifficultySettingsFetched
-    (via EventsPublisherUGS)
+    (via UGSBus)
     Data: List<DifficultyConfig>
 
 
@@ -57,7 +67,7 @@ PHASE 3: UGS → GAMEFLOW BRIDGE
 
     ┌─────────────────────────────────────┐
     │ UGSGameFlowBridge                   │
-    │ (Assets/UGS/Scripts/Events/)        │
+    │ (Runtime/Events/  [ugs package])        │
     │                                     │
     │ Line 32:                            │
     │ { DifficultySettingsFetched →       │
@@ -70,7 +80,7 @@ PHASE 3: UGS → GAMEFLOW BRIDGE
                     │
                     ▼
     Publishes: GameFlowEvents.DifficultySettingsApplied
-    (via EventsPublisherGameFlow)
+    (via GameFlowBus)
     Data: List<DifficultyConfig>
 
 
@@ -93,7 +103,7 @@ PHASE 4: GAMEFLOW → TEMPLERUN BRIDGE
                     │
                     ▼
     Publishes: TempleRunEvents.DifficultySettingsApplied
-    (via EventsPublisherTempleRun)
+    (via TempleRunBus)
     Data: List<DifficultyConfig>
 
 
@@ -128,7 +138,7 @@ PHASE 5: TEMPLERUN APPLIES SETTINGS
 
 ### Phase 1: Authentication
 **Component:** `PlayerAuthenticationManager`
-**Location:** `Assets/UGS/Scripts/Initialization/`
+**Location:** `Runtime/  [ugs package]Initialization/`
 **Responsibility:** Sign in player with UGS
 **Event Published:**
 - `UGS_EventsEnum.PlayerAuthenticated` (data: null)
@@ -147,7 +157,7 @@ UGSBus.Publish(
 
 ### Phase 2: RemoteConfig Fetch
 **Component:** `DifficultyObserver`
-**Location:** `Assets/UGS/Scripts/RemoteConfig/`
+**Location:** `Runtime/RemoteConfig/  [ugs package]`
 **Responsibility:** Fetch difficulty settings from RemoteConfig service
 **Event Published:**
 - `UGS_EventsEnum.DifficultySettingsFetched` (data: `List<DifficultyConfig>`)
@@ -221,7 +231,7 @@ The RemoteConfig service stores difficulty settings under key `"difficulty"` as 
 
 ### Phase 3: UGS → GameFlow Bridge
 **Component:** `UGSGameFlowBridge`
-**Location:** `Assets/UGS/Scripts/Events/`
+**Location:** `Runtime/Events/  [ugs package]`
 **Responsibility:** Translate UGS events to GameFlow events
 **Events:**
 - **Receives:** `UGS_EventsEnum.DifficultySettingsFetched`
@@ -320,7 +330,7 @@ private void AutoFireTempleRunEventFromGameFlowEvent(
 **Key Changes from Coupling Remediation:**
 - ✅ Moved from GameFlow to TempleRun domain
 - ✅ Now subscribes to `TempleRunEvents` only
-- ✅ Uses `EventsPublisherTempleRun` exclusively
+- ✅ Uses `TempleRunBus` exclusively
 - ✅ No cross-domain event subscriptions
 
 **Code Flow:**
@@ -395,7 +405,7 @@ float maxSpeed = config.MaxSpeed;
 ## Event Types & Values
 
 ### UGS Events
-**File:** `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs`
+**File:** `Runtime/Events/  [ugs package]UGS_EventsEnum.cs`
 
 ```csharp
 public enum UGS_EventsEnum
@@ -442,10 +452,10 @@ public enum TempleRunEvents
 
 | Step | Component | Event Published | Data Type | Destination |
 |------|-----------|-----------------|-----------|-------------|
-| 1 | PlayerAuthenticationManager | PlayerAuthenticated | null | EventsPublisherUGS |
-| 2 | DifficultyObserver | DifficultySettingsFetched | List<DifficultyConfig> | EventsPublisherUGS |
-| 3 | UGSGameFlowBridge | DifficultySettingsApplied | List<DifficultyConfig> | EventsPublisherGameFlow |
-| 4 | TempleRunGameFlowBridge | DifficultySettingsApplied | List<DifficultyConfig> | EventsPublisherTempleRun |
+| 1 | PlayerAuthenticationManager | PlayerAuthenticated | null | UGSBus |
+| 2 | DifficultyObserver | DifficultySettingsFetched | List<DifficultyConfig> | UGSBus |
+| 3 | UGSGameFlowBridge | DifficultySettingsApplied | List<DifficultyConfig> | GameFlowBus |
+| 4 | TempleRunGameFlowBridge | DifficultySettingsApplied | List<DifficultyConfig> | TempleRunBus |
 | 5 | GameDifficultyManager | (stores configs) | Dictionary<string, DifficultyConfig> | Local storage |
 
 ---
@@ -548,12 +558,12 @@ GameDifficultyManager (now in TempleRun domain)
 
 | File | Purpose |
 |------|---------|
-| `Assets/UGS/Scripts/RemoteConfig/DifficultyObserver.cs` | Fetch RemoteConfig, publish DifficultySettingsFetched |
-| `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs` | Bridge UGS → GameFlow events |
+| `Runtime/RemoteConfig/  [ugs package]DifficultyObserver.cs` | Fetch RemoteConfig, publish DifficultySettingsFetched |
+| `Runtime/Events/  [ugs package]UGSGameFlowBridge.cs` | Bridge UGS → GameFlow events |
 | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | Bridge GameFlow → TempleRun events |
 | `Assets/TempleRun/Scripts/Config/GameDifficultyManager.cs` | Apply difficulty settings in TempleRun domain |
 | `Assets/_Common/Config/DifficultyConfig.cs` | Shared data type for all domains |
-| `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` | UGS event definitions |
+| `Runtime/Events/  [ugs package]UGS_EventsEnum.cs` | UGS event definitions |
 | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` | GameFlow event definitions |
 | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` | TempleRun event definitions |
 

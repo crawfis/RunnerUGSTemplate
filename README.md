@@ -107,7 +107,7 @@ Each generation adds a new layer of **glue** — more systems, more boundaries t
 │   - Distance model: total, segment, turn, death distances               │
 │   - No physics/graphics required for core gameplay                      │
 │                                                                         │
-│   GLUE: TempleRunEvents + EventsPublisherTempleRun wires input,         │
+│   GLUE: TempleRunEvents on the static TempleRunBus wires input,         │
 │         distance tracking, turn logic, and player lifecycle together    │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
@@ -213,7 +213,7 @@ This example traces what happens from the moment a player hits an obstacle to a 
 [Player hits obstacle]
         │
         ▼  ObstacleCollisionDetector (TempleRun domain)
-EventsPublisherTempleRun.PublishEvent(PlayerFailRequested)
+TempleRunBus.Publish(TempleRunEvents.PlayerFailRequested, this, null)
         │
         ▼  TempleRunAutoEventFlow (same-domain auto-chain)
         PlayerFailRequested → PlayerFailing → PlayerFailed
@@ -1025,7 +1025,7 @@ RunnerUGSTemplate/
 │   │
 │   ├── GameFlow/                         # Application lifecycle domain
 │   │   ├── Scripts/
-│   │   │   ├── Events/                   # GameFlowEvents, EventsPublisherGameFlow, GameFlowAutoEventFlow
+│   │   │   ├── Events/                   # GameFlowEvents, GameFlowAutoEventFlow
 │   │   │   │                             # TempleRunGameFlowBridge (bridges TempleRun ↔ GameFlow)
 │   │   │   ├── Config/                   # Blackboard, GameConstants, GameState, PlayerPrefKeys
 │   │   │   ├── GameControl/              # GameController, PauseController, QuitController, etc.
@@ -1038,8 +1038,8 @@ RunnerUGSTemplate/
 │   │
 │   ├── TempleRun/                        # Gameplay domain
 │   │   ├── Scripts/
-│   │   │   ├── Events/                   # TempleRunEvents, EventsPublisherTempleRun, TempleRunAutoEventFlow
-│   │   │   │                             # UserInitiatedEvents, EventsPublisherUserInitiated, Input2TempleRunAutoEventBridge
+│   │   │   ├── Events/                   # TempleRunEvents, TempleRunAutoEventFlow
+│   │   │   │                             # UserInitiatedEvents, Input2TempleRunAutoEventBridge
 │   │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, LaneConfig, SlideConfig, DashConfig, JumpConfig
 │   │   │   ├── Player/                   # TeleportController, LaneChangeController, ObstacleCollisionDetector, PlayerLifeController
 │   │   │   │                             # SlideController, DashController, JumpController, AnimationLink, etc.
@@ -1060,7 +1060,7 @@ RunnerUGSTemplate/
 │   │
 │   ├── UGS/                              # Unity Gaming Services domain
 │   │   ├── Scripts/
-│   │   │   ├── Events/                   # UGS_EventsEnum, EventsPublisherUGS, UGSAutoEventFlow
+│   │   │   ├── (moved) The UGS domain now ships as the com.crawfissoftware.ugs package
 │   │   │   │                             # UGSGameFlowBridge (bridges UGS → GameFlow)
 │   │   │   ├── Initialization/           # GameManagerUGS, PlayerAuthenticationManager, UGS_State
 │   │   │   ├── Authentication/           # PlayerSignInController

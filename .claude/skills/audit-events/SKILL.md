@@ -54,7 +54,7 @@ DIRECT COUPLING:
 
 ### Check 3: Unused Events
 
-For each event in all four enums, search if it is:
+For each event in all five enums, search if it is:
 - Published anywhere (`PublishEvent([EnumName].[EventName]`)
 - Subscribed to anywhere (`SubscribeToEvent([EnumName].[EventName]`)
 - Referenced in an auto-chain or bridge mapping
@@ -168,8 +168,8 @@ Event System Audit Results:
 
 ## Files to Scan
 
-- Event enums: `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs`, `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs`, `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs`
-- Auto-flows: `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Assets/UGS/Scripts/Events/UGSAutoEventFlow.cs`
-- Bridges: `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`
+- Event enums: `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs`, `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs`; and from packages, `Runtime/GameSignals.cs` (contracts) and `Runtime/Events/UGS_EventsEnum.cs` (ugs)
+- Auto-flows: `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, and `Runtime/Events/UGSAutoEventFlow.cs` (ugs package)
+- Bridges: `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGSGlue/UGSGameFlowBridge.cs`, `Assets/UGSGlue/TempleRunUGSBridge.cs`, and `Runtime/Events/GameSignalsUGSBridge.cs` (ugs package)
 - Any additional `EventsPublisher*` subclasses, `*AutoEventFlow` classes, and `*Bridge` classes from domains added later
 - All C# scripts: `Assets/**/*.cs`

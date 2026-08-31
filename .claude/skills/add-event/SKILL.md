@@ -24,7 +24,8 @@ Ask the user if not obvious from context:
 | **GameFlow** | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` | App lifecycle: loading, menus, pause, quit, scenes, config |
 | **TempleRun** | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` | Gameplay: player actions, countdown, turns, track, collisions, coins, power-ups |
 | **UserInitiated** | `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs` | Raw input: new player-triggered actions |
-| **UGS** | `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` | Unity Gaming Services: auth, leaderboards, achievements, remote config |
+| **GameSignals** | `Runtime/GameSignals.cs` in the `com.crawfissoftware.contracts` package | The game/service contract. Add here only when a crossing is genuinely game-agnostic |
+| **UGS** | `Runtime/Events/UGS_EventsEnum.cs` in the `com.crawfissoftware.ugs` package (read-only here) | Unity Gaming Services: auth, leaderboards, achievements, remote config, economy |
 
 > This table lists the domains that exist today. The authoritative list is the set of
 > `EventsPublisher*` singleton subclasses (one per domain enum) — update this table when a
