@@ -1078,7 +1078,7 @@ RunnerUGSTemplate/
 │   │   │   │                             # UGSGameFlowBridge (bridges UGS → GameFlow)
 │   │   │   ├── Initialization/           # GameManagerUGS, PlayerAuthenticationManager, UGS_State
 │   │   │   ├── Authentication/           # PlayerSignInController
-│   │   │   ├── RemoteConfig/             # RemoteConfigManager, GameBalance, FeatureFlags, DifficultyObserver
+│   │   │   ├── RemoteConfig/             # RemoteConfigManager (the only fetch; publishes difficulty_settings)
 │   │   │   ├── Leaderboard/              # LeaderboardController, LeaderboardPlayerController
 │   │   │   ├── Achievements/             # AchievementsPrefab, DistanceBasedAchievements
 │   │   │   ├── Economy/                  # PlayerEconomyManager, PlayerEconomyManagerClient

@@ -378,7 +378,7 @@ internal class MyController : MonoBehaviour
 | Contract Bridge | `Runtime/Events/GameServiceEventsUGSBridge.cs` — the only place `GameServiceEvents` and `UGS_EventsEnum` are named together |
 | Initialization | `Runtime/Initialization/` — `PlayerAuthenticationManager`, `UGS_State`, `LocalStorageSystem`, `NetworkConnectivityHandler`, `UnityEventsToEventsPublisher` |
 | Authentication | `Runtime/Authentication/PlayerSignInController.cs`, `PlayerSignIn.cs` (the modal, named in UXML by its fully qualified type name) |
-| Remote Config | `Runtime/RemoteConfig/` — `RemoteConfigManager`, `GameBalance(+Manager)`, `FeatureFlags(+Manager)`, `CampaignEventConfig(+Manager)`, `DifficultyObserver`, `LocalDifficultySettingsProvider`, `App/UserAttributes`, `RemoteConfigConstants` |
+| Remote Config | `Runtime/RemoteConfig/` — `RemoteConfigManager` (the only fetch; it also publishes the `difficulty_settings` table), `App/UserAttributes`, `RemoteConfigConstants`. The typed views and `DifficultyObserver` were removed in ugs 0.5.0 — nothing constructed any of them |
 | Leaderboards | `Runtime/Leaderboard/` — `LeaderboardQuery`, `LeaderboardPanel`, `LeaderboardPlayerController` |
 | Achievements | `Runtime/Achievements/` — model, `Service/` (`IAchievementBackend` + Cloud Save and Cloud Code backends), `UI/`, plus `DistanceBasedAchievements` and `CoinBasedAchievements` |
 | Economy | `Runtime/Economy/` — `PlayerCurrencyManager`, `PlayerCurrencyController`, and `Service/` (`ICurrencyBackend`, `EconomyCurrencyBackend`, `CloudCodeCurrencyBackend`, `CurrencyBalanceUpdate`) |
