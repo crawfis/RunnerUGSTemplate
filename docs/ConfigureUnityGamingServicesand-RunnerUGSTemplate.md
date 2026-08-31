@@ -219,14 +219,18 @@ Also, you may need to change your .gitignore and remove the ProjectSettings.asse
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/6203d3fe-b6e5-467f-809c-06f8e46d9c83/ascreenshot_1b4e0729173d4a9ca2fd58413901188c_text_export.jpeg)
 
 
-44\. This project uses some Cloud Code to securely communicate with the leaderboards and claim achievements. To "deploy" this code, we need to generate solution files. Select the BlocksAdminModule in the CloudCode folder.
+44\. This project uses some Cloud Code to securely communicate with the leaderboards and claim achievements. To "deploy" this code, we need to generate solution files. Select `TempleRunUGSCloud` in `Assets/UGS/CloudCode`.
+
+> **The screenshots in steps 44-45 are out of date.** They were captured when this project carried
+> three Cloud Code modules; `BlocksAdminModule` and `BlocksGameModule` came from vendored Asset
+> Store content that has since been removed, and `TempleRunUGSCloud` is now the only module. Do
+> this once, for that module, and ignore the two the pictures show.
 
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/222d2192-9bcd-46e1-8f96-7eaa03d7fb9f/ascreenshot_4cffab6274a34864b5f8135f8fb53459_text_export.jpeg)
 
 
-45\. Click on the "Generate Solution" button.
-
-Repeat for the BlocksGameModule.
+45\. Click on the "Generate Solution" button. There is nothing to repeat - `TempleRunUGSCloud` is
+the only module.
 
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/da95b018-9e9c-4158-ac95-48950c4d7ad3/ascreenshot_140d8702dadb4b9fb23994d3c3306c04_text_export.jpeg)
 
@@ -258,7 +262,8 @@ This from a second session with Scribe, but it reset the set numbers.
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/4de313f0-589a-4778-bb56-5c20fa5e8002/ascreenshot_4b6484f01be84c7f8bdaed8e5777f407_text_export.jpeg)
 
 
-6\. Click "BlocksAdminModule"
+6\. Click "BlocksAdminModule" *(gone - skip this step and step 8; `TempleRunUGSCloud` is the only
+module left, and steps 9 and 10 are its endpoints)*
 
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/3e96f432-f6a0-4532-9cee-2d78aba61efb/ascreenshot_78dd31b38a9a4603a6ee3e2eeb405733_text_export.jpeg)
 

@@ -574,7 +574,8 @@ Assets/
 │   └── Prefabs/                      # AchievementsPrefab, AchievementsNotificationPrefab, LeaderboardPanel
 │                                     #   (the scripts they instance come from the UGS package)
 │
-├── CloudCode/                        # GeneratedModuleBindings/ only - the two Blocks module references were deleted
+├── CloudCode/                        # GeneratedModuleBindings/TempleRunUGSCloud only. The two Blocks modules -
+│                                     #   their .ccmr references, server sources and generated bindings - are all gone
 ├── ThirdParty/CrawfisSoftware/       # Vendored utilities: Random providers (Blackboard depends on them), editor tools
 │                                     #   (Play Scene 0 Always, screenshots, dev-build toggle)
 └── (also: LevelPlay/, MobileDependencyResolver/, Push Notifications/, AddressableAssetsData/,
