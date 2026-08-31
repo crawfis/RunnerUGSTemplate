@@ -1,20 +1,20 @@
 {
   "dependencies": {
     "com.crawfissoftware.common": {
-      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.common",
+      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.common#v0.2.0",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.modules.imageconversion": "1.0.0"
       },
-      "hash": "d4c525179a9cd6fc8d3245c0b7e45f06d18e7739"
+      "hash": "471d67ed993e85834ee0789905bd912ac612e92c"
     },
     "com.crawfissoftware.contracts": {
-      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts",
+      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts#v0.2.0",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "d4c525179a9cd6fc8d3245c0b7e45f06d18e7739"
+      "hash": "471d67ed993e85834ee0789905bd912ac612e92c"
     },
     "com.crawfissoftware.eventspublisher": {
       "version": "https://github.com/crawfis/EventsPublisher.git",
@@ -24,7 +24,7 @@
       "hash": "bfea2463e60ab9c57519a7d72a3488eefbb758ac"
     },
     "com.crawfissoftware.ugs": {
-      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.ugs",
+      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.ugs#v0.2.0",
       "depth": 0,
       "source": "git",
       "dependencies": {
@@ -39,7 +39,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.modules.uielements": "1.0.0"
       },
-      "hash": "d4c525179a9cd6fc8d3245c0b7e45f06d18e7739"
+      "hash": "471d67ed993e85834ee0789905bd912ac612e92c"
     },
     "com.gamesthatmoveyou.audiomanager": {
       "version": "https://github.com/crawfis/GTMY.Audio.git",
