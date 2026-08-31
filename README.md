@@ -427,10 +427,15 @@ On launch, the loading panel appears while UGS services initialize and scenes lo
 
 ![Authentication Screen](docs/images/01_authentication.png)
 
+> **Screenshot is out of date.** This modal is an original implementation in the
+> `com.crawfissoftware.ugs` package (`PlayerSignIn`), not the Building Blocks one, and its button
+> labels are those listed below.
+
 After UGS initialization completes, the player sees three sign-in options:
-- **Sign in Anonymously** - Creates a temporary account with auto-generated name
-- **Sign in with Unity** - Uses Unity Player Account (Google, Apple, email)
-- **Sign in with Password** - Developer-managed credentials
+- **Play as Guest** - anonymous account with an auto-generated name
+- **Unity Player Account** - Google, Apple or email, via Unity. Hidden automatically when that
+  service is not configured, rather than offered and then failing
+- **Username / Password** with **Sign In** and **Create Account** - developer-managed credentials
 
 **Hierarchy:** `UGS_Boot_2_Authentication` scene active with:
 - `PlayerSignInController` - UI interaction handling
@@ -570,9 +575,13 @@ When all lives are exhausted:
 
 ![Leaderboard](docs/images/05_leaderboard.png)
 
+> **Screenshot is out of date.** Rebuilt in the package as `LeaderboardPanel` → `LeaderboardView`
+> → `LeaderboardList` → `LeaderboardRow`, with two styled `Toggle`s for tabs reading **TOP** and
+> **YOU**.
+
 The Leaderboard automatically appears showing:
-- **Global** tab - Top rankings across all players
-- **Self** tab - Player's rank with nearby scores
+- **TOP** tab - highest scores on the board
+- **YOU** tab - the signed-in player's rank with nearby scores
 - Current player highlighted
 
 **Configuration:**
@@ -580,7 +589,7 @@ The Leaderboard automatically appears showing:
 - Best score strategy (not cumulative)
 - Auto-closes after configurable timeout
 
-**Hierarchy:** `Leaderboards` scene loaded with `LeaderboardPrefab`
+**Hierarchy:** `Leaderboards` scene loaded with `LeaderboardPanel`
 
 ---
 
@@ -588,15 +597,19 @@ The Leaderboard automatically appears showing:
 
 ![Achievements](docs/images/06_achievements.png)
 
+> **Screenshot is out of date.** Rebuilt in the package, and the icons are original 128×128
+> placeholders — the Asset Store artwork could not ship inside a UPM package.
+
 The Achievements panel displays earned and available achievements:
 
-**Instant Achievements:**
-- `CLAIM` button available immediately
-- `ProgressTarget: 0` in config
+**Instant achievements** - `ProgressTarget: 0` in the definition; unlocked in one step.
 
-**Progressive Achievements:**
-- Progress bar showing `current / target`
-- Unlocks when target reached
+**Progressive achievements** - `ProgressTarget: N`; a progress bar shows `current / target` and
+the achievement unlocks when the target is reached.
+
+> There is **no CLAIM button** any more. A card shows `UNLOCKED` once earned, and unlocking is
+> driven by the game (`DistanceBasedAchievements`, `CoinBasedAchievements`) rather than by the
+> player pressing a button.
 
 **Hierarchy:** `Achievements` scene loaded with `AchievementsPrefab`
 
@@ -715,9 +728,10 @@ The **Test_UGS_Windows** profile bypasses actual gameplay to focus on UGS integr
 ![Authentication Screen](docs/images/01_authentication.png)
 
 On launch, the player sees three sign-in options:
-- **Sign in Anonymously** - Creates a temporary account with auto-generated name
-- **Sign in with Unity** - Uses Unity Player Account (Google, Apple, email)
-- **Sign in with Password** - Developer-managed credentials
+- **Play as Guest** - anonymous account with an auto-generated name
+- **Unity Player Account** - Google, Apple or email, via Unity. Hidden automatically when that
+  service is not configured, rather than offered and then failing
+- **Username / Password** with **Sign In** and **Create Account** - developer-managed credentials
 
 **Hierarchy:** `UGS_Boot_2_Authentication` scene active with `PlayerSignInController`, `PlayerAuthenticationService`, `PlayerAuthenticationManager`
 
@@ -773,8 +787,8 @@ Buttons are placeholders in this test profile:
 ![Leaderboard](docs/images/05_leaderboard.png)
 
 The Leaderboard automatically appears showing:
-- **Global** tab - Top rankings across all players
-- **Self** tab - Player's rank with nearby scores
+- **TOP** tab - highest scores on the board
+- **YOU** tab - the signed-in player's rank with nearby scores
 - Current player highlighted (e.g., "AdmirableSparklingTriangle#1")
 - Auto-generated anonymous names from Unity Authentication
 
@@ -783,7 +797,7 @@ The Leaderboard automatically appears showing:
 - Best score strategy (not cumulative)
 - Auto-closes after timeout
 
-**Hierarchy:** `Leaderboards` scene loaded with `LeaderboardPrefab`, `AutoClose`
+**Hierarchy:** `Leaderboards` scene loaded with `LeaderboardPanel`, `AutoClose`
 
 ---
 
@@ -795,7 +809,7 @@ The Achievements panel displays:
 
 **Instant Achievements (Top Row):**
 - FooBar 1, Achievement 2, Achievement 3
-- `CLAIM` button (no progress required)
+- unlocked in one step; the card shows `UNLOCKED` (there is no CLAIM button in the rebuilt UI)
 - `ProgressTarget: 0` in config
 
 **Progressive Achievements (Bottom Row):**
