@@ -30,6 +30,10 @@ namespace CrawfisSoftware.GameFlow.Events
 
             // Player died -> game ending (absorbed from GameController)
             (TempleRunEvents.TempleRunEnded, GameFlowEvents.GameEnding),
+
+            // Coins collected this run, so UI outside the gameplay domain can show a live count
+            // without naming a TempleRun event. Carries the run's running total, not a delta.
+            (TempleRunEvents.CoinCollected, GameFlowEvents.SessionCoinsChanged),
         };
 
         private static readonly (GameFlowEvents From, TempleRunEvents To)[] GameFlowToTempleRun =

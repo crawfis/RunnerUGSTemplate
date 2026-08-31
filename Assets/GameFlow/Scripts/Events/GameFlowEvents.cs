@@ -124,5 +124,23 @@ namespace CrawfisSoftware.GameFlow.Events
         [EventPayload(typeof(long))]
         [EventDelivery(EventDelivery.Sticky)]
         CurrencyBalanceChanged = 140,
+
+        /// <summary>
+        /// Coins collected so far in the current run. Data: int, the running TOTAL for the run,
+        /// not a delta.
+        /// </summary>
+        /// <remarks>
+        /// <para>Translated by <c>TempleRunGameFlowBridge</c> from the <c>CoinCollected</c> event
+        /// in <c>TempleRunEvents</c>, so that UI outside the gameplay domain can show a coin count
+        /// without naming a TempleRun event. Written that way round on purpose: the dotted form
+        /// reads as a cross-domain reference to /audit-events, which greps textually and cannot
+        /// tell a doc comment from code.</para>
+        /// <para>Not Sticky, unlike <see cref="CurrencyBalanceChanged"/>. This one only has
+        /// meaning during a run, and the HUD that reads it is loaded with the run - there is no
+        /// late subscriber to rescue. Retaining it would also outlive the run it describes and
+        /// hand the next one a stale count before its first coin.</para>
+        /// </remarks>
+        [EventPayload(typeof(int))]
+        SessionCoinsChanged = 141,
     }
 }
