@@ -160,6 +160,19 @@ namespace CrawfisSoftware.TempleRun
         TempleRunDifficultyChangeRequested = 318,
 
         // ---------- New difficulty events (direct, non-legacy) ----------
+        /// <summary>
+        /// The difficulty table the services layer supplied, bridged from GameFlow. Data:
+        /// <c>IList&lt;DifficultyConfig&gt;</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>Deliberately distinct from <see cref="TempleRunDifficultySettingsApplied"/> above,
+        /// which carries the LOCAL table published by <c>LoadDefaultGameConfigs</c>.
+        /// <c>GameDifficultyManager</c> has to tell the two apart, because a remote table overrides
+        /// a local one whichever of them arrives first - and each replaces the table wholesale.</para>
+        /// <para><b>Sticky</b>, for the same reason as its GameFlow counterpart: it is published
+        /// during boot and consumed from a gameplay scene loaded later.</para>
+        /// </remarks>
+        [EventDelivery(EventDelivery.Sticky)]
         DifficultySettingsApplied = 320,
         DifficultyChanging = 321,
         DifficultyChanged = 322,

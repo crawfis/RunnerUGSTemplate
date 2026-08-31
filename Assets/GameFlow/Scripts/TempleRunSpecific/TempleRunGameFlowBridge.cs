@@ -48,6 +48,12 @@ namespace CrawfisSoftware.GameFlow.Events
             (GameFlowEvents.GameConfigApplied, TempleRunEvents.TempleRunConfigApplied),
             (GameFlowEvents.LevelApplied, TempleRunEvents.TempleRunLevelApplied),
             (GameFlowEvents.GameScenesLoaded, TempleRunEvents.TempleRunScenesReady),
+
+            // The difficulty table the services layer supplied. Both events are Sticky, which is
+            // what makes this hop work at all: the publish happens during boot, and this bridge is
+            // in Game_Boot_2_Play, so it subscribes long afterwards and is handed the retained
+            // value on subscribe.
+            (GameFlowEvents.DifficultySettingsApplied, TempleRunEvents.DifficultySettingsApplied),
         };
 
         private readonly EventChainDispatcher<TempleRunEvents, GameFlowEvents> _templeRunToGameFlow =
