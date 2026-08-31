@@ -173,10 +173,9 @@ MonoBehaviour:
   - 800
   - 1000
   - 2000
-  - 12000
   _achievementIds:
   - first_achievement
-  - second_achievment
+  - second_achievement
   - third_achievement
   - fourth_achievement
   - fifth_achievement
