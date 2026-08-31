@@ -1382,7 +1382,7 @@ Achievements are defined in `Assets/UGS/ThirdParty/Blocks/Achievements/Deploymen
 - [ ] **Multiple Leaderboards**: Daily, weekly, all-time
 - [ ] **Achievement Logic**: Wire gameplay events to achievement progress
 - [ ] **Cloud Save**: Player preferences, unlocks
-- [ ] **Economy**: In-game currency (future)
+- [x] **Economy**: Persistent coin balance - a run's coins bank into an Economy `COIN` balance at `SessionEnding`
 
 ---
 
