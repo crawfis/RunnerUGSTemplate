@@ -7,14 +7,14 @@
       "dependencies": {
         "com.unity.modules.imageconversion": "1.0.0"
       },
-      "hash": "8db87d8bb4fe8342678f00215a82017f7f1b519f"
+      "hash": "d4c525179a9cd6fc8d3245c0b7e45f06d18e7739"
     },
     "com.crawfissoftware.contracts": {
       "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "8db87d8bb4fe8342678f00215a82017f7f1b519f"
+      "hash": "d4c525179a9cd6fc8d3245c0b7e45f06d18e7739"
     },
     "com.crawfissoftware.eventspublisher": {
       "version": "https://github.com/crawfis/EventsPublisher.git",
@@ -32,13 +32,14 @@
         "com.unity.services.authentication": "3.7.3",
         "com.unity.services.cloudsave": "3.4.1",
         "com.unity.services.cloudcode": "2.10.4",
+        "com.unity.services.economy": "3.5.4",
         "com.unity.services.leaderboards": "2.3.4",
         "com.unity.remote-config-runtime": "4.0.4",
         "com.unity.remote-config": "4.2.5",
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.modules.uielements": "1.0.0"
       },
-      "hash": "8db87d8bb4fe8342678f00215a82017f7f1b519f"
+      "hash": "d4c525179a9cd6fc8d3245c0b7e45f06d18e7739"
     },
     "com.gamesthatmoveyou.audiomanager": {
       "version": "https://github.com/crawfis/GTMY.Audio.git",
