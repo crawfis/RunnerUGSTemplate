@@ -106,5 +106,23 @@ namespace CrawfisSoftware.GameFlow.Events
         LevelSelected = 136,              // data: LevelConfig
         LevelUnlocked = 137,              // data: LevelConfig (newly unlocked)
         LevelProgressSaved = 138,
+
+        // ---------- Currency ----------
+
+        /// <summary>
+        /// The player's banked lifetime soft-currency balance. Data: long.
+        /// </summary>
+        /// <remarks>
+        /// <para>Translated from the services contract by <c>UGSGameFlowBridge</c>. It is the
+        /// stored total, not this run's coin count - that one stays in TempleRun and resets every
+        /// run.</para>
+        /// <para><b>Sticky</b>, and the first event in this enum to declare a delivery. The
+        /// balance arrives once at sign-in, while the HUD that displays it lives in a gameplay
+        /// scene loaded per run. As an edge it would be long gone before any HUD existed, and the
+        /// display would stay blank until a run ended and banked.</para>
+        /// </remarks>
+        [EventPayload(typeof(long))]
+        [EventDelivery(EventDelivery.Sticky)]
+        CurrencyBalanceChanged = 140,
     }
 }

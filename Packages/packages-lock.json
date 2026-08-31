@@ -7,14 +7,14 @@
       "dependencies": {
         "com.unity.modules.imageconversion": "1.0.0"
       },
-      "hash": "cd376aaca44a1783cf0d511fc2a4dbd203502a2b"
+      "hash": "a8c006d8c186ce6a0d1b57d9af992db217700626"
     },
     "com.crawfissoftware.contracts": {
       "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "cd376aaca44a1783cf0d511fc2a4dbd203502a2b"
+      "hash": "a8c006d8c186ce6a0d1b57d9af992db217700626"
     },
     "com.crawfissoftware.eventspublisher": {
       "version": "https://github.com/crawfis/EventsPublisher.git",
@@ -39,7 +39,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.modules.uielements": "1.0.0"
       },
-      "hash": "cd376aaca44a1783cf0d511fc2a4dbd203502a2b"
+      "hash": "a8c006d8c186ce6a0d1b57d9af992db217700626"
     },
     "com.gamesthatmoveyou.audiomanager": {
       "version": "https://github.com/crawfis/GTMY.Audio.git",
