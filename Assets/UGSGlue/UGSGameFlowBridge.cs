@@ -43,6 +43,13 @@ namespace CrawfisSoftware.UGS.Events
             (GameServiceEvents.RemoteConfigApplied, GameFlowEvents.LoadingScreenHideRequested),
 
             (GameServiceEvents.DifficultySettingsAvailable, GameFlowEvents.DifficultySettingsApplied),
+
+            // The banked balance, forwarded unchanged. A pair is enough here, unlike on the UGS
+            // side of the seam where the payload is a services type that had to be unwrapped: by
+            // this point it is already a plain long. Sticky survives the hop because a dispatcher
+            // attaches with SubscribeToAll, which subscribes to each member individually and so
+            // receives the same retained-value replay any subscribe does.
+            (GameServiceEvents.CurrencyBalanceChanged, GameFlowEvents.CurrencyBalanceChanged),
         };
 
         private readonly EventChainDispatcher<GameFlowEvents, GameServiceEvents> _gameFlowToGameService =
@@ -58,6 +65,7 @@ namespace CrawfisSoftware.UGS.Events
 
             // Sticky: if services are already up, this fires immediately on subscribe.
             StatusChanged.Subscribe(OnServicesStatusChanged);
+
         }
 
         protected virtual void OnDestroy()
