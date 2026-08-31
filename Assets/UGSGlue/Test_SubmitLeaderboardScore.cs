@@ -8,7 +8,7 @@ using UnityEngine;
 using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
 
 using CrawfisSoftware.Contracts;
-using SignalsBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Contracts.GameSignals>;
+using GameServiceBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Contracts.GameServiceEvents>;
 
 namespace CrawfisSoftware.UGS.Leaderboard.Test
 {
@@ -40,9 +40,9 @@ namespace CrawfisSoftware.UGS.Leaderboard.Test
             for (int i = 0; i < _numberOfTimesToSubmit; i++)
             {
                 float randomScore = UnityEngine.Random.Range((int)_minValue, (int)_maxValue + 1);
-                // Publishes the contract signal a real game would, so this harness exercises the
-            // same path as gameplay rather than a UGS-internal shortcut.
-            SignalsBus.Publish(GameSignals.SessionEnding, this, randomScore);
+                // Publishes the contract event a real game would, so this harness exercises
+                // the same path as gameplay rather than a UGS-internal shortcut.
+                GameServiceBus.Publish(GameServiceEvents.SessionEnding, this, randomScore);
                 yield return new WaitForSeconds(_delayBetweenSubmissionsInSeconds);
             }
             if(_endGameAfterSubmissions)

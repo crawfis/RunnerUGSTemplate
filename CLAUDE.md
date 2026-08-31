@@ -26,7 +26,7 @@ List Domains:       CrawfisSoftware > Events > List Domains (EventsPublisher 2.5
                     All five domain enums are marked [EventEnum], so the menu sweeps and
                     lists them in EDIT MODE — per domain: prefix, enum, member / payload /
                     sticky / replay counts. Three live in Assets (GameFlow, TempleRun,
-                    UserInitiated); GameSignals and UGS_EventsEnum come from packages
+                    UserInitiated); GameServiceEvents and UGS_EventsEnum come from packages
 Track Import:       CrawfisSoftware > Track > Import JSON -> ScriptableObjects (one-shot)
 Cloud Code:         Services > Cloud Code > Generate All Modules Bindings
 Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_GameOnly_Windows]
@@ -38,12 +38,12 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | Entry Scene | `Assets/UGS/Scenes/Boot/0_BootStrap` (build index 0); game-only: `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only` |
 | GameFlow Events | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | TempleRun Events | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
-| Contract Signals | `Runtime/GameSignals.cs` in the **`com.crawfissoftware.contracts`** package — the vocabulary the game and the services layer share |
+| Contract Events | `Runtime/GameServiceEvents.cs` in the **`com.crawfissoftware.contracts`** package — the vocabulary the game and the services layer share |
 | UGS Events | `Runtime/Events/UGS_EventsEnum.cs` in the **`com.crawfissoftware.ugs`** package. Read-only here: edit it in the [EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) repo |
 | UGS Glue | `Assets/UGSGlue/` — `UGSGameFlowBridge.cs`, `TempleRunUGSBridge.cs`, `Test_SubmitLeaderboardScore.cs`, `UGS_Glue.unity` (build index 1). This game's half of the contract |
-| Event Buses | `EventsFor<T>` from the `com.crawfissoftware.eventspublisher` package, aliased per file as `GameFlowBus` / `TempleRunBus` / `UserInputBus` / `SignalsBus` / `UGSBus`. The buses are static — there are no `EventsPublisher*` singletons and no scene object hosting them |
+| Event Buses | `EventsFor<T>` from the `com.crawfissoftware.eventspublisher` package, aliased per file as `GameFlowBus` / `TempleRunBus` / `UserInputBus` / `GameServiceBus` / `UGSBus`. The buses are static — there are no `EventsPublisher*` singletons and no scene object hosting them |
 | Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, and `Runtime/Events/UGSAutoEventFlow.cs` in the UGS package |
-| Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow), `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` (input → gameplay), `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameSignals), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameSignals, one-way), `Runtime/Events/GameSignalsUGSBridge.cs` in the UGS package (GameSignals ↔ UGS) |
+| Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow), `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` (input → gameplay), `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameServiceEvents), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameServiceEvents, one-way), `Runtime/Events/GameServiceEventsUGSBridge.cs` in the UGS package (GameServiceEvents ↔ UGS) |
 | Game State | `Assets/GameFlow/Scripts/Config/GameState.cs`, `Assets/TempleRun/Scripts/Config/Blackboard.cs` |
 
 ## MANDATORY: Event System Enforcement
@@ -69,22 +69,22 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | UGS package `Runtime/**/*.cs` (non-bridge) | `UGS_EventsEnum` only |
 | `Input2TempleRunAutoEventBridge.cs` | `UserInitiatedEvents` + `TempleRunEvents` (bridge duty) |
 | `TempleRunGameFlowBridge.cs` | `TempleRunEvents` + `GameFlowEvents` (bridge duty) |
-| `Assets/UGSGlue/TempleRunUGSBridge.cs` | `TempleRunEvents` + `GameSignals` (bridge duty; one-way, gameplay -> signals) |
-| `Assets/UGSGlue/UGSGameFlowBridge.cs` | `GameFlowEvents` + `GameSignals` (bridge duty) |
-| `GameSignalsUGSBridge.cs` (UGS package) | `GameSignals` + `UGS_EventsEnum` (bridge duty) |
+| `Assets/UGSGlue/TempleRunUGSBridge.cs` | `TempleRunEvents` + `GameServiceEvents` (bridge duty; one-way, gameplay -> contract) |
+| `Assets/UGSGlue/UGSGameFlowBridge.cs` | `GameFlowEvents` + `GameServiceEvents` (bridge duty) |
+| `GameServiceEventsUGSBridge.cs` (UGS package) | `GameServiceEvents` + `UGS_EventsEnum` (bridge duty) |
 
 **The game and UGS no longer name each other's events at all.** They meet in the middle at
-`GameSignals`, a third enum in `com.crawfissoftware.contracts` that neither owns. The game's half
-of that translation lives in `Assets/UGSGlue/`; the services half is `GameSignalsUGSBridge` inside
+`GameServiceEvents`, a third enum in `com.crawfissoftware.contracts` that neither owns. The game's half
+of that translation lives in `Assets/UGSGlue/`; the services half is `GameServiceEventsUGSBridge` inside
 the UGS package. That is what lets either side be replaced without the other being edited.
 
 **Violations — what NOT to do:**
 - TempleRun scripts subscribing to or publishing `GameFlowEvents` (e.g., `GameFlowBus.Subscribe(GameFlowEvents.GameStarted, ...)` in a TempleRun file)
 - GameFlow scripts subscribing to or publishing `TempleRunEvents` (e.g., `TempleRunBus.Publish(TempleRunEvents.CountdownTick, ...)` in a GameFlow file)
 - UGS package code naming `GameFlowEvents` or `TempleRunEvents` at all — it cannot even see them
-- Game code naming `UGS_EventsEnum` directly (go through `GameSignals` and the UGSGlue bridges)
+- Game code naming `UGS_EventsEnum` directly (go through `GameServiceEvents` and the UGSGlue bridges)
 
-**How to fix a violation:** If TempleRun code needs to react to a GameFlow event, add a bridge mapping in `TempleRunGameFlowBridge.cs` that translates the GameFlow event into a TempleRun event, then subscribe to the TempleRun event in your TempleRun code. For anything crossing to UGS, add the mapping in `Assets/UGSGlue/` against `GameSignals` — and if the signal you need does not exist, it is added to the contracts package, deliberately rarely.
+**How to fix a violation:** If TempleRun code needs to react to a GameFlow event, add a bridge mapping in `TempleRunGameFlowBridge.cs` that translates the GameFlow event into a TempleRun event, then subscribe to the TempleRun event in your TempleRun code. For anything crossing to UGS, add the mapping in `Assets/UGSGlue/` against `GameServiceEvents` — and if the event you need does not exist, it is added to the contracts package, deliberately rarely.
 
 > The UGS domain is no longer in this repository. It ships as three UPM packages resolved by git
 > URL in `Packages/manifest.json` — `com.crawfissoftware.contracts`, `.common` and `.ugs`, from
@@ -141,15 +141,15 @@ Unity 6 endless runner demonstrating **event-driven architecture** with Unity Ga
 
 | Domain | Enum | Bus alias | Purpose | Lives in | Bridges |
 |--------|------|-----------|---------|----------|---------|
-| **GameFlow** | `GameFlowEvents` | `GameFlowBus` | App lifecycle: loading, menus, sessions, pause, config/difficulty, save/load, quit | `Assets/GameFlow/` | ↔ TempleRun via `TempleRunGameFlowBridge`; ↔ GameSignals via `UGSGameFlowBridge` |
-| **TempleRun** | `TempleRunEvents` | `TempleRunBus` | Gameplay: player lifecycle, countdown, movement, collisions, coins/power-ups, track/spline generation, teleportation | `Assets/TempleRun/` | ↔ GameFlow via `TempleRunGameFlowBridge`; → GameSignals via `TempleRunUGSBridge` |
+| **GameFlow** | `GameFlowEvents` | `GameFlowBus` | App lifecycle: loading, menus, sessions, pause, config/difficulty, save/load, quit | `Assets/GameFlow/` | ↔ TempleRun via `TempleRunGameFlowBridge`; ↔ GameServiceEvents via `UGSGameFlowBridge` |
+| **TempleRun** | `TempleRunEvents` | `TempleRunBus` | Gameplay: player lifecycle, countdown, movement, collisions, coins/power-ups, track/spline generation, teleportation | `Assets/TempleRun/` | ↔ GameFlow via `TempleRunGameFlowBridge`; → GameServiceEvents via `TempleRunUGSBridge` |
 | **UserInitiated** | `UserInitiatedEvents` | `UserInputBus` | Raw input requests (turns, lanes, jump, slide, dash, pause, quit) | `Assets/TempleRun/` | → TempleRun via `Input2TempleRunAutoEventBridge` |
-| **GameSignals** | `GameSignals` | `SignalsBus` | The game/service **contract**: score, currency total, session start/end, services status, remote config applied. Owned by neither side | `com.crawfissoftware.contracts` package | ↔ GameFlow and ← TempleRun via `Assets/UGSGlue/`; ↔ UGS via `GameSignalsUGSBridge` |
-| **UGS** | `UGS_EventsEnum` | `UGSBus` | Unity Gaming Services: init, auth, remote config, leaderboards, achievements, **economy/currency**, rewarded ads | `com.crawfissoftware.ugs` package | ↔ GameSignals via `GameSignalsUGSBridge` — and nothing else |
+| **GameService** | `GameServiceEvents` | `GameServiceBus` | The game/service **contract**: score, currency total, session start/end, services status, remote config applied. Owned by neither side | `com.crawfissoftware.contracts` package | ↔ GameFlow and ← TempleRun via `Assets/UGSGlue/`; ↔ UGS via `GameServiceEventsUGSBridge` |
+| **UGS** | `UGS_EventsEnum` | `UGSBus` | Unity Gaming Services: init, auth, remote config, leaderboards, achievements, **economy/currency**, rewarded ads | `com.crawfissoftware.ugs` package | ↔ GameServiceEvents via `GameServiceEventsUGSBridge` — and nothing else |
 
 Two invariants keep this registry trustworthy:
 - **Placement:** three domain enums live in `Assets/*/Scripts/Events/`; the other two come from
-  packages (`GameSignals` from contracts, `UGS_EventsEnum` from ugs). All five are marked
+  packages (`GameServiceEvents` from contracts, `UGS_EventsEnum` from ugs). All five are marked
   `[EventEnum]`, so **List Domains** reports the same five as this table: a domain in one list
   and not the other is drift. The `EventsPublisher*` singleton subclasses are gone — the buses
   are static and need no scene object.
@@ -305,9 +305,9 @@ CrawfisSoftware.GameFlow.*          - Per-area: .GameConfig (GameConstants), .Sc
 CrawfisSoftware.TempleRun           - Gameplay logic (TempleRunEvents, Blackboard, controllers)
 CrawfisSoftware.TempleRun.Events    - TempleRun auto-event flow + Input2TempleRunAutoEventBridge
 CrawfisSoftware.TempleRun.GameConfig - Difficulty / game-config managers
-CrawfisSoftware.Contracts           - GameSignals, ServicesStatus (contracts package; the game/service contract)
+CrawfisSoftware.Contracts           - GameServiceEvents, ServicesStatus (contracts package; the game/service contract)
 CrawfisSoftware.UGS                 - Unity Gaming Services integration (ugs package: managers, initialization)
-CrawfisSoftware.UGS.Events          - UGS_EventsEnum, UGSAutoEventFlow, GameSignalsUGSBridge (ugs package)
+CrawfisSoftware.UGS.Events          - UGS_EventsEnum, UGSAutoEventFlow, GameServiceEventsUGSBridge (ugs package)
 CrawfisSoftware.UGS.Economy         - PlayerCurrencyManager and the currency backends (ugs package)
 CrawfisSoftware.UGS.Achievements    - achievements model, service and UI (ugs package)
 CrawfisSoftware.Config              - Shared, domain-neutral config (the LIVE DifficultyConfig in _Common)
@@ -375,7 +375,7 @@ internal class MyController : MonoBehaviour
 | **UGS Domain** (the `com.crawfissoftware.ugs` package — read-only here) | |
 | Event Enum | `Runtime/Events/UGS_EventsEnum.cs` |
 | Auto-Event Flow | `Runtime/Events/UGSAutoEventFlow.cs` |
-| Contract Bridge | `Runtime/Events/GameSignalsUGSBridge.cs` — the only place `GameSignals` and `UGS_EventsEnum` are named together |
+| Contract Bridge | `Runtime/Events/GameServiceEventsUGSBridge.cs` — the only place `GameServiceEvents` and `UGS_EventsEnum` are named together |
 | Initialization | `Runtime/Initialization/` — `PlayerAuthenticationManager`, `UGS_State`, `LocalStorageSystem`, `NetworkConnectivityHandler`, `UnityEventsToEventsPublisher` |
 | Authentication | `Runtime/Authentication/PlayerSignInController.cs`, `PlayerSignIn.cs` (the modal, named in UXML by its fully qualified type name) |
 | Remote Config | `Runtime/RemoteConfig/` — `RemoteConfigManager`, `GameBalance(+Manager)`, `FeatureFlags(+Manager)`, `CampaignEventConfig(+Manager)`, `DifficultyObserver`, `LocalDifficultySettingsProvider`, `App/UserAttributes`, `RemoteConfigConstants` |
@@ -384,7 +384,7 @@ internal class MyController : MonoBehaviour
 | Economy | `Runtime/Economy/` — `PlayerCurrencyManager`, `PlayerCurrencyController`, and `Service/` (`ICurrencyBackend`, `EconomyCurrencyBackend`, `CloudCodeCurrencyBackend`, `CurrencyBalanceUpdate`) |
 | Editor | `Editor/Achievements/` — `AchievementDefinitionCatalog` and its `.rc` exporter |
 | **Game-side UGS glue** | |
-| Bridges | `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameSignals), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameSignals) |
+| Bridges | `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameServiceEvents), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameServiceEvents) |
 | Scene | `Assets/UGSGlue/UGS_Glue.unity` (build index 1), `Test_SubmitLeaderboardScore.cs` |
 | Cloud Code | `Assets/UGS/CloudCode/TempleRunUGSCloud~/` (.NET module: models + 16 services). Its `.sln`/`.csproj` are tracked; `Generate Solution` on the `.ccmr` is not idempotent — clear `Project/Properties/PublishProfiles/FolderProfile.pubxml` before re-running |
 | **Shared/Common** (the `com.crawfissoftware.common` package) | |
@@ -394,7 +394,7 @@ internal class MyController : MonoBehaviour
 | Test Utilities | `Runtime/Test/Test_AutoFireEvent.cs`, `Test_AutoFireEventOnStart.cs` |
 | Utilities | `Runtime/Utility/` — `Logger`, `DebugEventFileLogger`, `DebugLog`, `TimedEvent`, `TextureExtensions`; `Runtime/Events/EventHistory.cs` |
 | **Contract** (the `com.crawfissoftware.contracts` package) | |
-| Signals | `Runtime/GameSignals.cs`, `Runtime/ServicesStatus.cs` |
+| Contract | `Runtime/GameServiceEvents.cs`, `Runtime/ServicesStatus.cs` |
 | Vendored | `Assets/ThirdParty/CrawfisSoftware/` (Random providers used by `Blackboard`, editor tools incl. Play Scene 0 Always); `Assets/CloudCode/GeneratedModuleBindings/` (generated Cloud Code bindings — regenerated by the tooling, no live consumer in the game) |
 
 ## Gotchas and Warnings
@@ -450,7 +450,7 @@ Or select the `Test_GameOnly_Windows` build profile, which uses that bootstrap.
 > does. `0_BootStrap` also carries `Load_UGS_Glue`, which loads `Assets/UGSGlue/UGS_Glue.unity`,
 > and the `UGSGameFlowBridge` in that scene is the **only** publisher of
 > `GameFlowEvents.GameplayReady` in this bootstrap — it fires it on
-> `GameSignals.ServicesStatusChanged == Ready`. With UGS init disabled that status never arrives,
+> `GameServiceEvents.ServicesStatusChanged == Ready`. With UGS init disabled that status never arrives,
 > `GameplayReady` never fires, the main menu is never requested, and the boot sits on the loading
 > screen. Disabling `Load_UGS_Glue` as well does not help either: then nothing publishes
 > `GameplayReady` at all. The game-only bootstrap exists precisely because it wires that path
@@ -514,7 +514,7 @@ infrastructure, which now arrive as UPM packages rather than living here:
 
 ```
 Assets/
-├── UGSGlue/                          # This game's half of the GameSignals contract (asmdef-free on purpose)
+├── UGSGlue/                          # This game's half of the GameServiceEvents contract (asmdef-free on purpose)
 │                                     #   UGSGameFlowBridge, TempleRunUGSBridge, Test_SubmitLeaderboardScore,
 │                                     #   UGS_Glue.unity (build index 1)
 │
@@ -597,22 +597,22 @@ USER INPUT (UserInitiatedEvents, in TempleRun)
 TEMPLERUN GAMEPLAY (TempleRunEvents)
     ├─→ TempleRunGameFlowBridge ──→ GAMEFLOW SESSION (GameFlowEvents)
     │                                     ↕  Assets/UGSGlue/UGSGameFlowBridge
-    └─→ Assets/UGSGlue/TempleRunUGSBridge ──→ THE CONTRACT (GameSignals)
-                                                  ↕  GameSignalsUGSBridge   (UGS package)
+    └─→ Assets/UGSGlue/TempleRunUGSBridge ──→ THE CONTRACT (GameServiceEvents)
+                                                  ↕  GameServiceEventsUGSBridge   (UGS package)
                                               UGS SERVICES (UGS_EventsEnum)
 ```
 
-Neither end names the other. The game speaks `GameSignals`; the services layer speaks
-`GameSignals`; `GameSignals` belongs to neither and lives in its own package. Everything
+Neither end names the other. The game speaks `GameServiceEvents`; the services layer speaks
+`GameServiceEvents`; the enum belongs to neither and lives in its own package. Everything
 game-specific — that a "score" is metres run, that a "currency total" is coins — is translated in
 `Assets/UGSGlue/`.
 
 **Worked example, one coin:** `CoinCollectionController` publishes `TempleRunEvents.CoinCollected`
 carrying the run's **running total**. `TempleRunUGSBridge` maps it to
-`GameSignals.CurrencyTotalChanged`; `GameSignalsUGSBridge` maps that to
+`GameServiceEvents.CurrencyTotalChanged`; `GameServiceEventsUGSBridge` maps that to
 `UGS_EventsEnum.UGS_CoinUpdated`. `PlayerCurrencyController` remembers the number but does not
-bank it yet. At the end of a run `GameFlowEvents.GameEnding` becomes `GameSignals.SessionEnding`,
-which fans out to **two** UGS events — `ScoreUpdating` (submit the leaderboard score) and
+bank it yet. At the end of a run `GameFlowEvents.GameEnding` becomes
+`GameServiceEvents.SessionEnding`, which fans out to **two** UGS events — `ScoreUpdating` (submit the leaderboard score) and
 `CurrencySyncRequested` (bank the coins). The banked lifetime balance comes back as
 `CurrencyBalanceChanged`, which is what `CoinBasedAchievements` reads — so a coin achievement
 means a lifetime total, not one run's.

@@ -81,10 +81,10 @@ code sits on:
 | If the domain… | Put it in |
 |---|---|
 | is specific to this game | `Assets/<Domain>/Scripts/Events/` |
-| is a backing service the game should be able to run without | its own UPM package, talking to the game only through `GameSignals` — the way `com.crawfissoftware.ugs` does |
+| is a backing service the game should be able to run without | its own UPM package, talking to the game only through `GameServiceEvents` — the way `com.crawfissoftware.ugs` does |
 
 If you pick the second, the game must not reference the domain's enum at all. Add the
-crossing to `GameSignals` in `com.crawfissoftware.contracts` and bridge it on both sides —
+crossing to `GameServiceEvents` in `com.crawfissoftware.contracts` and bridge it on both sides —
 `Assets/UGSGlue/` is the worked example.
 
 ### Step 5 (optional): Auto-flow class
