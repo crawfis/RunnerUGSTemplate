@@ -8,6 +8,9 @@ namespace Unity.Services.CloudCode.GeneratedBindings
     public class PlayerDataServiceBindings
     {
         readonly ICloudCodeService k_Service;
+
+        public PlayerDataServiceBindings() : this(CloudCodeService.Instance) { }
+
         public PlayerDataServiceBindings(ICloudCodeService service)
         {
             k_Service = service;

@@ -8,6 +8,9 @@ namespace Unity.Services.CloudCode.GeneratedBindings
     public class HandleProfileChangeServiceBindings
     {
         readonly ICloudCodeService k_Service;
+
+        public HandleProfileChangeServiceBindings() : this(CloudCodeService.Instance) { }
+
         public HandleProfileChangeServiceBindings(ICloudCodeService service)
         {
             k_Service = service;

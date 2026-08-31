@@ -386,7 +386,7 @@ internal class MyController : MonoBehaviour
 | **Game-side UGS glue** | |
 | Bridges | `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameServiceEvents), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameServiceEvents) |
 | Scene | `Assets/UGSGlue/UGS_Glue.unity` (build index 1), `Test_SubmitLeaderboardScore.cs` |
-| Cloud Code | `Assets/UGS/CloudCode/TempleRunUGSCloud~/` (.NET module: models + 16 services). Its `.sln`/`.csproj` are tracked; `Generate Solution` on the `.ccmr` is not idempotent — clear `Project/Properties/PublishProfiles/FolderProfile.pubxml` before re-running |
+| Cloud Code | `Assets/UGS/CloudCode/TempleRunUGSCloud~/` (.NET module: models + 6 services, 11 endpoints). Its `.sln`/`.csproj` are tracked, and so is `Project/Properties/PublishProfiles/FolderProfile.pubxml` — **do not delete that file**; the tooling needs it and a run without it fails. A run rewrites it with CRLF line endings and identical content, so discard that diff rather than committing it. Deleting `TestProject` means removing its entry from the `.sln` too, or the solution stops building |
 | **Shared/Common** (the `com.crawfissoftware.common` package) | |
 | Auto-Event Base | `Runtime/Events/AutoEventFlowBase.cs` — `EventChainDispatcher<TSource, TDest>` + `AutoEventFlowBase<TSource, TDest>`; the one dispatch implementation, shared by every flow and bridge class in both repos |
 | Shared Config | `Runtime/Config/DifficultyConfig.cs` (namespace `CrawfisSoftware.Config` — the LIVE difficulty config) |
