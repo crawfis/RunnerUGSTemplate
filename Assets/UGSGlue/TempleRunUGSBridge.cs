@@ -7,7 +7,8 @@ using UnityEngine;
 namespace CrawfisSoftware.UGS.Events
 {
     /// <summary>
-    /// Maps this game's gameplay events onto the game-agnostic <see cref="GameSignals"/> contract.
+    /// Maps this game's gameplay events onto the game-agnostic <see cref="GameServiceEvents"/>
+    /// contract.
     /// </summary>
     /// <remarks>
     /// <para>This is the per-game half of the seam, and the only file here that names
@@ -22,27 +23,27 @@ namespace CrawfisSoftware.UGS.Events
     /// </remarks>
     internal class TempleRunUGSBridge : MonoBehaviour
     {
-        private static readonly (TempleRunEvents From, GameSignals To)[] GameplayToSignals =
+        private static readonly (TempleRunEvents From, GameServiceEvents To)[] GameplayToGameService =
         {
             // Distance is this game's score metric. A different game maps whatever its is.
-            (TempleRunEvents.DistanceUpdated, GameSignals.ScoreUpdated),
+            (TempleRunEvents.DistanceUpdated, GameServiceEvents.ScoreUpdated),
 
             // CoinCollected carries Blackboard.SessionCoinCount - a running total, which is why
             // the contract member is CurrencyTotalChanged rather than CurrencyEarned.
-            (TempleRunEvents.CoinCollected, GameSignals.CurrencyTotalChanged),
+            (TempleRunEvents.CoinCollected, GameServiceEvents.CurrencyTotalChanged),
         };
 
-        private readonly EventChainDispatcher<TempleRunEvents, GameSignals> _gameplayToSignals =
-            new EventChainDispatcher<TempleRunEvents, GameSignals>(GameplayToSignals);
+        private readonly EventChainDispatcher<TempleRunEvents, GameServiceEvents> _gameplayToGameService =
+            new EventChainDispatcher<TempleRunEvents, GameServiceEvents>(GameplayToGameService);
 
         protected virtual void Awake()
         {
-            _gameplayToSignals.Attach();
+            _gameplayToGameService.Attach();
         }
 
         protected virtual void OnDestroy()
         {
-            _gameplayToSignals.Detach();
+            _gameplayToGameService.Detach();
         }
     }
 }

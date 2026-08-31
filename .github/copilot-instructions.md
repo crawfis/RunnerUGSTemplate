@@ -14,7 +14,7 @@ agent (not just the tools they are named after):
 Read both before changing code. The non-negotiable core:
 
 - **ALL cross-system communication goes through the event system** — the four singleton
-  static buses (`EventsFor<T>`, aliased `GameFlowBus`/`TempleRunBus`/`UserInputBus`/`SignalsBus`/`UGSBus`) — never
+  static buses (`EventsFor<T>`, aliased `GameFlowBus`/`TempleRunBus`/`UserInputBus`/`GameServiceBus`/`UGSBus`) — never
   direct method calls, `FindObjectOfType`, `SendMessage`, or cross-scene `GetComponent`.
 - **Domain isolation:** `Assets/TempleRun/**` may reference only `TempleRunEvents` /
   `UserInitiatedEvents`; `Assets/GameFlow/**` only `GameFlowEvents`; `Assets/UGS/**` only

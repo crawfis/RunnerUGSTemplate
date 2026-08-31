@@ -3,11 +3,11 @@
 > **Status note (2026-08-31).** The UGS domain is no longer in this repository — it ships as
 > the `com.crawfissoftware.ugs` package, so the paths below read `Runtime/...` rather than
 > `Assets/UGS/Scripts/...`, and the buses are static `EventsFor<T>` aliases rather than
-> `EventsPublisher*` singletons. The cross-domain hop also goes through `GameSignals` now, not
+> `EventsPublisher*` singletons. The cross-domain hop also goes through `GameServiceEvents` now, not
 > directly between UGS and GameFlow.
 >
 > One caveat this document does not yet reflect: `DifficultyObserver` is constructed by
-> nothing in the package, so `GameSignals.DifficultySettingsAvailable` is not published today.
+> nothing in the package, so `GameServiceEvents.DifficultySettingsAvailable` is not published today.
 > The flow described here is the design, not fully live behaviour.
 
 ## Overview
