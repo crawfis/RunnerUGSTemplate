@@ -11,7 +11,8 @@ namespace CrawfisSoftware.GameFlow.UI
     /// <summary>
     /// Shows the player's banked lifetime coin balance on the gameplay HUD.
     ///    Dependencies: PanelRenderer (the HUD overlay panel)
-    ///    Subscribes: GameFlowEvents.CurrencyBalanceChanged (data: long)
+    ///    Subscribes: GameFlowEvents.CurrencyBalanceChanged (data: long),
+    ///                GameFlowEvents.SessionCoinsChanged (data: int)
     ///    Publishes: none
     /// </summary>
     /// <remarks>
@@ -21,9 +22,16 @@ namespace CrawfisSoftware.GameFlow.UI
     /// gameplay depend on a service being present, which the one-way TempleRunUGSBridge exists to
     /// prevent. It shares the HUD's PanelRenderer with <c>GUIController</c>; several components
     /// may register reload callbacks on one panel.</para>
-    /// <para><b>The balance is not live during a run.</b> It changes at sign-in and again when a
-    /// finished run banks its coins, so the number deliberately sits still while playing. The
-    /// running count for the current run is a separate, gameplay-side number.</para>
+    /// <para><b>What is displayed is the banked balance plus this run's coins.</b> The balance
+    /// itself only moves at sign-in and when a finished run banks, so on its own it would sit
+    /// still for the whole run. Adding the run's running count makes the number climb as coins
+    /// are picked up, and the two reconcile at the end: a newly banked balance already contains
+    /// those coins, so the run count is cleared the moment one arrives rather than being added
+    /// twice.</para>
+    /// <para><b>If banking fails</b> the coins stay pending and no new balance arrives, so the
+    /// display keeps including them - which is honest. The next run's first pickup then replaces
+    /// the run count and the pending coins stop being shown until they do bank. A display-only
+    /// artefact of a failure path, not a lost coin.</para>
     /// </remarks>
     public class CoinBalanceHUDController : MonoBehaviour
     {
@@ -40,16 +48,22 @@ namespace CrawfisSoftware.GameFlow.UI
         private long _balance;
         private bool _hasBalance;
 
+        // Assigned, never accumulated: SessionCoinsChanged carries the run's running total, so
+        // adding it would over-count by roughly the square of the coins collected.
+        private int _sessionCoins;
+
         private void Awake()
         {
             // Sticky: a balance read at sign-in, long before this scene loaded, arrives here on
             // subscribe rather than being lost.
             GameFlowBus.Subscribe(GameFlowEvents.CurrencyBalanceChanged, OnBalanceChanged);
+            GameFlowBus.Subscribe(GameFlowEvents.SessionCoinsChanged, OnSessionCoinsChanged);
         }
 
         private void OnDestroy()
         {
             GameFlowBus.Unsubscribe(GameFlowEvents.CurrencyBalanceChanged, OnBalanceChanged);
+            GameFlowBus.Unsubscribe(GameFlowEvents.SessionCoinsChanged, OnSessionCoinsChanged);
         }
 
         private void OnEnable()
@@ -77,6 +91,18 @@ namespace CrawfisSoftware.GameFlow.UI
 
             _balance = balance;
             _hasBalance = true;
+
+            // A balance the service just reported already contains everything banked up to now,
+            // including this run's coins. Keeping the run count would show them twice.
+            _sessionCoins = 0;
+            Repaint();
+        }
+
+        private void OnSessionCoinsChanged(string eventName, object sender, object data)
+        {
+            if (data is not int coins) return;
+
+            _sessionCoins = coins;
             Repaint();
         }
 
@@ -86,7 +112,7 @@ namespace CrawfisSoftware.GameFlow.UI
 
             // Blank until a balance has actually arrived. Showing "0" before the first read would
             // claim the player has no coins, which is a different statement from "not known yet".
-            _balanceLabel.text = _hasBalance ? _balance.ToString("N0") : string.Empty;
+            _balanceLabel.text = _hasBalance ? (_balance + _sessionCoins).ToString("N0") : string.Empty;
         }
     }
 }
