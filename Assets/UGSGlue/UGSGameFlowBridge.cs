@@ -4,13 +4,13 @@ using CrawfisSoftware.GameFlow.Events;
 
 using UnityEngine;
 using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
-using SignalsBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Contracts.GameSignals>;
+using GameServiceBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Contracts.GameServiceEvents>;
 
 namespace CrawfisSoftware.UGS.Events
 {
     /// <summary>
-    /// Maps this application's session lifecycle onto the game-agnostic <see cref="GameSignals"/>
-    /// contract, and the contract's answers back onto GameFlow.
+    /// Maps this application's session lifecycle onto the game-agnostic
+    /// <see cref="GameServiceEvents"/> contract, and the contract's answers back onto GameFlow.
     /// </summary>
     /// <remarks>
     /// <para>The host half of the seam. It names GameFlow and the contract, never a UGS type, so
@@ -28,33 +28,33 @@ namespace CrawfisSoftware.UGS.Events
     internal class UGSGameFlowBridge : MonoBehaviour
     {
         private static readonly EventId<ServicesStatus> StatusChanged =
-            SignalsBus.Id<ServicesStatus>(GameSignals.ServicesStatusChanged);
+            GameServiceBus.Id<ServicesStatus>(GameServiceEvents.ServicesStatusChanged);
 
-        private static readonly (GameFlowEvents From, GameSignals To)[] GameFlowToSignals =
+        private static readonly (GameFlowEvents From, GameServiceEvents To)[] GameFlowToGameService =
         {
             // A run has finished: its score is final, then the session is over.
-            (GameFlowEvents.GameEnding, GameSignals.SessionEnding),
-            (GameFlowEvents.GameEnded, GameSignals.SessionEnded),
+            (GameFlowEvents.GameEnding, GameServiceEvents.SessionEnding),
+            (GameFlowEvents.GameEnded, GameServiceEvents.SessionEnded),
         };
 
-        private static readonly (GameSignals From, GameFlowEvents To)[] SignalsToGameFlow =
+        private static readonly (GameServiceEvents From, GameFlowEvents To)[] GameServiceToGameFlow =
         {
             // The host's choice, not the service's: config has arrived, so stop showing loading.
-            (GameSignals.RemoteConfigApplied, GameFlowEvents.LoadingScreenHideRequested),
+            (GameServiceEvents.RemoteConfigApplied, GameFlowEvents.LoadingScreenHideRequested),
 
-            (GameSignals.DifficultySettingsAvailable, GameFlowEvents.DifficultySettingsApplied),
+            (GameServiceEvents.DifficultySettingsAvailable, GameFlowEvents.DifficultySettingsApplied),
         };
 
-        private readonly EventChainDispatcher<GameFlowEvents, GameSignals> _gameFlowToSignals =
-            new EventChainDispatcher<GameFlowEvents, GameSignals>(GameFlowToSignals);
+        private readonly EventChainDispatcher<GameFlowEvents, GameServiceEvents> _gameFlowToGameService =
+            new EventChainDispatcher<GameFlowEvents, GameServiceEvents>(GameFlowToGameService);
 
-        private readonly EventChainDispatcher<GameSignals, GameFlowEvents> _signalsToGameFlow =
-            new EventChainDispatcher<GameSignals, GameFlowEvents>(SignalsToGameFlow);
+        private readonly EventChainDispatcher<GameServiceEvents, GameFlowEvents> _gameServiceToGameFlow =
+            new EventChainDispatcher<GameServiceEvents, GameFlowEvents>(GameServiceToGameFlow);
 
         protected virtual void Awake()
         {
-            _gameFlowToSignals.Attach();
-            _signalsToGameFlow.Attach();
+            _gameFlowToGameService.Attach();
+            _gameServiceToGameFlow.Attach();
 
             // Sticky: if services are already up, this fires immediately on subscribe.
             StatusChanged.Subscribe(OnServicesStatusChanged);
@@ -62,8 +62,8 @@ namespace CrawfisSoftware.UGS.Events
 
         protected virtual void OnDestroy()
         {
-            _gameFlowToSignals.Detach();
-            _signalsToGameFlow.Detach();
+            _gameFlowToGameService.Detach();
+            _gameServiceToGameFlow.Detach();
 
             StatusChanged.Unsubscribe(OnServicesStatusChanged);
         }

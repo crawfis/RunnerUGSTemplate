@@ -168,8 +168,8 @@ Event System Audit Results:
 
 ## Files to Scan
 
-- Event enums: `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs`, `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs`; and from packages, `Runtime/GameSignals.cs` (contracts) and `Runtime/Events/UGS_EventsEnum.cs` (ugs)
+- Event enums: `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs`, `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs`; and from packages, `Runtime/GameServiceEvents.cs` (contracts) and `Runtime/Events/UGS_EventsEnum.cs` (ugs)
 - Auto-flows: `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, and `Runtime/Events/UGSAutoEventFlow.cs` (ugs package)
-- Bridges: `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGSGlue/UGSGameFlowBridge.cs`, `Assets/UGSGlue/TempleRunUGSBridge.cs`, and `Runtime/Events/GameSignalsUGSBridge.cs` (ugs package)
+- Bridges: `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGSGlue/UGSGameFlowBridge.cs`, `Assets/UGSGlue/TempleRunUGSBridge.cs`, and `Runtime/Events/GameServiceEventsUGSBridge.cs` (ugs package)
 - Any additional `EventsPublisher*` subclasses, `*AutoEventFlow` classes, and `*Bridge` classes from domains added later
 - All C# scripts: `Assets/**/*.cs`
