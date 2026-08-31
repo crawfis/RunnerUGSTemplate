@@ -22,7 +22,8 @@ Display a comprehensive view of all events in the event system.
 | GameFlow | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | TempleRun | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` |
 | UserInitiated | `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs` |
-| UGS | `Assets/UGS/Scripts/Events/UGS_EventsEnum.cs` |
+| GameSignals | `Runtime/GameSignals.cs` in the `com.crawfissoftware.contracts` package |
+| UGS | `Runtime/Events/UGS_EventsEnum.cs` in the `com.crawfissoftware.ugs` package (read-only here) |
 
 > The authoritative domain list is the set of `EventsPublisher*` singleton subclasses
 > (one per enum). If a domain exists that isn't in this table (added via
@@ -36,14 +37,15 @@ Read the relevant auto-flow file(s) and extract all dictionary entries.
 |--------|------|
 | GameFlow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs` |
 | TempleRun | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs` |
-| UGS | `Assets/UGS/Scripts/Events/UGSAutoEventFlow.cs` |
+| UGS | `Runtime/Events/UGSAutoEventFlow.cs` in the `com.crawfissoftware.ugs` package (read-only here) |
 
 ### Step 3: Read bridge mappings
 
 Read bridge files and extract cross-domain mappings:
 - `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (includes the
   TempleRun -> UGS passthrough dictionary)
-- `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs`
+- `Assets/UGSGlue/UGSGameFlowBridge.cs` and `Assets/UGSGlue/TempleRunUGSBridge.cs`
+- `Runtime/Events/GameSignalsUGSBridge.cs` in the `com.crawfissoftware.ugs` package
 
 ### Step 4: Format output
 

@@ -1,6 +1,6 @@
 ---
 name: add-event-domain
-description: Create a new event domain — a new enum with its own EventsPublisher singleton, optional auto-flow, and a bridge — for a genuinely separate bounded context (a new backend, analytics, netcode). Rare; includes the decision gate, scene hosting, and the registration checklist for docs and skills.
+description: Create a new event domain — a new [EventEnum] enum, an optional auto-flow, and a bridge — for a genuinely separate bounded context (a new backend, analytics, netcode). Rare; includes the decision gate, where the domain should live, and the registration checklist for docs and skills.
 allowed-tools: Read, Write, Edit, Grep, Glob
 argument-hint: <DomainName> [purpose]
 ---
@@ -45,7 +45,7 @@ service call is a category in an existing enum.
 |-------|------------|----------------------|
 | Enum | `<Name>Events` | `AnalyticsEvents` |
 | Enum file | `Assets/<Name>/Scripts/Events/<Name>Events.cs` | `Assets/Analytics/Scripts/Events/AnalyticsEvents.cs` |
-| Publisher | `EventsPublisher<Name>` next to the enum | `EventsPublisherAnalytics` |
+| Bus alias | `<Name>Bus`, aliased per file from `EventsFor<T>` | `AnalyticsBus` |
 | Auto-flow (optional) | `<Name>AutoEventFlow`, next to the enum | `AnalyticsAutoEventFlow` |
 | Bridge | `<Name>GameFlowBridge` (or whichever pair applies) | `AnalyticsGameFlowBridge` |
 
@@ -55,34 +55,37 @@ Explicit values, categories separated by `// ---------- Name ----------` comment
 gaps of ~10 between categories; naming `*Requested` / `*Starting`/`*ing` /
 `*Started`/`*ed` / `*Failed` / `*Cancelled`.
 
-### Step 3: Create the publisher singleton
+### Step 3: Mark the enum `[EventEnum]`
 
-Copy the three-line pattern from `EventsPublisherUGS.cs`:
+There is **no publisher to create**. The `EventsPublisher*` singletons this step used to
+describe are retired: the buses are static generics, `EventsFor<TEnum>`, so a domain needs
+no MonoBehaviour, no `[DefaultExecutionOrder]` and no scene object.
 
 ```csharp
-[DefaultExecutionOrder(-10000)]
-public class EventsPublisherAnalytics : EventsPublisherEnumsSingleton<AnalyticsEvents>
-{
-}
+[EventEnum]
+public enum AnalyticsEvents { ... }
 ```
 
-`[DefaultExecutionOrder(-10000)]` is required — subscribers use the singleton from their
-own `Awake()`, so the publisher's `Awake` must run first.
+`[EventEnum]` is what makes `CrawfisSoftware > Events > List Domains` find it in edit mode.
+Alias the bus per file, the way every other domain does:
 
-### Step 4: Host the publisher in the bootstrap scene(s)
+```csharp
+using AnalyticsBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Analytics.AnalyticsEvents>;
+```
 
-The publisher is a MonoBehaviour singleton: it must live on a GameObject in every
-bootstrap variant that will use the domain. Verified current placements — follow the
-pattern:
+### Step 4: Decide where the domain lives
 
-| Publisher | Host scene(s) |
-|-----------|---------------|
-| `EventsPublisherGameFlow`, `EventsPublisherUserInitiated` | all three bootstraps: `Assets/UGS/Scenes/Boot/0_BootStrap`, `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only`, `Assets/UGS/Scenes/Test/0_BootStrap_UGS_Only` |
-| `EventsPublisherTempleRun` | `Assets/GameFlow/Scenes/Boot/Game_Boot_2_Play` |
-| `EventsPublisherUGS` | `Assets/UGS/Scenes/Boot/UGS_Boot_0_Initialization` (+ the UGS-only test boot) |
+Nothing needs hosting, so the only placement question left is which side of the fence the
+code sits on:
 
-An app-wide domain goes in the bootstraps; a domain scoped to one mode goes in that
-mode's boot scene. Remember every build profile's scene list.
+| If the domain… | Put it in |
+|---|---|
+| is specific to this game | `Assets/<Domain>/Scripts/Events/` |
+| is a backing service the game should be able to run without | its own UPM package, talking to the game only through `GameSignals` — the way `com.crawfissoftware.ugs` does |
+
+If you pick the second, the game must not reference the domain's enum at all. Add the
+crossing to `GameSignals` in `com.crawfissoftware.contracts` and bridge it on both sides —
+`Assets/UGSGlue/` is the worked example.
 
 ### Step 5 (optional): Auto-flow class
 

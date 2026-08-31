@@ -24,7 +24,9 @@ After adding a bridge mapping, remind the user that any existing code that direc
 | Bridge Class | File | Connects |
 |-------------|------|----------|
 | **TempleRunGameFlowBridge** | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | TempleRun <-> GameFlow (bidirectional) + TempleRun -> UGS (passthrough) |
-| **UGSGameFlowBridge** | `Assets/UGS/Scripts/Events/UGSGameFlowBridge.cs` | UGS <-> GameFlow (bidirectional) |
+| **UGSGameFlowBridge** | `Assets/UGSGlue/UGSGameFlowBridge.cs` | GameFlow <-> GameSignals (bidirectional) |
+| **TempleRunUGSBridge** | `Assets/UGSGlue/TempleRunUGSBridge.cs` | gameplay -> GameSignals (one-way) |
+| **GameSignalsUGSBridge** | `Runtime/Events/GameSignalsUGSBridge.cs` in the `com.crawfissoftware.ugs` package | GameSignals <-> UGS (read-only here) |
 
 Note: TempleRun -> UGS passthrough mappings live in `TempleRunGameFlowBridge` as a third dictionary. This avoids routing through GameFlow when a TempleRun event maps directly to a UGS event (e.g., `DistanceUpdated`, `CoinCollected`).
 
