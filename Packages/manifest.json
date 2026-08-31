@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.crawfissoftware.eventspublisher": "https://github.com/crawfis/EventsPublisher.git",
-    "com.crawfissoftware.contracts": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts#v0.3.0",
-    "com.crawfissoftware.common": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.common#v0.3.0",
-    "com.crawfissoftware.ugs": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.ugs#v0.3.0",
+    "com.crawfissoftware.contracts": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts",
+    "com.crawfissoftware.common": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.common",
+    "com.crawfissoftware.ugs": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.ugs",
     "com.gamesthatmoveyou.audiomanager": "https://github.com/crawfis/GTMY.Audio.git",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
