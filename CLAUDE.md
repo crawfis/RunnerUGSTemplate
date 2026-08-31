@@ -568,6 +568,8 @@ Assets/
 │   │   ├── Test/                     # 0_BootStrap_UGS_Only, DummyGame_Boot_0_Initialization, Test_SubmitScoreAndEnd
 │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards
 │   ├── CloudCode/TempleRunUGSCloud~/ # .NET Cloud Code module (models + 16 services)
+│   ├── Economy/                      # COIN.ecc - the Economy currency definition; deploy it from the
+│   │                                 #   Deployment window. The id comes from the filename
 │   ├── Editor/                       # RemoteConfig editor data
 │   └── Prefabs/                      # AchievementsPrefab, AchievementsNotificationPrefab, LeaderboardPanel
 │                                     #   (the scripts they instance come from the UGS package)
@@ -614,3 +616,10 @@ which fans out to **two** UGS events — `ScoreUpdating` (submit the leaderboard
 `CurrencySyncRequested` (bank the coins). The banked lifetime balance comes back as
 `CurrencyBalanceChanged`, which is what `CoinBasedAchievements` reads — so a coin achievement
 means a lifetime total, not one run's.
+
+Two links in that chain live outside C# and fail silently, so check them before debugging code:
+`PlayerCurrencyController` must be in a loaded scene — it sits on `GameFlow/PlayerCurrency` in
+`UGS_Boot_0_Initialization`, and it is the **only** subscriber to `CurrencySyncRequested`, so
+without it every event above still fires and nothing is ever written — and a `COIN` currency must
+exist in the environment being signed in to, which `Assets/UGS/Economy/COIN.ecc` defines and the
+Deployment window publishes. Economy configuration is per-environment.
