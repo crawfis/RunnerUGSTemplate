@@ -18,38 +18,54 @@ MonoBehaviour:
   m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
     rid: 2588008534742138982
+  m_ActivePlatformGuid: 
+  m_AdditionalPlatformBuildSettings: []
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Test/0_BootStrap_UGS_Only.unity
+    m_guid: e61ca760ec9395c4b9edb9268d2d164f
+  - m_enabled: 1
+    m_path: Assets/UGSGlue/UGS_Glue.unity
+    m_guid: 0c419d0e21fd3e545ad143d4d18edca1
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Boot/UGS_Boot_0_Initialization.unity
+    m_guid: 9e41f512bef570248865e5805818e3f6
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Boot/UGS_Boot_1_RemoteConfig.unity
+    m_guid: 40955da1a8a683e44b31c3c75357eb2e
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Boot/UGS_Boot_2_Authentication.unity
+    m_guid: ac7af94e402ae0344a26bfdf8fe23659
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Boot/UGS_Boot_3_Achievements.unity
+    m_guid: 71b7e258485c91640afa5384d40e024d
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Boot/UGS_Boot_4_Leaderboards.unity
+    m_guid: 51ee7295eacd8514e91ffe87b205a442
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Test/DummyGame_Boot_0_Initialization.unity
+    m_guid: d5561aff6e4ec78479937b49f666958b
   - m_enabled: 1
     m_path: Assets/GameFlow/Scenes/Boot/Game_Boot_1_UI.unity
+    m_guid: d5b81091373cb5245b2da2b188c7322a
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/Test/Test_SubmitScoreAndEnd.unity
+    m_guid: e45918eec9fed134c9064e68ec56ee6e
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/UGS/AchievementNotifications.unity
+    m_guid: 93d8c3d5097af894ab6dcf02fdccac12
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/UGS/Achievements.unity
+    m_guid: d0403b6237a9979438047d87ba19840e
   - m_enabled: 1
     m_path: Assets/UGS/Scenes/UGS/Leaderboards.unity
-  - m_enabled: 1
-    m_path: Assets/UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only.unity
+    m_guid: fa56826d61f527442bdc0ebd26b48f00
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []
+  requiredComponents: []
   references:
     version: 2
     RefIds:
@@ -59,6 +75,7 @@ MonoBehaviour:
         m_Development: 0
         m_ConnectProfiler: 0
         m_BuildWithDeepProfilingSupport: 0
+        m_BuildWithCodeCoverage: 0
         m_AllowDebugging: 0
         m_WaitForManagedDebugger: 0
         m_ManagedDebuggerFixedPort: 0
