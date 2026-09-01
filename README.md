@@ -1429,6 +1429,12 @@ package — `Blackboard` depends on them.)
 
 ## Development Tasks
 
+Beyond the checklists below: [docs/FUTURE_TASKS.md](docs/FUTURE_TASKS.md) is the task
+catalog for taking this template further — 33 live-services, multiplayer, and economy
+projects (sections Q–X, continuing the sibling repo's
+[Student Task Catalog](https://github.com/crawfis/EndlessRunnerTemplate/blob/main/docs/STUDENT_TASKS.md)),
+each with enough context to hand to an AI assistant.
+
 ### Initial Setup
 
 - [ ] **Update Player Settings**: Company, Product, Version (`0.1.0`)

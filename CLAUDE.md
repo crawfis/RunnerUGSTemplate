@@ -13,6 +13,11 @@ complete documentation, see [README.md](README.md).
 > this repo has two more domains (GameService and UGS) and eight dispatch classes rather
 > than four.
 
+**Course material:** [docs/FUTURE_TASKS.md](docs/FUTURE_TASKS.md) — the 33-task catalog for
+this repo (live services, multiplayer, deeper economy; its sections Q–X continue the sibling
+catalog's A–P, and every task carries an AI hand-off brief). Students working in this repo
+will ask for help with these.
+
 ## Quick Reference
 
 ### Essential Commands
