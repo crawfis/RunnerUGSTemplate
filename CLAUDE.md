@@ -386,7 +386,7 @@ internal class MyController : MonoBehaviour
 | **Game-side UGS glue** | |
 | Bridges | `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameServiceEvents), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameServiceEvents) |
 | Scene | `Assets/UGSGlue/UGS_Glue.unity` (build index 1), `Test_SubmitLeaderboardScore.cs` |
-| Cloud Code | `Assets/UGS/CloudCode/TempleRunUGSCloud~/` (.NET module: models + 6 services, 11 endpoints). Its `.sln`/`.csproj` are tracked, and so is `Project/Properties/PublishProfiles/FolderProfile.pubxml` — **do not delete that file**; the tooling needs it and a run without it fails. A run rewrites it with CRLF line endings and identical content, so discard that diff rather than committing it. Deleting `TestProject` means removing its entry from the `.sln` too, or the solution stops building |
+| Cloud Code | `Assets/UGS/CloudCode/TempleRunUGSCloud~/` (.NET module: models + 4 services, 7 endpoints — AdRewards, HandleProfileChange, PlayerData, PlayerEconomy). Its `.sln`/`.csproj` are tracked, and so is `Project/Properties/PublishProfiles/FolderProfile.pubxml` — **do not delete that file**; the tooling needs it and a run without it fails. A run rewrites it with CRLF line endings and identical content, so discard that diff rather than committing it. Deleting `TestProject` means removing its entry from the `.sln` too, or the solution stops building |
 | **Shared/Common** (the `com.crawfissoftware.common` package) | |
 | Auto-Event Base | `Runtime/Events/AutoEventFlowBase.cs` — `EventChainDispatcher<TSource, TDest>` + `AutoEventFlowBase<TSource, TDest>`; the one dispatch implementation, shared by every flow and bridge class in both repos |
 | Shared Config | `Runtime/Config/DifficultyConfig.cs` (namespace `CrawfisSoftware.Config` — the LIVE difficulty config) |
@@ -567,7 +567,7 @@ Assets/
 │   │   │                             #   UGS_Boot_3_Achievements, UGS_Boot_4_Leaderboards
 │   │   ├── Test/                     # 0_BootStrap_UGS_Only, DummyGame_Boot_0_Initialization, Test_SubmitScoreAndEnd
 │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards
-│   ├── CloudCode/TempleRunUGSCloud~/ # .NET Cloud Code module (models + 6 services, 11 endpoints)
+│   ├── CloudCode/TempleRunUGSCloud~/ # .NET Cloud Code module (models + 4 services, 7 endpoints)
 │   ├── Economy/                      # COIN.ecc - the Economy currency definition; deploy it from the
 │   │                                 #   Deployment window. The id comes from the filename
 │   ├── Editor/                       # RemoteConfig editor data

@@ -45,25 +45,5 @@ namespace Unity.Services.CloudCode.GeneratedBindings
                 {
                 });
         }
-
-        public async Task<TempleRunUGSCloud.Models.PlayerData> HandleLevelWon()
-        {
-            return await k_Service.CallModuleEndpointAsync<TempleRunUGSCloud.Models.PlayerData>(
-                "TempleRunUGSCloud",
-                "HandleLevelWon",
-                new Dictionary<string, object>()
-                {
-                });
-        }
-
-        public async Task<TempleRunUGSCloud.Models.PlayerData> HandleLevelLost()
-        {
-            return await k_Service.CallModuleEndpointAsync<TempleRunUGSCloud.Models.PlayerData>(
-                "TempleRunUGSCloud",
-                "HandleLevelLost",
-                new Dictionary<string, object>()
-                {
-                });
-        }
     }
 }
