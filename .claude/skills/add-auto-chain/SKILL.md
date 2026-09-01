@@ -24,11 +24,16 @@ Add an auto-event chain mapping within a single event domain. Auto-chains fire a
 Note: `UserInitiatedEvents` does NOT have an auto-flow — input events are always handled by subscribers directly.
 
 A domain added via `/add-event-domain` gets its own `<Domain>AutoEventFlow` following the
-same dictionary pattern — add it to the table above when it exists.
+same pair-table pattern — add it to the table above when it exists.
 
-## CRITICAL: Always use dictionaries
+## CRITICAL: Always use the pair table
 
-**NEVER add individual `SubscribeToEvent` / `UnsubscribeToEvent` calls in auto-flow or bridge classes.** All event mappings MUST go into the appropriate dictionary. The `SubscribeToAllEnumEvents` handler will pick them up automatically. Individual subscriptions break the declarative pattern and create maintenance burden.
+**NEVER add individual `Subscribe` / `Unsubscribe` calls in auto-flow classes.** All same-domain
+mappings MUST go into the class's `ChainTable` — a flat list of `(From, To)` pairs handed to
+`EventChainDispatcher` (common package), which subscribes to every enum member and dispatches.
+Because it is a pair list, **one source event may appear several times**, declaring several
+consequences; targets fire in declaration order, synchronously. Individual subscriptions break
+the declarative pattern and create maintenance burden.
 
 ## Procedure
 
@@ -43,7 +48,7 @@ Read the enum file and confirm both events exist. If not, tell the user to run `
 ### Step 3: Read the auto-flow file
 
 Read the appropriate `*AutoEventFlow.cs` to understand:
-- The dictionary variable name (e.g., `_autoGameFlow2GameFlowEvents`)
+- The pair-table field (each flow declares a `ChainTable` of `(From, To)` tuples)
 - Existing mappings and their comment structure
 - Where the new mapping logically belongs
 
@@ -56,7 +61,7 @@ Read the appropriate `*AutoEventFlow.cs` to understand:
 
 ### Step 5: Add the mapping
 
-Add the new entry to the dictionary. Place it:
+Add the new `(Source, Target)` pair to the `ChainTable`. Place it:
 - Near related mappings (same feature group)
 - With a comment explaining the chain purpose
 - Following the existing comment block style
@@ -86,18 +91,24 @@ Not auto-chained (intentional):
 
 **Immediate progression** (no async work):
 ```csharp
-{ GameFlowEvents.PauseRequested, GameFlowEvents.Pausing },
-{ GameFlowEvents.Pausing, GameFlowEvents.Paused },
+(GameFlowEvents.PauseRequested, GameFlowEvents.Pausing),
+(GameFlowEvents.Pausing, GameFlowEvents.Paused),
 ```
 
 **Async progression** (auto-chain the request, controller publishes completion):
 ```csharp
-{ GameFlowEvents.GameScenesLoadRequested, GameFlowEvents.GameScenesLoading },
+(GameFlowEvents.GameScenesLoadRequested, GameFlowEvents.GameScenesLoading),
 // GameScenesLoading -> GameScenesLoaded: Published by scene loader after async load
 ```
 
 **Orchestration** (cross-phase):
 ```csharp
-{ GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowRequested },
-{ GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested },
+(GameFlowEvents.GameplayReady, GameFlowEvents.MainMenuShowRequested),
+(GameFlowEvents.GameScenesLoaded, GameFlowEvents.GameStartRequested),
+```
+
+**Fan-out** (one source, several consequences — the reason chains are a pair list):
+```csharp
+(GameServiceEvents.SessionEnding, UGS_EventsEnum.ScoreUpdating),
+(GameServiceEvents.SessionEnding, UGS_EventsEnum.CurrencySyncRequested),
 ```

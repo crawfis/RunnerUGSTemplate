@@ -47,10 +47,10 @@ skills especially. Two parity rules:
 - **Track segment assets must stay guid-identical across the repos.** Copy `.asset` +
   `.meta` files from the sibling; never re-generate them here (that would mint different
   guids). See the `generate-segments` skill.
-- **The sibling is on a newer EventsPublisher API** (static `EventsFor<T>` buses, typed
-  payloads, Sticky delivery). This repo still uses the singleton-publisher API
-  (`EventsPublisher*.Instance`). Do not port sibling code or guidance verbatim — translate
-  it to this repo's API, or propose the upgrade as its own explicit project.
+- **Both repos are now on the same EventsPublisher API** — static `EventsFor<T>` buses,
+  typed payloads, Sticky delivery — so code and guidance port between them directly. The
+  structural differences that remain are real ones: this repo has the GameService and UGS
+  domains (five enums, eight dispatch classes) where the sibling has three and four.
 
 ## Documentation: audience and map
 

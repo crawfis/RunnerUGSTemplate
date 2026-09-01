@@ -15,12 +15,13 @@ namespace CrawfisSoftware.UGS.Events
     /// <remarks>
     /// <para>The host half of the seam. It names GameFlow and the contract, never a UGS type, so
     /// swapping UGS for a different backend - or none - changes nothing here.</para>
-    /// <para><b>Why the status is read as a level, not an edge.</b> This component lives in an
-    /// additively-loaded scene, so it may subscribe well after services came up. Reacting to the
-    /// transient <c>ServicesReady</c> edge meant that if it lost that race, GameplayReady was never
-    /// published and the boot stalled at LoadingScreenHidden - no menu, no error. Subscribing to
-    /// the Sticky level instead, the current status is delivered on subscribe however late that
-    /// is. The race cannot occur rather than being unlikely.</para>
+    /// <para><b>Why the status is read as retained state, not caught in the moment.</b> This
+    /// component lives in an additively-loaded scene, so it may subscribe well after services
+    /// came up. Reacting to the one-shot <c>ServicesReady</c> announcement meant that if it lost
+    /// that race, GameplayReady was never published and the boot stalled at LoadingScreenHidden -
+    /// no menu, no error. Subscribing to the Sticky status event instead, the current status is
+    /// delivered on subscribe however late that is. The race cannot occur rather than being
+    /// unlikely.</para>
     /// <para><b>Not its own assembly, deliberately.</b> Glue is the most volatile thing here: it
     /// changes whenever either side does, and it is the one place licensed to know both. An
     /// assembly boundary would enforce nothing and cost a reference edit on every change.</para>
@@ -90,8 +91,8 @@ namespace CrawfisSoftware.UGS.Events
 
                 case ServicesStatus.Connecting:
                     // Nothing to announce to GameFlow yet. A "Connecting to Unity Services..."
-                    // panel should subscribe to the level directly rather than have this
-                    // translate it - the host owns how waiting is presented.
+                    // panel should subscribe to the status event directly rather than have
+                    // this translate it - the host owns how waiting is presented.
                     break;
             }
         }

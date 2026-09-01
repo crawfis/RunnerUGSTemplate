@@ -35,7 +35,7 @@ PHASE 1: USER AUTHENTICATION
 
     ┌─────────────────────────────────────┐
     │ PlayerAuthenticationManager         │
-    │ (Runtime/  [ugs package]...)            │
+    │ (Runtime/Initialization/, ugs pkg)            │
     │                                     │
     │ Authenticates player with UGS       │
     └─────────────────────────────────────┘
@@ -50,7 +50,7 @@ PHASE 2: REMOTE CONFIG FETCH (PARALLEL WITH AUTH)
 
     ┌─────────────────────────────────────┐
     │ RemoteConfigManager                 │
-    │ (Runtime/RemoteConfig/  [ugs package])  │
+    │ (Runtime/RemoteConfig/, ugs pkg)  │
     │                                     │
     │ 1. Fetches from RemoteConfig API    │
     │ 2. Publishes RemoteConfigFetched    │
@@ -68,24 +68,36 @@ PHASE 2: REMOTE CONFIG FETCH (PARALLEL WITH AUTH)
     Data: List<DifficultyConfig>
 
 
-PHASE 3: UGS → GAMEFLOW BRIDGE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 3: UGS → CONTRACT → GAMEFLOW (two bridges)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     ┌─────────────────────────────────────┐
-    │ UGSGameFlowBridge                   │
-    │ (Runtime/Events/  [ugs package])        │
+    │ GameServiceEventsUGSBridge          │
+    │ (Runtime/Events/, ugs package)      │
     │                                     │
-    │ Line 32:                            │
+    │ Pair table:                         │
     │ { DifficultySettingsFetched →       │
-    │   GameFlowEvents.                   │
-    │     DifficultySettingsApplied }     │
-    │                                     │
-    │ Translates UGS events to            │
-    │ GameFlow events                     │
+    │   GameServiceEvents.                │
+    │     DifficultySettingsAvailable }   │
     └─────────────────────────────────────┘
                     │
                     ▼
-    Publishes: GameFlowEvents.DifficultySettingsApplied
+    Publishes: GameServiceEvents.DifficultySettingsAvailable
+    (via GameServiceBus — the contract; neither side owns it)
+    Data: List<DifficultyConfig>, passed through unchanged
+
+    ┌─────────────────────────────────────┐
+    │ UGSGameFlowBridge                   │
+    │ (Assets/UGSGlue/)                   │
+    │                                     │
+    │ Pair table:                         │
+    │ { DifficultySettingsAvailable →     │
+    │   GameFlowEvents.                   │
+    │     DifficultySettingsApplied }     │
+    └─────────────────────────────────────┘
+                    │
+                    ▼
+    Publishes: GameFlowEvents.DifficultySettingsApplied  (STICKY)
     (via GameFlowBus)
     Data: List<DifficultyConfig>
 
@@ -98,7 +110,7 @@ PHASE 4: GAMEFLOW → TEMPLERUN BRIDGE
     │ (Assets/GameFlow/Scripts/           │
     │  TempleRunSpecific/)                │
     │                                     │
-    │ Line 52:                            │
+    │ Pair table:                         │
     │ { DifficultySettingsApplied →       │
     │   TempleRunEvents.                  │
     │     DifficultySettingsApplied }     │
@@ -144,7 +156,7 @@ PHASE 5: TEMPLERUN APPLIES SETTINGS
 
 ### Phase 1: Authentication
 **Component:** `PlayerAuthenticationManager`
-**Location:** `Runtime/  [ugs package]Initialization/`
+**Location:** `Runtime/Initialization/` (ugs package)
 **Responsibility:** Sign in player with UGS
 **Event Published:**
 - `UGS_EventsEnum.PlayerAuthenticated` (data: null)
@@ -163,7 +175,7 @@ UGSBus.Publish(
 
 ### Phase 2: RemoteConfig Fetch
 **Component:** `RemoteConfigManager`
-**Location:** `Runtime/RemoteConfig/  [ugs package]`
+**Location:** `Runtime/RemoteConfig/` (ugs package)
 **Responsibility:** Fetch RemoteConfig once, and announce the difficulty table it carries
 **Event Published:**
 - `UGS_EventsEnum.DifficultySettingsFetched` (data: `List<DifficultyConfig>`)
@@ -192,27 +204,17 @@ private void PublishDifficultySettings()
 
     UGSBus.Publish(UGS_EventsEnum.DifficultySettingsFetched, this, difficulties);
 }
-
-async Task<List<DifficultyConfig>> GetDefinitions()
-{
-    var configs = await RemoteConfigService.Instance
-        .FetchConfigsAsync(new EmptyStruct(), new EmptyStruct());
-
-    var difficultiesJobject = configs.config["difficulty"];
-
-    // Deserialize to shared DifficultyConfig type
-    var difficulties = difficultiesJobject
-        .ToObject<List<DifficultyConfig>>();
-
-    return difficulties ?? new List<DifficultyConfig>();
-}
 ```
 
+(The old `GetDefinitions()` second fetch — and the `DifficultyObserver` that called it — were
+removed in ugs 0.5.0; the manager reads the table off the response it already has.)
+
 **RemoteConfig Schema:**
-The RemoteConfig service stores difficulty settings under key `"difficulty"` as JSON:
+The RemoteConfig service stores difficulty settings under key `"difficulty_settings"`
+(`RemoteConfigConstants.difficultySettingsKey`) as a JSON array:
 ```json
 {
-  "difficulty": [
+  "difficulty_settings": [
     {
       "DifficultyName": "Easy",
       "InitialSpeed": 5,
@@ -231,50 +233,43 @@ The RemoteConfig service stores difficulty settings under key `"difficulty"` as 
 
 ---
 
-### Phase 3: UGS → GameFlow Bridge
-**Component:** `UGSGameFlowBridge`
-**Location:** `Runtime/Events/  [ugs package]`
-**Responsibility:** Translate UGS events to GameFlow events
-**Events:**
-- **Receives:** `UGS_EventsEnum.DifficultySettingsFetched`
-- **Publishes:** `GameFlowEvents.DifficultySettingsApplied`
+### Phase 3: UGS → Contract → GameFlow (two bridges)
 
-**Code Flow:**
+The UGS domain and the game no longer name each other's events. The hop goes through
+`GameServiceEvents` (the contracts package), crossed by one bridge on each side:
+
+**`GameServiceEventsUGSBridge`** — `Runtime/Events/` in the ugs package (read-only here)
+- **Receives:** `UGS_EventsEnum.DifficultySettingsFetched`
+- **Publishes:** `GameServiceEvents.DifficultySettingsAvailable`
+
+**`UGSGameFlowBridge`** — `Assets/UGSGlue/` (this game's half of the seam)
+- **Receives:** `GameServiceEvents.DifficultySettingsAvailable`
+- **Publishes:** `GameFlowEvents.DifficultySettingsApplied` *(Sticky)*
+
+Both are declarative pair tables on the shared `EventChainDispatcher` (common package) —
+no dictionaries, no hand subscriptions for this mapping, payload forwarded unchanged:
+
 ```csharp
-// In UGSGameFlowBridge.cs
-private Dictionary<UGS_EventsEnum, GameFlowEvents>
-    _autoUGS2GameFlowEvents = new Dictionary<UGS_EventsEnum, GameFlowEvents>()
+// GameServiceEventsUGSBridge (ugs package)
+private static readonly (UGS_EventsEnum From, GameServiceEvents To)[] UGSToGameService =
 {
-    // Line 32: Difficulty settings bridge mapping
-    { UGS_EventsEnum.DifficultySettingsFetched,
-      GameFlowEvents.DifficultySettingsApplied },
+    (UGS_EventsEnum.RemoteConfigUpdated, GameServiceEvents.RemoteConfigApplied),
+    (UGS_EventsEnum.DifficultySettingsFetched, GameServiceEvents.DifficultySettingsAvailable),
 };
 
-private void AutoFireGameFlowEventFromUGSEvent(
-    string eventName,
-    object sender,
-    object data)
+// UGSGameFlowBridge (Assets/UGSGlue)
+private static readonly (GameServiceEvents From, GameFlowEvents To)[] GameServiceToGameFlow =
 {
-    if (_autoUGS2GameFlowEvents.TryGetValue(
-        (UGS_EventsEnum)Enum.Parse(typeof(UGS_EventsEnum), eventName),
-        out GameFlowEvents autoEvent))
-    {
-        // Translate and publish
-        DelayedFire(_delayBetweenEvents,
-            autoEvent.ToString(),
-            sender,
-            data);  // Data passed through unchanged
-    }
-}
+    (GameServiceEvents.RemoteConfigApplied, GameFlowEvents.LoadingScreenHideRequested),
+    (GameServiceEvents.DifficultySettingsAvailable, GameFlowEvents.DifficultySettingsApplied),
+    (GameServiceEvents.CurrencyBalanceChanged, GameFlowEvents.CurrencyBalanceChanged),
+};
 ```
 
-**Why This Bridge?**
-- UGS publishes UGS-specific events
-- GameFlow doesn't directly access UGS events
-- Bridge enables clean separation of domains
-- Event data (DifficultyConfig list) passes through unchanged
-
----
+**Why two bridges?**
+- UGS publishes UGS-specific events; the game publishes game-specific ones
+- The contract enum is owned by neither, so either side can be replaced without editing the other
+- Event data (the `DifficultyConfig` list) passes through unchanged
 
 ### Phase 4: GameFlow → TempleRun Bridge
 **Component:** `TempleRunGameFlowBridge`
@@ -286,31 +281,12 @@ private void AutoFireGameFlowEventFromUGSEvent(
 
 **Code Flow:**
 ```csharp
-// In TempleRunGameFlowBridge.cs
-[SerializeField] private Dictionary<GameFlowEvents, TempleRunEvents>
-    _autoGameFlow2TempleRunEvents = new Dictionary<GameFlowEvents, TempleRunEvents>()
+// In TempleRunGameFlowBridge.cs — one entry in the GameFlowToTempleRun pair table
+private static readonly (GameFlowEvents From, TempleRunEvents To)[] GameFlowToTempleRun =
 {
-    // Line 52: Difficulty settings bridge mapping
-    { GameFlowEvents.DifficultySettingsApplied,
-      TempleRunEvents.DifficultySettingsApplied },
+    // ...
+    (GameFlowEvents.DifficultySettingsApplied, TempleRunEvents.DifficultySettingsApplied),
 };
-
-private void AutoFireTempleRunEventFromGameFlowEvent(
-    string eventName,
-    object sender,
-    object data)
-{
-    if (_autoGameFlow2TempleRunEvents.TryGetValue(
-        (GameFlowEvents)Enum.Parse(typeof(GameFlowEvents), eventName),
-        out TempleRunEvents autoEvent))
-    {
-        // Translate and publish
-        DelayedFire(_delayBetweenEvents,
-            autoEvent.ToString(),
-            sender,
-            data);  // Data passed through unchanged
-    }
-}
 ```
 
 **Why This Bridge?**
@@ -326,8 +302,11 @@ private void AutoFireTempleRunEventFromGameFlowEvent(
 **Location:** `Assets/TempleRun/Scripts/Config/`
 **Responsibility:** Store and manage difficulty configurations for gameplay
 **Events:**
-- **Receives:** `TempleRunEvents.DifficultySettingsApplied`
-- **Publishes:** `TempleRunEvents.DifficultyChanged` (when difficulty selected)
+- **Receives:** `TempleRunEvents.DifficultySettingsApplied` (the REMOTE table, Sticky),
+  `TempleRunEvents.TempleRunDifficultySettingsApplied` (the local table), and
+  `TempleRunEvents.TempleRunDifficultyChangeRequested`
+- **Publishes:** `TempleRunEvents.TempleRunDifficultyChanging` (data: the chosen
+  `DifficultyConfig`) or `TempleRunEvents.DifficultyChangeFailed`
 
 **Key Changes from Coupling Remediation:**
 - ✅ Moved from GameFlow to TempleRun domain
@@ -338,14 +317,11 @@ private void AutoFireTempleRunEventFromGameFlowEvent(
 **Code Flow:**
 ```csharp
 // In GameDifficultyManager.cs (TempleRun domain)
-public void Awake()
+private void Awake()
 {
-    TempleRunBus.Subscribe(
-        TempleRunEvents.DifficultyChanging,
-        OnDifficultyChanging);
-    TempleRunBus.Subscribe(
-        TempleRunEvents.DifficultySettingsApplied,
-        OnDifficultySettingsChanged);
+    TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+    TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
+    TempleRunBus.Subscribe(TempleRunEvents.DifficultySettingsApplied, OnRemoteDifficultySettingsApplied);
 }
 
 public void OnDifficultySettingsChanged(
@@ -407,7 +383,7 @@ float maxSpeed = config.MaxSpeed;
 ## Event Types & Values
 
 ### UGS Events
-**File:** `Runtime/Events/  [ugs package]UGS_EventsEnum.cs`
+**File:** `Runtime/Events/UGS_EventsEnum.cs` (ugs package)
 
 ```csharp
 public enum UGS_EventsEnum
@@ -425,10 +401,12 @@ public enum UGS_EventsEnum
 public enum GameFlowEvents
 {
     // Related to RemoteConfig/Difficulty
-    DifficultySettingsApplied = XXX,  // Bridged from UGS
-    DifficultyChanged = XXX,          // When difficulty is selected
-    DifficultyChanging = XXX,         // When difficulty change is requested
-    DifficultyChangeFailed = XXX,     // When difficulty change fails
+    DifficultyChangeRequested = 90,
+    DifficultyChanging = 91,
+    DifficultyChanged = 92,
+    DifficultyChangeFailed = 93,
+    [EventDelivery(EventDelivery.Sticky)]
+    DifficultySettingsApplied = 94,   // Bridged from the contract
     // ... other events
 }
 ```
@@ -489,7 +467,7 @@ retained event is delivered on subscribe; a transient one would reach neither of
 - Each domain receives configuration via subscribed events
 
 ### 4. **Bridge Pattern**
-- Bidirectional mapping dictionaries translate between event systems
+- Declarative pair tables (`EventChainDispatcher`, common package) translate between event systems
 - Auto-fire mechanism automatically translates events
 - Data payload passes through unchanged
 - No domain logic in bridges
@@ -499,26 +477,24 @@ retained event is delivered on subscribe; a transient one would reach neither of
 ## Example Scenario: Difficulty Change During Gameplay
 
 ```
-Player selects "Hard" difficulty during menu
+Player selects "Hard" difficulty
 
-    1. Menu publishes: UserInitiatedEvents.DifficultyChangeRequested
+    1. A config UI (SetGameDifficulty) publishes:
+       TempleRunEvents.TempleRunDifficultyChangeRequested
        (data: "Hard")
 
-    2. GameDifficultyManager.OnDifficultyChanging() receives:
-       TempleRunEvents.DifficultyChanging
-       (data: "Hard")
+    2. GameDifficultyManager.OnDifficultyChanging() looks "Hard" up in its
+       table — the remote table if one arrived and latched, else the local one
 
-    3. GameDifficultyManager calls:
-       SetDifficulty("Hard")
-
-    4. GameDifficultyManager publishes:
-       TempleRunEvents.DifficultyChanged
+    3. GameDifficultyManager publishes:
+       TempleRunEvents.TempleRunDifficultyChanging
        (data: DifficultyConfig for Hard)
+       — or TempleRunEvents.DifficultyChangeFailed if the name is unknown
 
-    5. Blackboard subscribes to this event:
+    4. Blackboard stores it:
        GameConfig = (received DifficultyConfig)
 
-    6. Gameplay adjusts based on new difficulty:
+    5. Gameplay adjusts based on new difficulty:
        - ObstacleSpawner uses GameConfig.ObstacleSpawnRate
        - TrackManager uses GameConfig.MaxTrackLength
        - Player movement uses GameConfig.MaxSpeed
@@ -571,13 +547,13 @@ GameDifficultyManager (now in TempleRun domain)
 
 | File | Purpose |
 |------|---------|
-| `Runtime/RemoteConfig/  [ugs package]RemoteConfigManager.cs` | Fetch RemoteConfig, publish DifficultySettingsFetched |
-| `Runtime/Events/  [ugs package]GameServiceEventsUGSBridge.cs` | Bridge UGS ↔ the GameServiceEvents contract |
+| `Runtime/RemoteConfig/RemoteConfigManager.cs` (ugs package) | Fetch RemoteConfig, publish DifficultySettingsFetched |
+| `Runtime/Events/GameServiceEventsUGSBridge.cs` (ugs package) | Bridge UGS ↔ the GameServiceEvents contract |
 | `Assets/UGSGlue/UGSGameFlowBridge.cs` | Bridge the contract ↔ GameFlow events |
 | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | Bridge GameFlow → TempleRun events |
 | `Assets/TempleRun/Scripts/Config/GameDifficultyManager.cs` | Apply difficulty settings in TempleRun domain |
-| `Runtime/Config/DifficultyConfig.cs`  [common package] | Shared data type for all domains |
-| `Runtime/Events/  [ugs package]UGS_EventsEnum.cs` | UGS event definitions |
+| `Runtime/Config/DifficultyConfig.cs` (common package) | Shared data type for all domains |
+| `Runtime/Events/UGS_EventsEnum.cs` (ugs package) | UGS event definitions |
 | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` | GameFlow event definitions |
 | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` | TempleRun event definitions |
 
@@ -589,7 +565,7 @@ The RemoteConfig system demonstrates the **event-driven architecture** principle
 
 1. **Domains are isolated** - Each domain only uses its own events
 2. **Data flows through events** - RemoteConfig difficulty settings propagate as event payloads
-3. **Bridges translate between domains** - UGSGameFlowBridge and TempleRunGameFlowBridge enable cross-domain communication
+3. **Bridges translate between domains** - GameServiceEventsUGSBridge, UGSGameFlowBridge, and TempleRunGameFlowBridge enable cross-domain communication
 4. **Shared types don't create coupling** - DifficultyConfig in _Common is referenced by all domains without coupling
 5. **No direct access** - UGS never directly accesses TempleRun code or state
 

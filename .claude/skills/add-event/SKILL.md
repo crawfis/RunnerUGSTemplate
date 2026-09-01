@@ -28,8 +28,8 @@ Ask the user if not obvious from context:
 | **UGS** | `Runtime/Events/UGS_EventsEnum.cs` in the `com.crawfissoftware.ugs` package (read-only here) | Unity Gaming Services: auth, leaderboards, achievements, remote config, economy |
 
 > This table lists the domains that exist today. The authoritative list is the set of
-> `EventsPublisher*` singleton subclasses (one per domain enum) — update this table when a
-> domain is added. If the feature genuinely needs a domain that doesn't exist yet (rare),
+> `[EventEnum]`-marked enums (`CrawfisSoftware > Events > List Domains` sweeps them) —
+> update this table when a domain is added. If the feature genuinely needs a domain that doesn't exist yet (rare),
 > run `/add-event-domain` first — its decision gate tells you whether you really do.
 
 ### Step 2: Read the target enum file

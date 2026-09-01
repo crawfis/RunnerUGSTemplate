@@ -23,20 +23,33 @@ After adding a bridge mapping, remind the user that any existing code that direc
 
 | Bridge Class | File | Connects |
 |-------------|------|----------|
-| **TempleRunGameFlowBridge** | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | TempleRun <-> GameFlow (bidirectional) + TempleRun -> UGS (passthrough) |
+| **Input2TempleRunAutoEventBridge** | `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` | UserInitiated -> TempleRun (one-way) |
+| **TempleRunGameFlowBridge** | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | TempleRun <-> GameFlow (bidirectional) |
+| **TempleRunUGSBridge** | `Assets/UGSGlue/TempleRunUGSBridge.cs` | gameplay -> GameServiceEvents (one-way; e.g. `DistanceUpdated`, `CoinCollected`) |
 | **UGSGameFlowBridge** | `Assets/UGSGlue/UGSGameFlowBridge.cs` | GameFlow <-> GameServiceEvents (bidirectional) |
-| **TempleRunUGSBridge** | `Assets/UGSGlue/TempleRunUGSBridge.cs` | gameplay -> GameServiceEvents (one-way) |
-| **GameServiceEventsUGSBridge** | `Runtime/Events/GameServiceEventsUGSBridge.cs` in the `com.crawfissoftware.ugs` package | GameServiceEvents <-> UGS (read-only here) |
+| **GameServiceEventsUGSBridge** | `Runtime/Events/GameServiceEventsUGSBridge.cs` in the `com.crawfissoftware.ugs` package | GameServiceEvents <-> UGS (read-only here — edit in the EventDrivenUGS repo) |
 
-Note: TempleRun -> UGS passthrough mappings live in `TempleRunGameFlowBridge` as a third dictionary. This avoids routing through GameFlow when a TempleRun event maps directly to a UGS event (e.g., `DistanceUpdated`, `CoinCollected`).
+The game and UGS never name each other's events: anything crossing that boundary goes
+through `GameServiceEvents` (the contracts package), mapped on the game side in
+`Assets/UGSGlue/` and on the services side in `GameServiceEventsUGSBridge`. If the contract
+lacks the crossing you need, it is added to the contracts package — deliberately rarely.
 
 If you are adding a whole new integration domain (analytics, another backend), create it
-with `/add-event-domain` — it walks through the enum, the publisher singleton, scene
-hosting, and the bridge class — then add the new bridge to the table above.
+with `/add-event-domain` — it walks through the enum, the `[EventEnum]` marking, and the
+bridge class — then add the new bridge to the table above.
 
-## CRITICAL: Always use dictionaries
+## CRITICAL: Prefer the pair table
 
-**NEVER add individual `SubscribeToEvent` / `UnsubscribeToEvent` calls in bridge or auto-flow classes.** All event mappings MUST go into the appropriate dictionary. The `SubscribeToAllEnumEvents` handler will pick them up automatically. Individual subscriptions break the declarative pattern and create maintenance burden.
+**Do NOT add individual `Subscribe` / `Unsubscribe` calls for mappings that forward the
+payload unchanged.** Those MUST go into the bridge's `(From, To)` pair tables, dispatched by
+`EventChainDispatcher` (common package). One source event may appear in several pairs — that
+fan-out is the point of the pair list.
+
+The one sanctioned exception: a translation that must **transform** the payload cannot be a
+pair (the dispatcher forwards data untouched). Those are hand-written subscriptions with a
+matching `Unsubscribe` in `OnDestroy()` — see `UGSGameFlowBridge` (reading the Sticky
+`ServicesStatusChanged` status and reacting per value) and `GameServiceEventsUGSBridge`
+(unwrapping `CurrencyBalanceUpdate` to a plain `long`).
 
 ## Procedure
 
@@ -54,22 +67,25 @@ Read both enum files to confirm the source and target events exist. If they don'
 ### Step 3: Read the bridge file
 
 Read the appropriate bridge class to understand:
-- The existing dictionary mappings
-- The direction dictionaries (e.g., `_autoTempleRun2GameFlowEvents` vs `_autoGameFlow2TempleRunEvents`)
+- The existing pair tables
+- The direction tables (e.g., `TempleRunToGameFlow` vs `GameFlowToTempleRun`)
 - Comment style used
 
 ### Step 4: Add the mapping
 
-Add the new entry to the correct direction dictionary. Include a comment explaining why this bridge exists.
+Add the new `(Source, Target)` pair to the correct direction table. Include a comment
+explaining why this crossing exists.
 
-**TempleRunGameFlowBridge has three dictionaries:**
-- `_autoTempleRun2GameFlowEvents` — TempleRun fires, GameFlow receives
-- `_autoGameFlow2TempleRunEvents` — GameFlow fires, TempleRun receives
-- `_autoTempleRun2UGSEvents` — TempleRun fires, UGS receives (passthrough, bypasses GameFlow)
+**TempleRunGameFlowBridge has two pair tables:**
+- `TempleRunToGameFlow` — TempleRun fires, GameFlow receives
+- `GameFlowToTempleRun` — GameFlow fires, TempleRun receives
 
-**UGSGameFlowBridge has two dictionaries:**
-- `_autoUGS2GameFlowEvents` — UGS fires, GameFlow receives
-- `_autoGameFlow2UGSEvents` — GameFlow fires, UGS receives
+**UGSGameFlowBridge has two pair tables (plus the hand-written status subscription):**
+- `GameFlowToGameService` — GameFlow fires, the contract receives
+- `GameServiceToGameFlow` — the contract fires, GameFlow receives
+
+**TempleRunUGSBridge has one:** `GameplayToGameService` (one-way by design).
+**GameServiceEventsUGSBridge has two:** `GameServiceToUGS` and `UGSToGameService`.
 
 ### Step 5: Check for circular paths
 
@@ -91,13 +107,16 @@ Event flow path:
 
 ## Example
 
-Adding `TempleRunEvents.CoinCollected -> GameFlowEvents.ScoreUpdateRequested`:
+The real coin mapping, `TempleRunEvents.CoinCollected -> GameFlowEvents.SessionCoinsChanged`:
 
 1. Verify both events exist in their enums
 2. Open `TempleRunGameFlowBridge.cs`
-3. Add to `_autoTempleRun2GameFlowEvents`:
+3. Add to `TempleRunToGameFlow`:
    ```csharp
-   // Coin collected in gameplay -> request score update in GameFlow
-   { TempleRunEvents.CoinCollected, GameFlowEvents.ScoreUpdateRequested },
+   // Coin count for UI outside the gameplay domain (running total, not a delta)
+   (TempleRunEvents.CoinCollected, GameFlowEvents.SessionCoinsChanged),
    ```
-4. Trace: CoinCollected -> (bridge) -> ScoreUpdateRequested -> (auto-chain?) -> ...
+4. Trace: CoinCollected -> (bridge) -> SessionCoinsChanged -> HUD subscribers. The same
+   source also crosses to the contract in `TempleRunUGSBridge`
+   (`CoinCollected -> GameServiceEvents.CurrencyTotalChanged`) — one event, two bridges,
+   both declarative.

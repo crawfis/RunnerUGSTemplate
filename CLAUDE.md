@@ -10,7 +10,8 @@ complete documentation, see [README.md](README.md).
 > [EndlessRunnerTemplate](https://github.com/crawfis/EndlessRunnerTemplate). Both repos now
 > resolve the same EventsPublisher package and use the same static `EventsFor<T>` buses, so
 > code and guidance port between them directly. The differences that remain are real ones:
-> this repo has a fourth domain (UGS) and six dispatch classes rather than four.
+> this repo has two more domains (GameService and UGS) and eight dispatch classes rather
+> than four.
 
 ## Quick Reference
 
@@ -236,13 +237,16 @@ When `GameScenesLoaded` fires, it automatically triggers `GameStartRequested` �
 
 Note: Countdown events (`CountdownStartRequested`, `CountdownTick`, etc.) are now in `TempleRunEvents` since they are gameplay-specific.
 
-> **Chains are declared as a flat list of pairs, not a dictionary.** All six dispatch classes
-> (three auto-flows, three bridges) share one implementation in
+> **Chains are declared as a flat list of pairs, not a dictionary.** All eight dispatch classes
+> (three auto-flows, five bridges) share one implementation in
 > `Runtime/Events/AutoEventFlowBase.cs` in the common package: `EventChainDispatcher<TSource, TDest>` does
 > subscribe-to-all, lookup and publish; `AutoEventFlowBase<TSource, TDest>` is the
 > MonoBehaviour wrapper for a single direction. A bridge covering several directions cannot
-> inherit repeatedly, so `TempleRunGameFlowBridge` (TempleRun↔GameFlow plus the TempleRun→UGS
-> passthrough) holds three dispatchers and `UGSGameFlowBridge` holds two.
+> inherit repeatedly, so `TempleRunGameFlowBridge` and `UGSGameFlowBridge` each hold two
+> dispatchers (one per direction). Where a translation must transform the payload — choosing
+> a `ServicesStatus` value per source event, unwrapping `CurrencyBalanceUpdate` — the bridge
+> subscribes by hand instead of adding a pair; see `UGSGameFlowBridge` and
+> `GameServiceEventsUGSBridge`.
 >
 > The pair list exists so **one event may declare several consequences** — a dictionary
 > allowed exactly one successor each. That ceiling never produced bugs directly; it produced
@@ -298,7 +302,7 @@ public enum GameFlowEvents
 
 ### Namespaces
 ```
-CrawfisSoftware.Events              - UserInitiatedEvents + EventsPublisherUserInitiated (+ package core)
+CrawfisSoftware.Events              - UserInitiatedEvents (+ the EventsPublisher core and the common package's dispatcher)
 CrawfisSoftware.GameFlow.Events     - GameFlowEvents, GameFlowAutoEventFlow, TempleRunGameFlowBridge
 CrawfisSoftware.GameFlow.UI         - GameFlow UI controllers
 CrawfisSoftware.GameFlow.*          - Per-area: .GameConfig (GameConstants), .SceneManagement, .GameControl
@@ -349,16 +353,16 @@ internal class MyController : MonoBehaviour
 | **GameFlow Domain** | |
 | Event Enums | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs` |
-| Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow + the TempleRun → UGS passthrough) |
-| Game State / Config | `Assets/GameFlow/Scripts/Config/GameState.cs`, `GameConstants.cs`, `PlayerPrefKeys.cs` |
+| Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow; the old TempleRun → UGS passthrough now lives in `Assets/UGSGlue/TempleRunUGSBridge.cs`) |
+| Game State / Config | `Assets/GameFlow/Scripts/Config/GameState.cs`, `GameConstants.cs` |
 | Level System | `Assets/GameFlow/Scripts/Config/LevelConfig.cs`, `LevelConfigApplier.cs`, `LevelRegistry.cs`, `LevelProgressManager.cs`, `LevelProgressData.cs`; assets in `Assets/TempleRun/Scriptables/Levels/` |
-| UI Controllers | `Assets/GameFlow/Scripts/UI/GameFlowUIPanelController.cs` (loading / game-over overlays), `MainMenuController.cs`, `MainMenuPanelController.cs`, `LevelSelectorController.cs`, `LevelSelectorPanelController.cs` |
-| Game Control | `Assets/GameFlow/Scripts/GameControl/QuitController.cs`, `UnloadNonActiveScenes.cs`, `LoadSceneAdditively.cs` |
-| Scene Management | `Assets/GameFlow/Scripts/SceneManagement/DynamicLevelSceneLoader.cs`, `LoadSceneAfterGameControlEvent.cs`, `FireEventAfterSceneLoads.cs`, `FireEventWhenSceneCloses.cs`, `CloseSceneOnEvent.cs` |
+| UI Controllers | `Assets/GameFlow/Scripts/UI/GameFlowUIPanelController.cs` (loading / game-over overlays), `MainMenuController.cs`, `MainMenuPanelController.cs`, `LevelSelectorController.cs`, `LevelSelectorPanelController.cs`, `CoinBalanceHUDController.cs` |
+| Game Control | `Assets/GameFlow/Scripts/GameControl/QuitController.cs`, `UnloadNonActiveScenes.cs` (`LoadSceneAdditively` comes from the common package) |
+| Scene Management | `Assets/GameFlow/Scripts/SceneManagement/DynamicLevelSceneLoader.cs`, `FireEventAfterSceneLoads.cs` (`LoadSceneAfterGameControlEvent`, `FireEventWhenSceneCloses`, `CloseSceneOnEvent` come from the common package) |
 | **TempleRun Domain** | |
 | Event Enums | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
 | Auto-Event Flow | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Input2TempleRunAutoEventBridge.cs` (input → gameplay) |
-| Config | `Assets/TempleRun/Scripts/Config/Blackboard.cs`, `TempleRunGameConfig.cs`, `GameDifficultyManager.cs`, `DifficultySettings.cs`, `SetGameDifficulty.cs`, `LoadDefaultGameConfigs.cs`, `SpawnPrefabRegistry.cs`, `TempleRunConstants.cs`, per-mechanic configs (`CoinConfig.cs`, `DashConfig.cs`, `JumpConfig.cs`, `LaneConfig.cs`, `SlideConfig.cs`, `PowerUpDefinition.cs`, `PowerUpType.cs`) |
+| Config | `Assets/TempleRun/Scripts/Config/Blackboard.cs`, `TempleRunGameConfig.cs`, `GameDifficultyManager.cs`, `DifficultySettings.cs`, `SetGameDifficulty.cs`, `LoadDefaultGameConfigs.cs`, `SpawnPrefabRegistry.cs`, `TempleRunConstants.cs`, `PlayerPrefKeys.cs`, per-mechanic configs (`CoinConfig.cs`, `DashConfig.cs`, `JumpConfig.cs`, `LaneConfig.cs`, `SlideConfig.cs`, `PowerUpDefinition.cs`, `PowerUpType.cs`) |
 | Player Controllers | `Assets/TempleRun/Scripts/Player/TurnController.cs`, `JumpController.cs`, `SlideController.cs`, `DashController.cs`, `LaneChangeController.cs`, `PlayerLifeController.cs`, `PowerUpBuffController.cs`, `CountdownController.cs`, `DistanceController.cs`, `MoveCharacterByDistance.cs`, `PauseController.cs`, `PlayerPauseController.cs`, `AIController.cs` |
 | Player Support | collision detectors (`ObstacleCollisionDetector.cs`, `CollectableCollisionDetector.cs`, `TurnCollisionDetector.cs`), `CoinCollectionController.cs`, motion shaping (`JumpArcController.cs`, `SlideArcController.cs`, `DashSpeedController.cs`, `LaneOffsetController.cs`), failure/teleport (`PlayerFailedController.cs`, `PlayerFailureAutoTurnController.cs`, `TeleportController.cs`, `CharacterTeleporter.cs`); `Assets/TempleRun/Scripts/GameTime.cs` |
 | Power-Up Effects | `Assets/TempleRun/Scripts/PowerUps/IPowerUpEffect.cs`, `PowerUpEffectBase.cs`, `SpeedBoostEffect.cs`, `ScoreMultiplierEffect.cs`, `CoinMagnetEffect.cs`, `CoinDoublerEffect.cs`, `ShieldEffect.cs` |
@@ -376,7 +380,7 @@ internal class MyController : MonoBehaviour
 | Event Enum | `Runtime/Events/UGS_EventsEnum.cs` |
 | Auto-Event Flow | `Runtime/Events/UGSAutoEventFlow.cs` |
 | Contract Bridge | `Runtime/Events/GameServiceEventsUGSBridge.cs` — the only place `GameServiceEvents` and `UGS_EventsEnum` are named together |
-| Initialization | `Runtime/Initialization/` — `PlayerAuthenticationManager`, `UGS_State`, `LocalStorageSystem`, `NetworkConnectivityHandler`, `UnityEventsToEventsPublisher` |
+| Initialization | `Runtime/Initialization/` — `PlayerAuthenticationManager`, `UGS_State`, `NetworkConnectivityHandler`, `UnityEventsToEventsPublisher`; also `Runtime/Config/UGSConstants.cs` and `Runtime/UI/` (theme, panel settings) |
 | Authentication | `Runtime/Authentication/PlayerSignInController.cs`, `PlayerSignIn.cs` (the modal, named in UXML by its fully qualified type name) |
 | Remote Config | `Runtime/RemoteConfig/` — `RemoteConfigManager` (the only fetch; it also publishes the `difficulty_settings` table), `App/UserAttributes`, `RemoteConfigConstants`. The typed views and `DifficultyObserver` were removed in ugs 0.5.0 — nothing constructed any of them |
 | Leaderboards | `Runtime/Leaderboard/` — `LeaderboardQuery`, `LeaderboardPanel`, `LeaderboardPlayerController` |
@@ -392,7 +396,7 @@ internal class MyController : MonoBehaviour
 | Shared Config | `Runtime/Config/DifficultyConfig.cs` (namespace `CrawfisSoftware.Config` — the LIVE difficulty config) |
 | Scene Management | `Runtime/SceneManagement/` — `LoadSceneAdditively`, `LoadSceneAfterGameControlEvent`, `CloseSceneOnEvent`, `FireEventWhenSceneCloses` |
 | Test Utilities | `Runtime/Test/Test_AutoFireEvent.cs`, `Test_AutoFireEventOnStart.cs` |
-| Utilities | `Runtime/Utility/` — `Logger`, `DebugEventFileLogger`, `DebugLog`, `TimedEvent`, `TextureExtensions`; `Runtime/Events/EventHistory.cs` |
+| Utilities | `Runtime/Utility/` — `Logger`, `DebugEventFileLogger`, `TimedEvent`, `TextureExtensions`; `Runtime/Events/EventHistory.cs` |
 | **Contract** (the `com.crawfissoftware.contracts` package) | |
 | Contract | `Runtime/GameServiceEvents.cs`, `Runtime/ServicesStatus.cs` |
 | Vendored | `Assets/ThirdParty/CrawfisSoftware/` (Random providers used by `Blackboard`, editor tools incl. Play Scene 0 Always); `Assets/CloudCode/GeneratedModuleBindings/` (generated Cloud Code bindings — regenerated by the tooling, no live consumer in the game) |
@@ -417,9 +421,10 @@ internal class MyController : MonoBehaviour
 - Some events are intentionally NOT auto-chained (documented in comments)
 
 ### Singletons
-- `Blackboard.Instance` - Global game state
-- `EventsPublisher*.Instance` - Event buses
-- Only access after `Awake()` has run (use `[DefaultExecutionOrder(-10000)]` on publishers)
+- `Blackboard.Instance` - Global game state; `GameTime.Instance` - pausable clock
+- The event buses are NOT singletons any more — `EventsFor<T>` is static, needs no scene
+  object, and is safe to use from `Awake()`
+- Only access `Blackboard.Instance` after its `Awake()` has run
 
 ### Design Notes
 - Turn distance is a difficulty setting (`DifficultyConfig.SafePreTurnDistance`, consumed
@@ -471,12 +476,14 @@ Or select the `Test_GameOnly_Windows` build profile, which uses that bootstrap.
 
 ### Adding a New UGS Feature
 1. **`/list-events UGS`** — Review existing UGS events
-2. **`/add-event`** — Add events to `UGS_EventsEnum` for the new service callbacks
-3. **`/add-bridge-mapping`** — Bridge UGS events to GameFlow (via `UGSGameFlowBridge`)
+2. **`/add-event`** — Add events to `UGS_EventsEnum` for the new service callbacks (in the
+   EventDrivenUGS repo — the ugs package is read-only here)
+3. **`/add-bridge-mapping`** — If the game must react, add a `GameServiceEvents` crossing and
+   map it on both sides (`GameServiceEventsUGSBridge` in the package, `Assets/UGSGlue/` here)
 4. **`/add-auto-chain`** — Wire UGS auto-progressions if needed
 5. Create `UGS_Boot_N_[Feature]` scene
 6. Add scene to Build Profile scene list
-7. Create event adapters bridging UGS SDK callbacks to `EventsPublisherUGS`
+7. Create event adapters publishing the UGS SDK callbacks on `UGSBus`
 8. Wire loading in `0_BootStrap` via `LoadSceneAdditively` component
 9. **`/audit-events`** — Verify all subscriptions have matching unsubscriptions
 
@@ -521,13 +528,13 @@ Assets/
 ├── GameFlow/                         # Application lifecycle domain
 │   ├── Scripts/
 │   │   ├── Events/                   # GameFlowEvents, GameFlowAutoEventFlow
-│   │   ├── TempleRunSpecific/        # TempleRunGameFlowBridge (TempleRun <-> GameFlow + TempleRun -> UGS passthrough)
-│   │   ├── Config/                   # GameState, GameConstants, PlayerPrefKeys, LevelConfig(+Applier), LevelRegistry,
+│   │   ├── TempleRunSpecific/        # TempleRunGameFlowBridge (TempleRun <-> GameFlow)
+│   │   ├── Config/                   # GameState, GameConstants, LevelConfig(+Applier), LevelRegistry,
 │   │   │                             #   LevelProgressManager/Data (BlackboardGameFlow is dead code)
-│   │   ├── GameControl/              # QuitController, UnloadNonActiveScenes, LoadSceneAdditively
+│   │   ├── GameControl/              # QuitController, UnloadNonActiveScenes
 │   │   ├── UI/                       # GameFlowUIPanelController, MainMenu(+Panel)Controller, LevelSelector(+Panel)Controller
-│   │   └── SceneManagement/          # DynamicLevelSceneLoader, LoadSceneAfterGameControlEvent, FireEventAfterSceneLoads,
-│   │                                 #   FireEventWhenSceneCloses, CloseSceneOnEvent
+│   │   └── SceneManagement/          # DynamicLevelSceneLoader, FireEventAfterSceneLoads (the rest of the
+│   │                                 #   scene plumbing comes from the common package)
 │   ├── Scenes/Boot/                  # 0_BootStrap_Game_Only, Game_Boot_0_Initialization, Game_Boot_0_Test_Initialization,
 │   │                                 #   Game_Boot_1_UI, Game_Boot_2_Play
 │   ├── Audio/                        # UI sound effects
@@ -535,9 +542,9 @@ Assets/
 │
 ├── TempleRun/                        # Gameplay domain
 │   ├── Scripts/
-│   │   ├── Events/                   # TempleRunEvents, UserInitiatedEvents, both publishers, TempleRunAutoEventFlow,
+│   │   ├── Events/                   # TempleRunEvents, UserInitiatedEvents, TempleRunAutoEventFlow,
 │   │   │                             #   Input2TempleRunAutoEventBridge
-│   │   ├── Config/                   # Blackboard, TempleRunGameConfig, GameDifficultyManager, per-mechanic configs, SpawnPrefabRegistry
+│   │   ├── Config/                   # Blackboard, TempleRunGameConfig, GameDifficultyManager, PlayerPrefKeys, per-mechanic configs, SpawnPrefabRegistry
 │   │   ├── Player/                   # Turn/Jump/Slide/Dash/Lane/Life controllers, collision detectors, countdown, distance,
 │   │   │                             #   pause, teleport, AI
 │   │   ├── PowerUps/                 # IPowerUpEffect strategy: PowerUpEffectBase + five concrete effects
