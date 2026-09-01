@@ -1,17 +1,16 @@
 using CrawfisSoftware.Events;
 
 using UnityEngine;
-
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
-
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
-    /// Maps input events to game events. Will check if a turn request is the proper direction and within
-    ///    the turn distance. If so, it will fire a turn successful event.
-    ///    Dependencies: Blackboard, DistanceTracker, EventsPublisherTempleRun
-    ///    Subscribes: LeftTurnRequested and RightTurnRequested. If it is a valid turn publishes corresponding turn events.
+    /// Checks whether a turn request is the proper direction and within the turn distance. If so,
+    /// it fires a turn successful event.
+    ///    Dependencies: Blackboard, DistanceTracker, EventsFor<TempleRunEvents>
+    ///    Subscribes: TempleRunEvents.TurnLeftRequested, TurnRightRequested (from bridge
+    ///                translating UserInitiated). If it is a valid turn publishes corresponding turn events.
     ///    Subscribes: ActiveTrackChanged - adjusts the next valid turn distance.
     ///    Publishes: TurnLeftStarting, TurnLeftCompleted, TurnRightStarting, TurnRightCompleted
     ///    Publishes: SegmentRequested (data: Direction) when direction is committed at an Either junction
@@ -57,11 +56,19 @@ namespace CrawfisSoftware.TempleRun
             OnTurnRequested(this, null, chosenDirection, startingEvent, completedEvent);
         }
 
+        private static readonly EventId<TrackSegmentInfo> TrackChanging =
+            TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.ActiveTrackChanging);
+        private static readonly EventId<Direction> SegmentRequested =
+            TempleRunBus.Id<Direction>(TempleRunEvents.SegmentRequested);
+
         private void Awake()
         {
+            // Subscribe to TempleRun domain events, not UserInitiated.
+            // This allows turns to be triggered from any source: player input, AI, replay, network.
+            // The bridge translates UserInitiated.UserLeftTurnRequested -> TempleRunEvents.TurnLeftRequested
             TempleRunBus.Subscribe(TempleRunEvents.TurnLeftRequested, OnLeftTurnRequested);
             TempleRunBus.Subscribe(TempleRunEvents.TurnRightRequested, OnRightTurnRequested);
-            TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            TrackChanging.Subscribe(OnTrackChanging);
             _safeTurnDistance = Blackboard.Instance.GameConfig.SafePreTurnDistance;
         }
 
@@ -72,7 +79,21 @@ namespace CrawfisSoftware.TempleRun
             if (distance > _turnAvailableDistance)
             {
                 TempleRunBus.Publish(startingEvent,  this, distance);
-                //TempleRunBus.Publish(TempleRunEvents.SegmentRequested, this, chosenDirection);
+
+                // ONLY at an Either junction. A Left or Right segment has one exit, already built
+                // when the segment was created, so there is nothing to commit - and publishing this
+                // for an ordinary turn is destructive: TrackManager would clear
+                // _awaitingEitherDirection and generate straight past a junction still waiting for
+                // its direction, while PathProvider would resolve that junction's exit using the
+                // direction of an unrelated turn somewhere else on the track.
+                //
+                // Position between starting and completed is load-bearing: PathProvider resolves the
+                // junction's exit geometry from this, and SegmentTransitionController consumes that
+                // geometry when it sees the completed event. Publishing returns only once the event
+                // has been delivered, so the geometry is in place by the time completed is published.
+                if (_nextTrackDirection == Direction.Either)
+                    SegmentRequested.Publish(this, chosenDirection);
+
                 TempleRunBus.Publish(completedEvent, this, distance);
             }
         }
@@ -95,9 +116,8 @@ namespace CrawfisSoftware.TempleRun
             }
         }
 
-        private void OnTrackChanging(string eventName, object sender, object data)
+        private void OnTrackChanging(string eventName, object sender, TrackSegmentInfo trackSegment)
         {
-            var trackSegment = (TrackSegmentInfo)data;
             _nextTrackDirection  = trackSegment.Direction;
             // Anchor to this segment's start, not to the running sum of turn points. Summing
             // TurnPointDistance loses (Length - TurnPointDistance) per segment, which walked the
@@ -113,7 +133,7 @@ namespace CrawfisSoftware.TempleRun
         {
             TempleRunBus.Unsubscribe(TempleRunEvents.TurnLeftRequested, OnLeftTurnRequested);
             TempleRunBus.Unsubscribe(TempleRunEvents.TurnRightRequested, OnRightTurnRequested);
-            TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+            TrackChanging.Unsubscribe(OnTrackChanging);
         }
     }
 }

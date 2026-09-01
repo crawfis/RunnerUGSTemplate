@@ -1,8 +1,7 @@
-using CrawfisSoftware.Config;
+﻿using CrawfisSoftware.Config;
 
 using System;
 using System.Collections.Generic;
-
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun.GameConfig

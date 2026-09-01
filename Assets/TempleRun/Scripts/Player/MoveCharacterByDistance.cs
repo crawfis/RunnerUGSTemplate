@@ -1,12 +1,11 @@
-using UnityEngine;
-
+﻿using UnityEngine;
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Moves the player along the current spline with lateral lane offset, jump height, and slide height.
-    ///    Dependencies: Blackboard, DistanceTracker, LaneChangeController, EventsPublisherTempleRun
+    ///    Dependencies: Blackboard, DistanceTracker, LaneChangeController, EventsFor<TempleRunEvents>
     ///    Subscribes: CurrentSplineChanging — re-anchors at the START of each new sub-spline
     /// </summary>
     /// <remarks>

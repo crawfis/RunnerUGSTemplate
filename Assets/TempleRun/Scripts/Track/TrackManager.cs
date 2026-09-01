@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using UnityEngine;
 
+using CrawfisSoftware.Events;
 using CrawfisSoftware.TempleRun.GameConfig;
 using CrawfisSoftware.TempleRun.Track;
-
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
@@ -13,8 +13,9 @@ namespace CrawfisSoftware.TempleRun
     /// <summary>
     /// Provides new track distance for each turn. It publishes a new track segment
     ///       when needed (either to create visuals or to determine the currently active track).
-    ///    Dependencies: EventsPublisherTempleRun, Blackboard.GameConfig, Blackboard.MasterRandom,
-    ///                  Blackboard.SelectedLevel (set by level selection), _trackLevels registry
+    ///    Dependencies: EventsFor<TempleRunEvents>, Blackboard.GameConfig, Blackboard.MasterRandom,
+    ///                  TempleRunLevelApplied (Sticky; read at init via TryGetLast), _trackLevels registry
+    ///    Subscribes to TempleRunConfigApplied - initializes as soon as the level's config lands
     ///    Subscribes to SegmentExited for all segment types (single advancement path)
     ///    Subscribes to SegmentRequested to resume lookahead after an Either (T-junction) segment
     ///    Publishes: TrackSegmentCreated. Useful for creating prefabs. Several of these will be created at the start. Data is a TrackSegmentInfo
@@ -46,9 +47,21 @@ namespace CrawfisSoftware.TempleRun
         private int _segmentIndex;
         private bool _isInitialized = false;
 
+        private static readonly EventId<int> LevelApplied =
+            TempleRunBus.Id<int>(TempleRunEvents.TempleRunLevelApplied);
+        private static readonly EventId<TrackSegmentInfo> TrackSegmentCreated =
+            TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.TrackSegmentCreated);
+        private static readonly EventId<TrackSegmentInfo> ActiveTrackChanging =
+            TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.ActiveTrackChanging);
+        private static readonly EventId<TrackSegmentInfo> ActiveTrackChanged =
+            TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.ActiveTrackChanged);
+
         // Set when an Either (T-junction) segment is at the tail of the lookahead queue.
         // No further segments are generated until SegmentRequested fires with the chosen direction.
         private bool _awaitingEitherDirection = false;
+
+        // Set when a junction direction is committed; acted on in Update, out of the dispatch.
+        private bool _refillRequested = false;
 
 
         protected virtual void Awake()
@@ -86,7 +99,7 @@ namespace CrawfisSoftware.TempleRun
 
         protected virtual void OnGameStarting(string eventName, object sender, object data)
         {
-            if(!_isInitialized)
+            if (!_isInitialized)
             {
                 Initialize();
             }
@@ -98,7 +111,7 @@ namespace CrawfisSoftware.TempleRun
             _ = _trackSegments.Dequeue();
             if (!_awaitingEitherDirection)
                 AddTrackSegment();
-            TempleRunBus.Publish(TempleRunEvents.ActiveTrackChanging, this, _trackSegments.Peek());
+            ActiveTrackChanging.Publish(this, _trackSegments.Peek());
         }
 
         protected virtual void Initialize(float startDistance, float minDistance, float maxDistance, System.Random random)
@@ -109,12 +122,13 @@ namespace CrawfisSoftware.TempleRun
             _random = random;
             _awaitingEitherDirection = false;
 
-            // Resolve the selected level's track. The level number arrives via Blackboard (it is
-            // set, bridged from GameFlow, before this scene and TrackManager exist);
-            // TrackLibraryLoader reads the authoring SOs and builds the runtime library. A null
-            // result (no level selected) leaves the procedural fallback in CreateTrackSegment
-            // in charge.
-            _segmentLibrary = TrackLibraryLoader.Load(_trackLevels, Blackboard.Instance.SelectedLevel);
+            // Resolve the selected level's track. TempleRunLevelApplied is published (bridged from
+            // GameFlow) before this scene and TrackManager exist, so it is Sticky and read here
+            // rather than mirrored into a field. Never published means no level was selected, which
+            // is level 0. TrackLibraryLoader reads the authoring SOs and builds the runtime library;
+            // a null result leaves the procedural fallback in CreateTrackSegment in charge.
+            int selectedLevel = LevelApplied.TryGetLast(out _, out int level) ? level : 0;
+            _segmentLibrary = TrackLibraryLoader.Load(_trackLevels, selectedLevel);
             TempleRunBus.Subscribe(TempleRunEvents.SegmentExited, OnSegmentCompleted);
         }
 
@@ -124,13 +138,13 @@ namespace CrawfisSoftware.TempleRun
             _awaitingEitherDirection = false;
             var newTrackSegment = CreateTrackSegment(isStartSegment: true);
             _trackSegments.Enqueue(newTrackSegment);
-            TempleRunBus.Publish(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
+            TrackSegmentCreated.Publish(this, newTrackSegment);
             for (int i = 1; i < _numberOfLookAheadTracks; i++)
             {
                 AddTrackSegment();
                 if (_awaitingEitherDirection) break;
             }
-            TempleRunBus.Publish(TempleRunEvents.ActiveTrackChanging, this, _trackSegments.Peek());
+            ActiveTrackChanging.Publish(this, _trackSegments.Peek());
         }
 
         /// <summary>
@@ -139,7 +153,7 @@ namespace CrawfisSoftware.TempleRun
         /// </summary>
         protected virtual void OnSegmentCompleted(string eventName, object sender, object data)
         {
-            TempleRunBus.Publish(TempleRunEvents.ActiveTrackChanged, this, _trackSegments.Peek());
+            ActiveTrackChanged.Publish(this, _trackSegments.Peek());
             AdvanceToNextSegment();
         }
 
@@ -147,9 +161,11 @@ namespace CrawfisSoftware.TempleRun
         {
             var newTrackSegment = CreateTrackSegment(isStartSegment: false);
             _trackSegments.Enqueue(newTrackSegment);
-            TempleRunBus.Publish(TempleRunEvents.TrackSegmentCreated, this, newTrackSegment);
+            TrackSegmentCreated.Publish(this, newTrackSegment);
             if (newTrackSegment.Direction == Direction.Either)
+            {
                 _awaitingEitherDirection = true;
+            }
         }
 
         /// <summary>
@@ -158,8 +174,27 @@ namespace CrawfisSoftware.TempleRun
         /// PathProvider (execution order -10) processes this event first, updating _anchorPoint
         /// before the TrackSegmentCreated events fired here reach PathProvider.
         /// </summary>
+        // The junction's direction is committed, so generation can resume - but NOT from inside this
+        // dispatch. PathProvider handles the same event before us and publishes while it works;
+        // publishing re-enters the shared FIFO drain, which resumes with this handler still queued.
+        // Generating here therefore ran mid-way through PathProvider building the junction's exit,
+        // and the next segment's SegmentGeometryReady overtook the junction's own - closing
+        // SpawnerBase's pending batch onto the wrong segment, so the junction's exit tiles were
+        // attributed to the segment after it and destroyed on that segment's schedule.
+        // Ordering cannot fix this: TrackManager is in TempleRunTrackPCG and the spawners are in
+        // other additively-loaded scenes, where DefaultExecutionOrder does not apply. Deferring one
+        // frame takes us out of the dispatch entirely, and costs nothing - the player is at the
+        // junction, many segments from the end of the lookahead.
         private void OnSegmentRequested(string eventName, object sender, object data)
         {
+            _refillRequested = true;
+        }
+
+        private void Update()
+        {
+            if (!_refillRequested) return;
+            _refillRequested = false;
+
             _awaitingEitherDirection = false;
             while (!_awaitingEitherDirection && _trackSegments.Count < _numberOfLookAheadTracks)
                 AddTrackSegment();
