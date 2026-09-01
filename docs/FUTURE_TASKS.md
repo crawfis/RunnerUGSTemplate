@@ -51,7 +51,7 @@ something new**.
 |---------|:--:|------------------------|
 | Authentication | ✓ | **Working** — anonymous sign-in, session resume, sign-in modal (`PlayerSignIn`) |
 | Leaderboards | ✓ | **Working** — score submit on session end, panel UI |
-| Achievements (Cloud Save / Cloud Code) | ✓ | **Working** — catalog, two swappable backends, toasts, claim flow |
+| Achievements (Cloud Save / Cloud Code) | ✓ | **Working** — catalog, two swappable backends, toasts, claim flow; the coin-based granter sits in no scene yet (T2 starts there) |
 | Remote Config | ✓ | **Working** — one fetch (`RemoteConfigManager`), `difficulty_settings` table applied live |
 | Economy | ✓ | **Working, minimal** — one currency (`COIN`), single-currency manager, two backends |
 | Cloud Code | ✓ | **Working** — .NET module, 4 services / 7 endpoints (AdRewards, HandleProfileChange, PlayerData, PlayerEconomy) |
@@ -350,8 +350,31 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
    count does not cross today, and the contract should not grow one member per statistic.
    Design the crossing once — a generic stat event, or bank stats through the
    `PlayerData` endpoint and let the service read them — and write down why.
-   *Read first:* `Runtime/Achievements/` model + `DistanceBasedAchievements.cs` (ugs
-   package); `Editor/Achievements/AchievementDefinitionCatalog.cs` and its exporter — the
+   *Start here:* the coin half is dormant. `CoinBasedAchievements` ships in the ugs package
+   but sits in no scene — `DistanceBasedAchievements` was added to
+   `Assets/UGS/Scenes/UGS/AchievementNotifications.unity` and its coin twin never was — so no
+   coin achievement can unlock today. Wiring it is the natural first milestone, and it needs
+   no package or contract change: add the component beside `DistanceBasedAchievements`, fill
+   `_coinThresholds` (ascending) and `_achievementIds` (one id per threshold), and give every
+   id a definition in the `achievements_settings` Remote Config key. The nine ids the
+   distance list already uses (`first_achievement` … `ninth_achievement`) are all spoken
+   for, so author new ones — and author them as data in the repo, the way `COIN.ecc` does it
+   for currency: create an Achievement Definitions catalog asset (right-click Create >
+   CrawfisSoftware > UGS > Achievement Definitions, in an `Editor/` folder), add entries
+   whose Id is what `_achievementIds` quotes, export the `.rc`, and deploy it — per
+   environment, like everything Remote Config. Two behaviours to understand before judging
+   the result broken: thresholds compare against the banked *lifetime* balance, so a run's
+   coins only count once `SessionEnding` banks them and the toast lands at the end of a run,
+   never mid-run; and the first balance of a session primes the component silently instead
+   of unlocking, so a returning player is not re-congratulated at every launch — the remarks
+   in `CoinBasedAchievements.cs` walk through both choices; read them before "fixing"
+   either. One placement constraint: `CurrencyBalanceChanged` is not a retained event, so
+   the component must already be loaded when the launch balance read returns. Anywhere in
+   the boot scene set qualifies — the read cannot start until sign-in completes — which the
+   notifications scene, loaded by `UGS_Boot_3_Achievements`, is.
+   *Read first:* `Runtime/Achievements/` model, `DistanceBasedAchievements.cs`, and the
+   remarks in `CoinBasedAchievements.cs` (ugs package);
+   `Editor/Achievements/AchievementDefinitionCatalog.cs` and its exporter — the
    catalog is data, so new achievements are entries, not classes.
    *Done when:* a new player can read the achievement list top to bottom and know what
    skilled play looks like.
