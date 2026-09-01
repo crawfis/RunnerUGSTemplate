@@ -477,7 +477,8 @@ retained event is delivered on subscribe; a transient one would reach neither of
 - No direct method calls or singleton access across domains
 
 ### 2. **Shared Configuration**
-- `DifficultyConfig` lives in `Assets/_Common/Config/` (neutral domain)
+- `DifficultyConfig` lives in `Runtime/Config/` in the `com.crawfissoftware.common` package,
+  namespace `CrawfisSoftware.Config` (neutral domain, owned by no game or service)
 - All domains can reference this shared type without creating coupling
 - Before remediation: UGS imported from TempleRun (❌ coupled)
 - After remediation: UGS imports from _Common (✅ decoupled)
