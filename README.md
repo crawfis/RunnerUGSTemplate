@@ -39,8 +39,8 @@ The gameplay itself (a Temple Run-style endless runner) is intentionally simple.
 
 **What the template provides:**
 
-- **Event buses** — four typed publishers (`GameFlow`, `TempleRun`, `UserInitiated`, `UGS`) that any system can publish to or subscribe from without holding a reference to anything else
-- **Bridge classes** — explicit cross-domain translators (`TempleRunGameFlowBridge`, `UGSGameFlowBridge`) that are the *only* permitted places for one domain to react to another domain's events
+- **Event buses** — five static typed buses (`GameFlow`, `TempleRun`, `UserInitiated`, `GameService`, `UGS`), each an `EventsFor<TEnum>` aliased per file, that any system can publish to or subscribe from without holding a reference to anything else
+- **Bridge classes** — explicit cross-domain translators (`Input2TempleRunAutoEventBridge`, `TempleRunGameFlowBridge`, and — around the `GameServiceEvents` contract — `TempleRunUGSBridge`, `UGSGameFlowBridge`, `GameServiceEventsUGSBridge`) that are the *only* permitted places for one domain to react to another domain's events
 - **Auto-event chains** — dictionary-driven progressions (`Requested → Starting → Started`) that fire automatically, eliminating boilerplate sequencing code while allowing for new hooks to be injected at key times / events.
 - **Additive scene isolation** — each gameplay concern (obstacles, collectables, visuals, audio, HUD/countdown, track) lives in its own scene and communicates exclusively through events (preferred) or a shared Blackboard
 - **Domain isolation enforcement** — rules and skills that prevent accidental coupling from creeping back in
@@ -52,18 +52,19 @@ Student teams can replace the Temple Run gameplay with their own game, add new U
 
 ## Codebase Statistics
 
-> Assembly-CSharp only — excludes `ThirdParty/`, `CloudCode/`, and generated bindings. It also
-> excludes the UGS domain entirely, which now ships as a package rather than as project source.
+> In-repo domain code only (`Assets/GameFlow`, `Assets/TempleRun`, `Assets/UGSGlue`) — excludes
+> `ThirdParty/`, `CloudCode/`, generated bindings, and the UGS + Common + Contracts code, which
+> now ships as UPM packages rather than as project source.
 
 | Metric | Count |
 |--------|-------|
-| C# source files | 148 |
-| Declared types (class / interface / enum / struct) | 139 |
-| MonoBehaviours | 90 |
-| ScriptableObjects | 10 |
-| Namespaces | 29 |
-| Unity scenes | 31 |
-| Defined events (the 3 in-repo domains: GameFlow, TempleRun, UserInitiated) | 206 |
+| C# source files | 132 |
+| Declared types (class / interface / enum / struct) | ~174 |
+| Files defining MonoBehaviours | ~72 |
+| Files defining ScriptableObjects | 14 |
+| Namespaces | 21 |
+| Unity scenes | 28 |
+| Defined events (the 3 in-repo domains: GameFlow, TempleRun, UserInitiated) | 206 (76 + 121 + 9) |
 
 The other two domains — `GameServiceEvents` and `UGS_EventsEnum` — are declared in packages and are
 not counted above. **`CrawfisSoftware → Events → List Domains` is the authoritative count**: it
@@ -72,32 +73,37 @@ a hand-taken snapshot.
 
 ### Types by Domain
 
-| Domain | Files | Types | Primary responsibility |
-|--------|-------|-------|------------------------|
-| `TempleRun` | 76 | 78 | Gameplay mechanics, player, track, input, audio |
-| `UGS` | 36 | 33 | Authentication, leaderboards, achievements, remote config |
-| `GameFlow` | 26 | 19 | Boot, menus, level selection, scene management, UI panels |
-| `_Common` | 10 | 9 | Shared base classes, utilities, test infrastructure |
+| Domain | Files | Primary responsibility |
+|--------|-------|------------------------|
+| `TempleRun` | 107 | Gameplay mechanics, player, track, power-ups, input, audio, editor tools |
+| `GameFlow` | 22 | Boot, menus, level selection, scene management, UI panels |
+| `UGSGlue` | 3 | This game's half of the `GameServiceEvents` contract |
+
+The UGS domain (~40 files) and the shared Common/Contracts code now live in the
+[EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) packages and are not counted here.
 
 ### Namespaces
 
+In this repo:
+
 ```
-CrawfisSoftware.Events                  CrawfisSoftware.TempleRun
-CrawfisSoftware.GameFlow                CrawfisSoftware.TempleRun.Audio
-CrawfisSoftware.GameFlow.Config         CrawfisSoftware.TempleRun.Events
-CrawfisSoftware.GameFlow.Events         CrawfisSoftware.TempleRun.GameConfig
-CrawfisSoftware.GameFlow.GameConfig     CrawfisSoftware.TempleRun.Input
-CrawfisSoftware.GameFlow.GameControl    CrawfisSoftware.TempleRun.UI
-CrawfisSoftware.GameFlow.SceneManagement
-CrawfisSoftware.GameFlow.UI             CrawfisSoftware.UGS
-                                        CrawfisSoftware.UGS.Achievements
-CrawfisSoftware.Test                    CrawfisSoftware.UGS.Authentication
-CrawfisSoftware.Utility                 CrawfisSoftware.UGS.Events
-CrawfisSoftware.Utility.Testing         CrawfisSoftware.UGS.GameConfig
-                                        CrawfisSoftware.UGS.Leaderboard
-CrawfisSoftware.PlayerDataManagement    CrawfisSoftware.UGS.Leaderboard.Test
-CrawfisSoftware.PlayerEconomyManagement CrawfisSoftware.UGS.RemoteConfig
+CrawfisSoftware.Events (UserInitiatedEvents)   CrawfisSoftware.TempleRun
+CrawfisSoftware.GameFlow                       CrawfisSoftware.TempleRun.Audio
+CrawfisSoftware.GameFlow.Config                CrawfisSoftware.TempleRun.Editor
+CrawfisSoftware.GameFlow.Events                CrawfisSoftware.TempleRun.Events
+CrawfisSoftware.GameFlow.GameConfig            CrawfisSoftware.TempleRun.GameConfig
+CrawfisSoftware.GameFlow.GameControl           CrawfisSoftware.TempleRun.Input
+CrawfisSoftware.GameFlow.SceneManagement       CrawfisSoftware.TempleRun.PowerUps
+CrawfisSoftware.GameFlow.UI                    CrawfisSoftware.TempleRun.Track
+                                               CrawfisSoftware.TempleRun.Track.Geometry
+CrawfisSoftware.UGS.Events (UGSGlue bridges)   CrawfisSoftware.TempleRun.UI
+CrawfisSoftware.UGS.Leaderboard.Test (UGSGlue) CrawfisSoftware.Utility.Testing
 ```
+
+From the packages: `CrawfisSoftware.Contracts` (contracts); `CrawfisSoftware.Events`,
+`.Config`, `.SceneManagement`, `.Test`, `.Utility` (common); `CrawfisSoftware.UGS` and its
+`.Events`, `.Authentication`, `.RemoteConfig`, `.Leaderboard`, `.Achievements`, `.Economy`,
+`.UI`, `.GameConfig` children (ugs).
 
 ---
 
@@ -142,10 +148,11 @@ Each generation adds a new layer of **glue** — more systems, more boundaries t
 │   - Remote Config, Cloud Save, Cloud Code ready                         │
 │   - Three build profiles for isolated layer testing                     │
 │                                                                         │
-│   GLUE: UGSGameFlowBridge translates GameFlowEvents (GameEnding) into   │
-│         UGS_EventsEnum (ScoreUpdating) so UGS never touches gameplay;   │
-│         UGSAutoEventFlow chains initialization → auth → config →        │
-│         leaderboards → achievements without any system calling another  │
+│   GLUE: Assets/UGSGlue maps GameFlowEvents (GameEnding) onto the        │
+│         GameServiceEvents contract (SessionEnding); the UGS package     │
+│         maps that to UGS_EventsEnum (ScoreUpdating + CurrencySync-      │
+│         Requested), so UGS never touches gameplay; UGSAutoEventFlow     │
+│         chains init → auth → config → leaderboards → achievements       │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -219,45 +226,50 @@ This example traces what happens from the moment a player hits an obstacle to a 
 [Player hits obstacle]
         │
         ▼  ObstacleCollisionDetector (TempleRun domain)
-TempleRunBus.Publish(TempleRunEvents.PlayerFailRequested, this, null)
+TempleRunBus.Publish(TempleRunEvents.ObstacleHit, ...)
+        │
+        ▼  PowerUpBuffController (TempleRun domain)
+        Asks active power-up effects to absorb the hit (Shield)
+        └─ not absorbed ──► PlayerFailingAtObstacle
         │
         ▼  TempleRunAutoEventFlow (same-domain auto-chain)
-        PlayerFailRequested → PlayerFailing → PlayerFailed
+        PlayerFailingAtObstacle → PlayerFailing
+        (PlayerFailedController later publishes PlayerFailed, ending the freeze)
         │
         ▼  PlayerLifeController (TempleRun domain)
-        Decrements life count
-        ├─ lives > 0 ──► PlayerRevived (run continues)
-        └─ lives = 0 ──► PlayerDeathRequested
-        │
+        Decrements life count on PlayerFailing
+        ├─ lives > 0 ──► brief recovery, run continues
+        └─ lives = 0 ──► PlayerDied  (data: distance score — the payload
+        │                rides every hop from here on)
         ▼  TempleRunAutoEventFlow (same-domain auto-chain)
-        PlayerDeathRequested → PlayerDying → PlayerDied
+        PlayerDied → TempleRunEndRequested → TempleRunEnding → TempleRunEnded
         │
-        ▼  TempleRunGameFlowBridge (GameFlow domain — bridge duty only)
-        Subscribes to TempleRunEvents.PlayerDied
-        Publishes GameFlowEvents.GameEndRequested
+        ▼  TempleRunGameFlowBridge (in GameFlow — bridge duty only)
+        TempleRunEnded → GameFlowEvents.GameEnding
         │
-        ▼  GameFlowAutoEventFlow (same-domain auto-chain)
-        GameEndRequested → GameEnding → GameEnded
+        ▼  UGSGameFlowBridge (Assets/UGSGlue — bridge duty only)
+        GameEnding → GameServiceEvents.SessionEnding   (the contract)
         │
-        ▼  UGSGameFlowBridge (UGS domain — bridge duty only)
-        Subscribes to GameFlowEvents.GameEnding
-        Reads score from Blackboard
-        Publishes UGS_EventsEnum.ScoreUpdating
+        ▼  GameServiceEventsUGSBridge (UGS package — bridge duty only)
+        SessionEnding → UGS_EventsEnum.ScoreUpdating
+                      → UGS_EventsEnum.CurrencySyncRequested (banks the coins)
         │
-        ▼  LeaderboardController (UGS domain)
+        ▼  LeaderboardPlayerController (UGS package)
         Subscribes to UGS_EventsEnum.ScoreUpdating
-        Calls UGS Leaderboards SDK
-        Publishes UGS_EventsEnum.ScoreUpdated
+        Calls the UGS Leaderboards SDK with the score payload
+        Publishes UGS_EventsEnum.ScoreUpdated (or ScoreFailedToUpdate)
         │
-        ▼  [Leaderboard UI shown, achievements checked, ...]
+        ▼  [GameEnded → SessionEnded → LeaderboardOpening: panel shown,
+            achievements checked, ...]
 ```
 
 **Key properties of this chain:**
-- `ObstacleCollisionDetector` never imports anything from `GameFlow` or `UGS`
-- `LeaderboardController` never imports anything from `TempleRun` or `GameFlow`
-- The two bridge classes (`TempleRunGameFlowBridge`, `UGSGameFlowBridge`) are the *only* files that cross domain boundaries — and they contain no gameplay or service logic, only translation
-- Replacing the leaderboard with a different service requires changing only `LeaderboardController` and `UGSGameFlowBridge`
-- Replacing the Temple Run game with a different game requires only re-publishing the same `PlayerDied` event from the new game's death logic
+- `ObstacleCollisionDetector` never imports anything from `GameFlow`, the contract, or `UGS`
+- `LeaderboardPlayerController` never imports anything from `TempleRun` or `GameFlow` — the UGS package cannot even see those assemblies
+- The bridge classes are the *only* files that cross domain boundaries — and they contain no gameplay or service logic, only translation
+- The game and UGS never name each other's events: they meet at `GameServiceEvents`, a contract enum in its own package that neither side owns
+- Replacing UGS with a different backend means re-implementing the service side of `GameServiceEvents` — no game file changes
+- Replacing Temple Run with a different game means rewriting the small tables in `Assets/UGSGlue/` — no service file changes
 
 ---
 
@@ -389,7 +401,9 @@ The loading panel displays:
 - **Loading Indicator** - "Loading..." text with progress bar placeholder
 - **Progress Bar** - Currently a visual placeholder; logic to show actual progress is TODO
 
-**Hierarchy (0_BootStrap):** `UIInput` → `BlocksPanelSettings` → `PS_Loading`
+**Hierarchy:** `UIInput` in `0_BootStrap` hosts the UI Toolkit input/panel settings; the
+loading and game-over overlays themselves live on `UIRoot/LoadingPanel` and
+`UIRoot/Overlay-GameOver` in `Game_Boot_1_UI`, driven by `GameFlowUIPanelController`
 
 > **Note:** The loading panel can be toggled on/off programmatically. Actual progress tracking requires additional implementation.
 
@@ -474,8 +488,10 @@ After successful authentication:
 
 After clicking Play from the Main Menu, the Level Selection screen appears:
 - Player selects a level (or difficulty configuration) from the `LevelSelector` panel
-- `LevelSelectorPanelController` reads the chosen `LevelConfig` ScriptableObject
-- `LevelConfigApplier` applies the selected config to `Blackboard`
+- `LevelSelectorPanelController` publishes `LevelSelected` carrying the chosen `LevelConfig`
+- `LevelConfigApplier` publishes `GameConfigApplied` (the level's `DifficultyConfig`) and
+  `LevelApplied` (the level number); `TempleRunGameFlowBridge` relays both into TempleRun,
+  where they land on the `Blackboard`
 - `DynamicLevelSceneLoader` loads the appropriate TempleRun gameplay scenes additively
 
 **Hierarchy:** `LevelSelection` panel active under `UIRoot` in `Game_Boot_1_UI`
@@ -542,7 +558,7 @@ HUD elements visible in the image:
 - `TempleRunTrackVisuals` - Track mesh generation (SimplePlane / Voxels)
 - `TempleRunPlayerVisuals` - Player character visual and animations
 - `TempleRunObstacles` - `ObstacleSpawner` (full-width and lane barriers)
-- `TempleRunCollectables` - `CoinSpawner`, `PowerUpSpawner`, `CollectablesController`
+- `TempleRunCollectables` - `CoinSpawner`, `PowerUpSpawner`
 - `TempleRunGuiOverlay` - HUD (score, distance, timer) and Countdown overlay (`CountdownController`, `CountdownUIController`)
 - `TempleRunEnvironment` - Skybox, lighting
 - `TempleRunSfx` - Audio sources
@@ -551,17 +567,19 @@ HUD elements visible in the image:
 
 ### Step 7: Player Failure
 
-When the player fails (collision, missed turn, falls):
-- `PlayerFailed` event fires
-- Life count decremented
+When the player fails (collision or missed turn):
+- `PlayerFailingAtObstacle` / `PlayerFailingAtTurn` fires and auto-chains to `PlayerFailing`
+- `PlayerLifeController` decrements the life count
+- `PlayerFailedController` publishes `PlayerFailed`, which ends the failure freeze
 - If lives remain: brief recovery, continue
-- If no lives: `PlayerDied` event fires
+- If no lives: `PlayerDied` fires (carrying the distance score)
 
 **Events:**
 ```
-PlayerFailRequested → PlayerFailing → PlayerFailed → Check Lives
-                                                     ├── Lives > 0: PlayerRevived
-                                                     └── Lives = 0: PlayerDeathRequested → PlayerDying → PlayerDied
+ObstacleHit ─(shield gate)─► PlayerFailingAtObstacle ─┐
+PlayerFailingAtTurn ──────────────────────────────────┴─► PlayerFailing → PlayerFailed
+PlayerFailing → Check Lives ├── Lives > 0: recovery, run continues
+                            └── Lives = 0: PlayerDied → TempleRunEndRequested → … → GameEnding
 ```
 
 ---
@@ -687,13 +705,13 @@ After achievements auto-close (or manual close), returns to Main Menu.
          ▼                                 │
 ┌─────────────────┐                        │
 │  Leaderboard    │                        │
-│ Global | Self   │                        │
+│   TOP | YOU     │                        │
 └────────┬────────┘                        │
          │ auto-close                      │
          ▼                                 │
 ┌─────────────────┐                        │
 │  Achievements   │                        │
-│ Claim|Progress  │                        │
+│Unlocked|Progress│                        │
 └────────┬────────┘                        │
          │ auto-close                      │
          └─────────────────────────────────┘
@@ -730,8 +748,20 @@ The **Test_UGS_Windows** profile bypasses actual gameplay to focus on UGS integr
  9  UGS/Scenes/UGS/AchievementNotifications           ◄── In-game achievement toasts
 10  UGS/Scenes/UGS/Achievements                       ◄── Achievements UI panel
 11  UGS/Scenes/UGS/Leaderboards                       ◄── Leaderboards UI panel
-12  UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only    ◄── UGS init for test-only boot
 ```
+
+> The profile's `.asset` still carries a stale 13th entry pointing at the deleted
+> `UGS_Boot_0_Test_Init_UGS_Only` scene — see the note under [Build Profiles](#build-profiles);
+> it has no effect.
+
+> ⚠ **Known wiring gap (found by static analysis — needs a play test to confirm).** Since the
+> UGSGlue extraction, the only publisher of `GameFlowEvents.GameplayReady` is the
+> `UGSGameFlowBridge` in `Assets/UGSGlue/UGS_Glue.unity` — and this profile does not load that
+> scene. `0_BootStrap_UGS_Only` only *listens* for `GameplayReady` (to auto-fire `GameStarted`),
+> so after sign-in nothing requests the main menu, and `GameEnded` has no route to
+> `SessionEnded`/`LeaderboardOpening` either. The likely fix is loading `UGS_Glue` from this
+> bootstrap (and adding it to the profile's scene list), mirroring how `0_BootStrap` does it.
+> The steps below describe the intended flow.
 
 ---
 
@@ -763,34 +793,26 @@ After successful authentication:
 
 ---
 
-### Step 3: Countdown
+### Step 3: Dummy Run
 
-![Countdown](docs/images/03_countdown.png)
+There is no countdown and no HUD in this profile — the TempleRun scenes (including
+`TempleRunGuiOverlay`, which renders both) are not loaded. Instead, once `GameStarted`
+fires, the `Test_SubmitLeaderboardScore` component in `DummyGame_Boot_0_Initialization`:
 
-Clicking Play triggers:
-- HUD appears: `Score: 000000` and timer `00:00`
-- Countdown overlay: 3... 2... 1...
+- Waits ~1 second, then publishes `GameServiceEvents.SessionEnding` on the contract bus
+  with a random score — the same event a real game's glue publishes — twice by default
+- Then publishes `GameFlowEvents.GameEnded` to run the post-game chain
 
-The HUD and Countdown are rendered by the TempleRun domain (`CountdownUIController` in `TempleRunGuiOverlay`). In the DummyGame profile the gameplay scenes are not loaded, so the countdown fires from the dummy game's own event flow.
-
-**Hierarchy:** Countdown overlay and HUD driven by `DummyGame_Boot_0_Initialization` event sequence
+**Hierarchy:** `DummyGame` object in `DummyGame_Boot_0_Initialization`
 
 ---
 
-### Step 4: Game Over
+### Step 4: Post-Game
 
-![Game Over](docs/images/04_game_over.png)
-
-In Test_UGS_Windows, the "DummyGame" immediately:
-- Generates a random score
-- Fires `PlayerDied` event
-- Shows Game Over panel
-
-Buttons are placeholders in this test profile:
-- **Retry** - Not functional
-- **Main Menu** - Not functional
-
-**Hierarchy:** `Overlay-GameOver` active
+Each `SessionEnding` becomes `UGS_EventsEnum.ScoreUpdating` via `GameServiceEventsUGSBridge`,
+and `LeaderboardPlayerController` submits the score. `GameEnded` becomes `SessionEnded`,
+which opens the leaderboard. The Game Over overlay is not shown in this profile — it is
+triggered by `GameEnding`, which the dummy game skips.
 
 ---
 
@@ -856,32 +878,22 @@ After achievements auto-close, returns to Main Menu. **Sign Out** returns to Ste
          │ Play                            │
          ▼                                 │
 ┌─────────────────┐                        │
-│   Countdown     │                        │
-│   3... 2... 1   │                        │
-└────────┬────────┘                        │
-         │                                 │
-         ▼                                 │
-┌─────────────────┐                        │
 │   DummyGame     │                        │
-│ (random score)  │                        │
+│ (random scores  │                        │
+│ ×2 as contract  │                        │
+│  SessionEnding) │                        │
 └────────┬────────┘                        │
-         │ PlayerDied                      │
-         ▼                                 │
-┌─────────────────┐                        │
-│   Game Over     │                        │
-│ Retry|Main Menu │                        │
-└─────────────────┘                        │
-         │ auto                            │
+         │ GameEnded → SessionEnded        │
          ▼                                 │
 ┌─────────────────┐                        │
 │  Leaderboard    │                        │
-│ Global | Self   │                        │
+│   TOP | YOU     │                        │
 └────────┬────────┘                        │
          │ auto-close                      │
          ▼                                 │
 ┌─────────────────┐                        │
 │  Achievements   │                        │
-│ Claim|Progress  │                        │
+│Unlocked|Progress│                        │
 └────────┬────────┘                        │
          │ auto-close                      │
          └─────────────────────────────────┘
@@ -948,8 +960,6 @@ Same as [Loading Panel (All Profiles)](#visual-walkthrough-loading-panel-all-pro
 
 ### Step 2: Main Menu (No Authentication)
 
-![Main Menu - Game Only](docs/images/08_main_menu_gameonly.png)
-
 Authentication is bypassed entirely:
 - **Play** - Start gameplay immediately
 - **Options** - Settings (placeholder)
@@ -970,8 +980,6 @@ Same flow as [Windows Steps 5-6](#step-5-countdown) but without UGS event handle
 ---
 
 ### Step 4: Game Over (No Leaderboard)
-
-![Game Over - Game Only](docs/images/09_game_over_gameonly.png)
 
 When all lives exhausted:
 - Final score displayed
@@ -1044,7 +1052,8 @@ After Game Over, player can:
 
 ## Project Structure
 
-The codebase is organized into **two in-repo domains** — GameFlow and TempleRun — plus the UGS
+The codebase is organized into **three in-repo domains** — GameFlow, TempleRun, and
+UserInitiated (whose enum and input scripts live inside `Assets/TempleRun/`) — plus the UGS
 domain and the shared infrastructure, which arrive as UPM packages rather than living here.
 
 `Assets/_Common/` is gone: its contents ship as `com.crawfissoftware.common`
@@ -1058,10 +1067,13 @@ RunnerUGSTemplate/
 │   │   ├── Scripts/
 │   │   │   ├── Events/                   # GameFlowEvents, GameFlowAutoEventFlow
 │   │   │   │                             # TempleRunGameFlowBridge (bridges TempleRun ↔ GameFlow)
-│   │   │   ├── Config/                   # Blackboard, GameConstants, GameState, PlayerPrefKeys
-│   │   │   ├── GameControl/              # GameController, PauseController, QuitController, etc.
-│   │   │   ├── UI/                       # UIPanelController, MainMenuPanelController
-│   │   │   └── SceneManagement/          # LoadSceneAfterGameControlEvent, FireEventAfterSceneLoads
+│   │   │   ├── Config/                   # GameState, GameConstants, LevelConfig(+Applier),
+│   │   │   │                             #   LevelRegistry, LevelProgressManager/Data
+│   │   │   ├── GameControl/              # QuitController, UnloadNonActiveScenes
+│   │   │   ├── UI/                       # GameFlowUIPanelController, MainMenu(+Panel)Controller,
+│   │   │   │                             #   LevelSelector(+Panel)Controller, CoinBalanceHUDController
+│   │   │   └── SceneManagement/          # DynamicLevelSceneLoader, FireEventAfterSceneLoads
+│   │   │                                 #   (LoadSceneAdditively etc. come from the common package)
 │   │   ├── Scenes/
 │   │   │   └── Boot/                     # 0_BootStrap_Game_Only (the no-services entry point),
 │   │   │                                 #   Game_Boot_0_Initialization, Game_Boot_0_Test_Initialization,
@@ -1073,10 +1085,13 @@ RunnerUGSTemplate/
 │   │   ├── Scripts/
 │   │   │   ├── Events/                   # TempleRunEvents, TempleRunAutoEventFlow
 │   │   │   │                             # UserInitiatedEvents, Input2TempleRunAutoEventBridge
-│   │   │   ├── Config/                   # TempleRunGameConfig, DifficultyConfig, LaneConfig, SlideConfig, DashConfig, JumpConfig
+│   │   │   ├── Config/                   # Blackboard, TempleRunGameConfig, GameDifficultyManager,
+│   │   │   │                             #   PlayerPrefKeys, per-mechanic configs (Lane/Slide/Dash/Jump/Coin)
 │   │   │   ├── Player/                   # TeleportController, LaneChangeController, ObstacleCollisionDetector, PlayerLifeController
-│   │   │   │                             # SlideController, DashController, JumpController, AnimationLink, etc.
-│   │   │   ├── Track/                    # TrackManager, SplineCreator2D, DistanceTracker, Direction, ObstacleSpawner
+│   │   │   │                             # SlideController, DashController, JumpController, etc.
+│   │   │   ├── PowerUps/                 # IPowerUpEffect + five concrete effects
+│   │   │   ├── Track/                    # TrackManager (+variants), PathProvider, DistanceTracker, Direction,
+│   │   │   │                             #   spawners, SO types; Geometry/ and Selection/ subfolders
 │   │   │   ├── TrackVisuals/             # PrefabSpawner (SimplePlane, Voxels)
 │   │   │   ├── Animation/                # CapsuleAnimationLink (animator state management)
 │   │   │   ├── Input/                    # MovementInputActions, DashInputActions, PauseQuitInputActions, LeftRightJumpSlide
@@ -1126,22 +1141,30 @@ RunnerUGSTemplate/
 
 ### Domain Responsibilities
 
-- **_Common**: Shared base classes and utilities used across all domains
-- **GameFlow**: Application lifecycle - boot, initialization, menus, pause, quit, scene management
-- **TempleRun**: Gameplay mechanics - player movement, track generation, input, audio, visuals
-- **UGS**: Unity Gaming Services - authentication, leaderboards, achievements, remote config, cloud code
+- **Common** (the `com.crawfissoftware.common` package): shared base classes and utilities — the
+  one event-chain dispatcher, additive scene plumbing, the live `DifficultyConfig`
+- **GameFlow**: application lifecycle - boot, initialization, menus, pause, quit, scene management
+- **TempleRun**: gameplay mechanics - player movement, track generation, input, audio, visuals
+- **UGSGlue**: this game's half of the `GameServiceEvents` contract (deliberately asmdef-free)
+- **UGS** (the `com.crawfissoftware.ugs` package): authentication, leaderboards, achievements,
+  remote config, economy, cloud code — read-only here; edit in the EventDrivenUGS repo
 
 ### Event Flow Architecture
 
 ```
-USER INPUT (UserInitiatedEvents in TempleRun)
-    ↓
+USER INPUT (UserInitiatedEvents, in TempleRun)
+    ↓  Input2TempleRunAutoEventBridge
 TEMPLERUN GAMEPLAY (TempleRunEvents)
-    ↓ (via TempleRunGameFlowBridge in GameFlow)
-GAMEFLOW SESSION (GameFlowEvents)
-    ↓ (via UGSGameFlowBridge in UGS)
-UGS SERVICES (UGS_EventsEnum)
+    ├─→ TempleRunGameFlowBridge ──→ GAMEFLOW SESSION (GameFlowEvents)
+    │                                     ↕  Assets/UGSGlue/UGSGameFlowBridge
+    └─→ Assets/UGSGlue/TempleRunUGSBridge ──→ THE CONTRACT (GameServiceEvents)
+                                                  ↕  GameServiceEventsUGSBridge   (UGS package)
+                                              UGS SERVICES (UGS_EventsEnum)
 ```
+
+Neither end names the other. The game speaks `GameServiceEvents`; the services layer speaks
+`GameServiceEvents`; the enum belongs to neither and lives in its own package
+(`com.crawfissoftware.contracts`).
 
 ---
 
@@ -1150,35 +1173,29 @@ UGS SERVICES (UGS_EventsEnum)
 ### 0_BootStrap_UGS_Only Hierarchy
 
 ```
-0_BootStrap_UGS_Only
-├── Temp Camera                    # Android workaround
-├── AudioListener
-├── Loading Panel
-├── Load_UGS_Init                  # Triggers UGS scene loading
-├── Load_DummyGameUI
-├── UIInput
-│   ├── BlocksPanelSettings
-│   ├── PS_Menu
-│   ├── PS_Feedback
-│   └── PS_HUD
-├── GameEventsPublisher
-├── Quitting / Quitted
-└── GameState
+0_BootStrap_UGS_Only          (notable objects)
+├── Temp Camera / AudioListener
+├── Load_UGS_Init                  # Loads UGS_Boot_0_Initialization additively
+├── Load_DummyGameUI               # Loads DummyGame_Boot_0_Initialization
+├── FireGameScenesLoaded           # Test_AutoFireEvent: GameScenesLoading → GameScenesLoaded
+├── FireGameStarted                # Test_AutoFireEvent: GameplayReady → GameStarted
+├── Game Flow Auto Events          # GameFlowAutoEventFlow
+├── UIInput / GameState / Quitting / CloseApplication / Test_EventLogDump
+└── (the EventsPublisher* scene objects are gone — the buses are static)
 
-UGS_Boot_0_Test_Init_UGS_Only
+UGS_Boot_0_Initialization
 ├── UnityGamingServices
-│   ├── EventsPublisher
-│   ├── UGS_EventsHandler.01
-│   ├── InitializeServices
-│   └── UGS State
+│   ├── InitializeServices / UGS_EventsHandler.01 / UGS State
+│   └── GameSignalsUGSBridge       # hosts GameServiceEventsUGSBridge (object name is the
+│                                  #   pre-rename cosmetic leftover; Unity binds by GUID)
 └── GameFlow
-    ├── AutoEvents
-    ├── Load_RemoteConfig
-    ├── Load_Achievements
-    └── Load_Leaderboards
+    ├── AutoEvents                 # UGSAutoEventFlow
+    ├── Load_RemoteConfig / Load_Achievements / Load_Leaderboards
+    └── PlayerCurrency             # PlayerCurrencyController — the ONLY subscriber to
+                                   #   CurrencySyncRequested; without it no coins bank
 
 DummyGame_Boot_0_Initialization
-└── DummyGame
+└── DummyGame                      # Test_SubmitLeaderboardScore (random-score harness)
 
 UGS_Boot_1_RemoteConfig
 └── GameFlow
@@ -1193,9 +1210,9 @@ UGS_Boot_2_Authentication
 
 UGS_Boot_3_Achievements
 ├── Achievements
-│   └── AchievementsPrefab.01
 └── GameFlow
     ├── CloseLeaderboards
+    ├── LoadNotifications
     └── ShowAchievements
 
 UGS_Boot_4_Leaderboards
@@ -1229,67 +1246,106 @@ During play, you can:
 
 ### GameFlow Events (Application Lifecycle)
 
-| Event | Publisher | Description |
-|-------|-----------|-------------|
-| `LoadingScreenShowRequested/Showing/Shown` | Various | Loading screen visibility |
-| `MainMenuShowRequested/Showing/Shown` | Various | Main menu visibility |
-| `GameStartRequested/Starting/Started` | GameController | Game session lifecycle |
-| `GameEndRequested/Ending/Ended` | GameController | Game session end |
-| `GameScenesLoadRequested/Loading/Loaded` | SceneLoader | Scene loading |
-| `PauseRequested/Pausing/Paused` | PauseController | Game pause |
-| `ResumeRequested/Resuming/Resumed` | PauseController | Game resume |
-| `QuitRequested/Quitting/QuitCompleted` | QuitController | Application exit |
+A representative subset (76 events total — see the enum, or `CrawfisSoftware → Events → List Domains`):
+
+| Event | Published by | Description |
+|-------|--------------|-------------|
+| `LoadingScreenShowRequested/Showing/Shown` | `GameFlowUIPanelController` + auto-chain | Loading screen visibility |
+| `MainMenuShowRequested/Showing/Shown` | auto-chain from `GameplayReady`; panel controllers | Main menu visibility |
+| `GameStartRequested/Starting/Started` | auto-chain; `GameStarted` bridged from `CountdownEnded` | Game session lifecycle |
+| `GameEnding/Ended` | bridged from `TempleRunEnded`; `GameFlowUIPanelController` | Game session end |
+| `GameScenesLoadRequested/Loading/Loaded` | auto-chain; `DynamicLevelSceneLoader` | Scene loading |
+| `PauseRequested/Pausing/Paused` | bridged from `PlayerPaused`; auto-chain | Game pause |
+| `ResumeRequested/Resuming/Resumed` | bridged from `PlayerResumed`; auto-chain | Game resume |
+| `QuitRequested/Quitting/QuitCompleted` | `MainMenuController`; `QuitController` reacts | Application exit |
+| `DifficultySettingsApplied` *(Sticky)* | bridged from the contract | Remote difficulty table |
+| `CurrencyBalanceChanged` *(Sticky)* | bridged from the contract | Banked lifetime coin balance |
 
 ### TempleRun Events (Gameplay)
 
-| Event | Publisher | Description |
-|-------|-----------|-------------|
-| `PlayerFailRequested/Failing/Failed` | ObstacleCollisionDetector | Player hit obstacle |
-| `PlayerDeathRequested/Dying/Died` | PlayerLifeController | Player lost all lives |
-| `CountdownStartRequested/Starting/Tick/Ended` | CountdownController | Pre-game countdown |
-| `LaneChangingLeft/ChangedLeft` | LaneChangeController | Left lane change mechanics |
-| `LaneChangingRight/ChangedRight` | LaneChangeController | Right lane change mechanics |
-| `TeleportRequested/Starting/Ended` | TeleportController | Teleportation to new segments |
-| `SlideRequested/Starting/Ended` | SlideController | Slide mechanics with cooldown |
-| `DashRequested/Starting/Ended` | DashController | Dash speed boost |
-| `JumpRequested/Starting/Ended` | JumpController | Jump arc mechanics |
-| `ActiveTrackChangeRequested/Changing/Changed` | TrackManager | Track segment changes |
-| `SplineSegmentCreated` | SplineCreator2D | New spline segment created |
-| `CoinCollectRequested/Collecting/Collected` | CollectibleController | Coin collection |
-| `PowerUpActivateRequested/Activating/Activated` | PowerUpController | Power-up usage |
+A representative subset (121 events total):
+
+| Event | Published by | Description |
+|-------|--------------|-------------|
+| `ObstacleHit` → `PlayerFailingAtObstacle` | `ObstacleCollisionDetector`; shield gate in `PowerUpBuffController` | Player hit obstacle |
+| `PlayerFailingAtTurn` | `TurnCollisionDetector` | Player missed a turn |
+| `PlayerFailing/Failed` | auto-chain; `PlayerFailedController` | Failure freeze and recovery |
+| `PlayerDied` | `PlayerLifeController` (data: distance score) | Player lost all lives |
+| `CountdownStartRequested/Starting/Started/Tick/Ending/Ended` | `CountdownController` | Pre-game countdown |
+| `LaneChangingLeft/ChangedLeft` (and Right) | `LaneChangeController` | Lane change mechanics |
+| `TeleportRequested/Starting/Started/Ending/Ended` | `TeleportController` | Teleportation to new segments |
+| `SlideRequested/Starting/Started/Ending/Ended` | `SlideController` | Slide mechanics with cooldown |
+| `DashRequested/Starting/Started/Ending/Ended` | `DashController` | Dash speed boost |
+| `JumpRequested/Starting/Started/Ending/Landed` | `JumpController` | Jump arc mechanics |
+| `ActiveTrackChangeRequested/Changing/Changed` | `TrackManager` | Track segment changes |
+| `SplineSegmentCreated` | `PathProvider` | Spline span ready — spawners listen |
+| `CoinCollectRequested/Collecting/Collected` | `CollectableCollisionDetector`; `CoinCollectionController` | Coin collection (running total) |
+| `PowerUpActivateRequested/Activating/Activated` | `PowerUpBuffController` | Power-up usage |
+| `DistanceUpdated` | `DistanceController` | The score metric (bridged to the contract) |
 
 ### UserInitiated Events (Input)
 
-| Event | Publisher | Description |
-|-------|-----------|-------------|
-| `LeftTurnRequested` | InputController | User pressed left |
-| `RightTurnRequested` | InputController | User pressed right |
-| `PauseToggle` | InputController | User toggled pause |
+All nine events, published by the input-action classes in `Assets/TempleRun/Scripts/Input/`
+and translated into gameplay events by `Input2TempleRunAutoEventBridge`:
+
+| Event | Bridged to (TempleRun) |
+|-------|------------------------|
+| `UserLeftTurnRequested` / `UserRightTurnRequested` | `TurnLeftRequested` / `TurnRightRequested` |
+| `UserLeftLaneChangeRequested` / `UserRightLaneChangeRequested` | `LaneChangeLeftRequested` / `LaneChangeRightRequested` |
+| `UserJumpRequested` / `UserSlideRequested` / `UserDashRequested` | `JumpRequested` / `SlideRequested` / `DashRequested` |
+| `UserPauseToggle` | `PlayerPauseToggleRequested` |
+| `UserQuitRequested` | `TempleRunEndRequested` |
+
+### GameService Events (The Contract)
+
+`GameServiceEvents` lives in `com.crawfissoftware.contracts` — the vocabulary the game and the
+services layer share, owned by neither:
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `ScoreUpdated` | float | Game → services: the run's score metric changed |
+| `CurrencyTotalChanged` | int | Game → services: this run's coin total (not a delta) |
+| `SessionEnding` / `SessionEnded` | float / — | Game → services: a run finished |
+| `ServicesReady` / `ServicesUnavailable` | — | Services → game: one-shot announcements of the moment |
+| `ServicesStatusChanged` *(Sticky)* | `ServicesStatus` | Services → game: the current status, replayed to anyone who subscribes late |
+| `RemoteConfigApplied` | — | Services → game: config arrived |
+| `DifficultySettingsAvailable` | (undeclared) | Services → game: remote difficulty table |
+| `CurrencyBalanceChanged` *(Sticky)* | long | Services → game: banked lifetime balance |
 
 ### UGS Events (Services)
+
+Defined in `UGS_EventsEnum` in the `com.crawfissoftware.ugs` package (read-only here). A subset:
 
 | Event | Description |
 |-------|-------------|
 | `UnityServicesInitialized/InitializationFailed` | UGS core initialization |
 | `PlayerSigningIn/SignedIn/SignInFailed` | Authentication status |
-| `PlayerAuthenticated/SessionExpired` | Session management |
-| `RemoteConfigFetching/Fetched/Failed` | Remote config status |
-| `ScoreUpdating/Updated/FailedToUpdate` | Leaderboard submission |
-| `LeaderboardOpening/Opened/Closed` | Leaderboard UI |
-| `AchievementUnlocked/Claimed/ProgressUpdated` | Achievement status |
+| `PlayerAuthenticated/PlayerSessionExpired` | Session management |
+| `RemoteConfigFetching/Fetched/FetchFailed/Updated` | Remote config status |
+| `DifficultySettingsFetched` | Remote difficulty table (→ the contract) |
+| `ScoreUpdating/ScoreUpdated/ScoreFailedToUpdate` | Leaderboard submission |
+| `LeaderboardOpening/Opened/Closing/Closed` | Leaderboard UI |
+| `AchievementUnlocked/AchievementClaimed/AchievementProgressUpdated` | Achievement status |
+| `UGS_CoinUpdated`, `CurrencySyncRequested`, `CurrencyBalanceChanged`, `CurrencySyncFailed` | Economy / coin banking |
+| `RewardAdWatching/Watched/FailedToShow/ClosedWithoutReward` | Rewarded ads (no publisher shipped) |
 
 ---
 
 ## Unity Gaming Services Integration
 
-### Building Blocks Included
+### Services Included
 
-| Block | Purpose |
-|-------|---------|
-| **Player Account** | Authentication UI, anonymous/platform sign-in |
-| **Leaderboards** | Score submission, Global/Self ranking views |
-| **Achievements** | Progress tracking, claim notifications |
-| **Remote Config** | Server-side configuration |
+All original implementations in the `com.crawfissoftware.ugs` package (the vendored
+Building Blocks stack is gone):
+
+| Service | Purpose |
+|---------|---------|
+| **Authentication** | Sign-in modal: anonymous, Unity Player Account, username/password |
+| **Leaderboards** | Score submission, TOP/YOU ranking views |
+| **Achievements** | Instant + progressive tracking, unlock toasts (no claim button) |
+| **Remote Config** | Server-side configuration; publishes the difficulty table |
+| **Economy** | Persistent `COIN` balance, banked once per run |
+| **Cloud Code** | `TempleRunUGSCloud` module: 4 services, 7 endpoints |
 
 ### Authentication Options
 
@@ -1338,9 +1394,9 @@ definition is unchanged:
 | File Type | Extension | Purpose |
 |-----------|-----------|---------|
 | Leaderboard | `.lb` | Leaderboard rules |
-| Achievement | `.ach` | Achievement definitions |
 | Access Control | `.ac` | Security policies |
-| Remote Config | `.rc` | Server-side values |
+| Remote Config | `.rc` | Server-side values — including the achievement definitions exported by `AchievementDefinitionCatalog` (the old `.ach` extension went with the vendored Blocks) |
+| Economy currency | `.ecc` | `Assets/UGS/Economy/COIN.ecc` — the coin currency (id from the filename) |
 
 ---
 
@@ -1350,18 +1406,24 @@ definition is unchanged:
 
 | Package | Repository | Purpose |
 |---------|------------|---------|
-| EventsPublisher | [crawfis/EventsPublisher](https://github.com/crawfis/EventsPublisher) | Pub/sub event system |
-| RandomProvider | [crawfis/RandomProvider](https://github.com/crawfis/RandomProvider) | Seeded random, reproducibility |
+| EventsPublisher | [crawfis/EventsPublisher](https://github.com/crawfis/EventsPublisher) | The static `EventsFor<T>` buses |
+| Contracts | [crawfis/EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) (`?path=`) | `GameServiceEvents` — the game/service contract |
+| Common | [crawfis/EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) (`?path=`) | Event-chain dispatcher, scene plumbing, `DifficultyConfig` |
+| UGS | [crawfis/EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) (`?path=`) | The whole UGS domain |
 | GTMY.Audio | [crawfis/GTMY.Audio](https://github.com/crawfis/GTMY.Audio) | Audio management with Addressables |
+
+(The Random providers are vendored under `Assets/ThirdParty/CrawfisSoftware/`, not resolved as a
+package — `Blackboard` depends on them.)
 
 ### UGS SDK Packages
 
-- `com.unity.services.core`
 - `com.unity.services.authentication`
 - `com.unity.services.leaderboards`
 - `com.unity.services.cloudsave`
 - `com.unity.services.cloudcode`
-- `com.unity.services.remoteconfig`
+- `com.unity.services.economy`
+- `com.unity.remote-config`
+- `com.unity.services.deployment` (editor tooling)
 
 ---
 
@@ -1517,7 +1579,8 @@ Place animations in a dedicated `TempleRunPlayerAnimations` scene, loaded additi
    - `GameFlowEvents` - App lifecycle (loading, menus, pause, config, quit)
    - `TempleRunEvents` - Gameplay (player, countdown, turns, track, collisions)
    - `UserInitiatedEvents` - Raw input
-   - `UGS_EventsEnum` - UGS service callbacks
+   - `GameServiceEvents` - The game/service contract (contracts package; add here deliberately rarely)
+   - `UGS_EventsEnum` - UGS service callbacks (ugs package — edit in the EventDrivenUGS repo)
 
 2. **Add to the enum** with a unique value:
 ```csharp
@@ -1531,7 +1594,7 @@ public enum GameFlowEvents
 }
 ```
 
-3. **Publish** using the typed publisher:
+3. **Publish** on the domain's static bus:
 ```csharp
 GameFlowBus.Publish(
     GameFlowEvents.MyFeatureStarted,
@@ -1571,10 +1634,13 @@ private void OnMyFeatureStarted(string eventName, object sender, object data)
 
 ### Adding New UGS Services
 
-1. Install package via Package Manager
-2. Create initialization in appropriate `UGS_Boot_*` scene
-3. Create event adapters to bridge UGS callbacks to EventsPublisher
-4. Add deployment configuration files
+1. Install the Unity SDK package via Package Manager
+2. Add the service's events to `UGS_EventsEnum` — in the EventDrivenUGS repo, since the ugs
+   package is read-only here — and create an adapter that publishes them on `UGSBus`
+3. Host the adapter in the appropriate `UGS_Boot_*` scene
+4. If the game must react, add a `GameServiceEvents` crossing and map it on both sides
+   (`GameServiceEventsUGSBridge` in the package, `Assets/UGSGlue/` here)
+5. Add deployment configuration files
 
 ### Alternative Inputs
 
@@ -1586,7 +1652,8 @@ The architecture supports swapping input methods:
 - Assistive devices
 - Motion capture
 
-Modify `InputController` and adjust cooldown timers as needed.
+Add or modify the input-action classes in `Assets/TempleRun/Scripts/Input/` (they publish
+`UserInitiatedEvents`) and adjust cooldown timers as needed.
 
 ---
 
@@ -1628,7 +1695,7 @@ public float ObstacleSpawnRate = 0.6f;  // Probability of obstacle per segment
 - `_laneObstaclePrefab` - Lane-specific barrier
 
 **Events:**
-- `SplineSegmentCreated` (fired by SplineCreator2D) — Triggers obstacle spawn
+- `SplineSegmentCreated` (fired by `PathProvider`) — Triggers obstacle spawn
 - `TeleportEnded` — Cleans up obstacles from previous segment
 
 ### Jump Mechanics
@@ -1639,11 +1706,11 @@ public float ObstacleSpawnRate = 0.6f;  // Probability of obstacle per segment
 - `Assets/TempleRun/Scripts/Player/JumpArcController.cs` — Applies arc trajectory to player
 
 **How It Works:**
-1. Player input triggers `JumpRequested` (via `UserInitiated` domain or input script)
-2. Input2TempleRunBridge translates to `TempleRunEvents.JumpRequested`
+1. Player input triggers `UserJumpRequested` (UserInitiated domain)
+2. `Input2TempleRunAutoEventBridge` translates it to `TempleRunEvents.JumpRequested`
 3. `JumpController` validates cooldown and publishes `JumpStarting` → `JumpStarted`
 4. `JumpArcController` smoothly interpolates Y position along a parabolic arc
-5. On arc completion, fires `JumpEnded`
+5. On arc completion, fires `JumpLanded`
 
 **Configuration:**
 ```csharp
@@ -1721,27 +1788,32 @@ private void TriggerLeanLeftAnimation(string eventName, object sender, object da
 
 To test gameplay without Unity Gaming Services:
 
-1. Select the **Windows_Game_Only** build profile
-2. Open `0_BootStrap` scene
-3. Disable the `Load_UGS_Init` GameObject
-4. Enable event logging: `CrawfisSoftware → Events → Log Events`
-5. Play
+1. Select the **Test_GameOnly_Windows** build profile
+2. Open `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only`
+3. Enable event logging: `CrawfisSoftware → Events → Log Events`
+4. Play
+
+> **Do not** try this by disabling `Load_UGS_Init` in `0_BootStrap` — that used to work and no
+> longer does: `UGSGameFlowBridge` (loaded via `Load_UGS_Glue`) is the only publisher of
+> `GameplayReady` there, so with UGS disabled the boot sits on the loading screen forever. The
+> game-only bootstrap fires `GameplayReady` itself. See
+> [Visual Walkthrough: Test_GameOnly_Windows](#visual-walkthrough-test_gameonly_windows).
 
 Controls:
 - **Arrow keys / WASD** or **Swipe** - Turn left/right
 - **Tab** - Pause/Resume toggle
 - **Esc** - End gameplay
 
-Default difficulty: 2 lives (configurable in `GameConfig.cs`)
+Default lives: 2 (per difficulty — `DifficultyConfig.NumberOfLives`, from the common package)
 
 ### Quit Behavior
 
 Clicking Quit:
-1. Fires `Quitting` event
-2. Unloads all scenes except scene 0
-3. Prints unsubscribed event handlers to Console
-4. Fires `Quitted` event
-5. Exits play mode (or quits in build)
+1. `MainMenuController` publishes `QuitRequested`, which becomes `Quitting`
+2. Scenes are unloaded
+3. `QuitController` (on `Quitting`) waits `GameConstants.QuitDelay`, then — in the editor —
+   warns about any handlers that never unsubscribed and clears the registry
+4. Exits play mode (or `Application.Quit()` in a build)
 
 ---
 
@@ -1749,7 +1821,7 @@ Clicking Quit:
 
 - [Unity Gaming Services Documentation](https://docs.unity.com/ugs/)
 - [Leaderboards Guide](https://docs.unity.com/ugs/manual/leaderboards/manual/leaderboards)
-- [Achievements Building Block](https://docs.unity3d.com/6000.0/Documentation/Manual/building-blocks-liveops-achievements.html)
+- [Achievements Building Block](https://docs.unity3d.com/6000.0/Documentation/Manual/building-blocks-liveops-achievements.html) (historical — the vendored Blocks stack was replaced by original implementations in the ugs package)
 - [Event Publisher Package](https://github.com/crawfis/EventsPublisher)
 
 ---

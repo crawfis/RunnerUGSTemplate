@@ -278,12 +278,12 @@ module left, and steps 9 and 10 are its endpoints)*
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/cd149777-11bc-4924-84be-f0ad5217882e/ascreenshot_3c8855f3fb2c49df868cd647c126a5f8_text_export.jpeg)
 
 
-9\. Click "AddPlayerScoreAsync"
+9\. Click "AddPlayerScoreAsync" *(gone — this endpoint belonged to the removed Blocks modules; today's `TempleRunUGSCloud` endpoints are `OnSignInHandlePlayerInitialization`, `SyncAllPlayerData`, `GetPlayerData`, `ChangeDisplayName`, `ChangeProfilePicture`, `HandleGrantVideoAdReward`, and the economy sync)*
 
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/80056de2-ef6f-4e83-8dc5-4f62aa2abcc0/ascreenshot_9264ffaf3a7d43b78238e88765e3d064_text_export.jpeg)
 
 
-10\. Click "GetAchievements"
+10\. Click "GetAchievements" *(gone — see the note on step 9; achievements now deploy as an `.rc` exported from the `AchievementDefinitionCatalog`)*
 
 ![](https://colony-recorder.s3.amazonaws.com/files/2026-01-18/0e86527b-a310-4b85-8ccd-e656d21729e9/ascreenshot_a0d2759c068e4cddbd247a7b25b7d849_text_export.jpeg)
 

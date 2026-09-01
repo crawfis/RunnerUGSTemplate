@@ -17,19 +17,21 @@ Scan the codebase for violations of the event-driven architecture. This skill ch
 
 ### Check 1: Missing OnDestroy Unsubscriptions
 
-Search for classes that call `SubscribeToEvent` or `SubscribeToAllEnumEvents` but do NOT have a corresponding `UnsubscribeToEvent` or `UnsubscribeToAllEnumEvents` in `OnDestroy()`.
+Search for classes that call `.Subscribe(` (on a bus alias or an `EventId`), or a
+dispatcher `.Attach()`, but do NOT have the matching `.Unsubscribe(` / `.Detach()` in
+`OnDestroy()`.
 
 **Pattern to find:**
 ```
-Grep for SubscribeToEvent in *.cs files
-For each file found, verify it also contains UnsubscribeToEvent in an OnDestroy method
+Grep for "Bus.Subscribe(", ".Subscribe(", "Attach()" in *.cs files
+For each file found, verify the matching Unsubscribe/Detach appears in an OnDestroy method
 ```
 
 **Report format:**
 ```
 MISSING UNSUBSCRIPTION:
   [File:Line] subscribes to [EventName] but never unsubscribes
-  Fix: Add UnsubscribeToEvent in OnDestroy()
+  Fix: Add the matching Unsubscribe in OnDestroy()
 ```
 
 ### Check 2: Direct Coupling (bypassing events)
@@ -41,8 +43,9 @@ Search for direct method calls or references that should go through the event sy
 - `SendMessage()` or `BroadcastMessage()` calls
 
 **Exclude from this check:**
-- `EventsPublisher*.Instance` references (these ARE the event system)
-- `Blackboard.Instance` (legitimate shared state)
+- The `EventsFor<T>` bus aliases and `EventId` handles (these ARE the event system;
+  `EventsPublisher.Instance` survives only inside `QuitController`'s editor-only diagnostics)
+- `Blackboard.Instance` / `GameTime.Instance` (legitimate shared state)
 - References within the same class or same scene
 
 **Report format:**
@@ -55,9 +58,9 @@ DIRECT COUPLING:
 ### Check 3: Unused Events
 
 For each event in all five enums, search if it is:
-- Published anywhere (`PublishEvent([EnumName].[EventName]`)
-- Subscribed to anywhere (`SubscribeToEvent([EnumName].[EventName]`)
-- Referenced in an auto-chain or bridge mapping
+- Published anywhere (`Publish([EnumName].[EventName]`)
+- Subscribed to anywhere (`Subscribe([EnumName].[EventName]`)
+- Referenced in an auto-chain or bridge pair table
 
 **Report format:**
 ```
@@ -75,9 +78,11 @@ Trace all auto-chain and bridge mappings to detect cycles:
 1. Build a directed graph of all mappings from:
    - `GameFlowAutoEventFlow.cs`
    - `TempleRunAutoEventFlow.cs`
-   - `UGSAutoEventFlow.cs`
+   - `UGSAutoEventFlow.cs` (ugs package)
+   - `Input2TempleRunAutoEventBridge.cs`
    - `TempleRunGameFlowBridge.cs`
-   - `UGSGameFlowBridge.cs`
+   - `Assets/UGSGlue/UGSGameFlowBridge.cs` and `Assets/UGSGlue/TempleRunUGSBridge.cs`
+   - `GameServiceEventsUGSBridge.cs` (ugs package)
 2. Run cycle detection on the graph
 3. Report any cycles found
 
@@ -103,7 +108,16 @@ NEVER PUBLISHED (subscribed but never fires):
 
 ### Check 6: Domain Isolation Violations (Cross-Domain Event References)
 
-Each domain's code may ONLY reference events from its own domain. Cross-domain event references are ONLY permitted inside bridge files (`TempleRunGameFlowBridge.cs`, `UGSGameFlowBridge.cs`).
+Each domain's code may ONLY reference events from its own domain. Cross-domain event
+references are ONLY permitted inside the five bridge files
+(`Input2TempleRunAutoEventBridge.cs`, `TempleRunGameFlowBridge.cs`,
+`Assets/UGSGlue/TempleRunUGSBridge.cs`, `Assets/UGSGlue/UGSGameFlowBridge.cs`, and
+`GameServiceEventsUGSBridge.cs` in the ugs package).
+
+Two boundaries are already compile-enforced by asmdefs: game assemblies cannot reference
+`CrawfisSoftware.UGS` at all, so a game-side `UGS_EventsEnum.` reference will not even
+build. The checks below cover what asmdefs cannot: within-domain discipline, and the
+deliberately asmdef-free `Assets/UGSGlue/`.
 
 **Scan for these violations:**
 
@@ -116,31 +130,28 @@ Each domain's code may ONLY reference events from its own domain. Cross-domain e
    - Exclude `TempleRunGameFlowBridge.cs` — that file is allowed
    - Any other match is a violation
 
-3. **GameFlow code referencing UGS_EventsEnum:**
-   - Grep for `UGS_EventsEnum\.` in `Assets/GameFlow/**/*.cs`
-   - Exclude `TempleRunGameFlowBridge.cs` — it legitimately holds the TempleRun -> UGS
-     passthrough dictionary (see `/add-bridge-mapping`)
-   - Any other match is a violation (UGS <-> GameFlow bridging lives in `UGSGameFlowBridge.cs` under `Assets/UGS/`)
+3. **Game code referencing the contract outside the glue:**
+   - Grep for `GameServiceEvents\.` in `Assets/GameFlow/**/*.cs` and `Assets/TempleRun/**/*.cs`
+   - Any match is a violation — the contract is named only in `Assets/UGSGlue/`
+     (and inside the packages)
 
-4. **UGS code referencing GameFlowEvents (outside bridges):**
-   - Grep for `GameFlowEvents\.` in `Assets/UGS/**/*.cs`
-   - Exclude `UGSGameFlowBridge.cs` — that file is allowed
-   - Any other match is a violation
+4. **UGSGlue discipline:**
+   - `Assets/UGSGlue/*.cs` may name `GameFlowEvents`, `TempleRunEvents`, and
+     `GameServiceEvents` — but NEVER `UGS_EventsEnum` (grep to confirm)
+   - `TempleRunUGSBridge` must stay one-way: it publishes the contract, never TempleRun events
 
-5. **Any code referencing TempleRunEvents in UGS or UGS_EventsEnum in TempleRun:**
-   - Grep for `TempleRunEvents\.` in `Assets/UGS/**/*.cs`
-   - Grep for `UGS_EventsEnum\.` in `Assets/TempleRun/**/*.cs`
-   - Any match is a violation (TempleRun -> UGS crossings are allowed only via the
-     passthrough dictionary in `TempleRunGameFlowBridge`, which lives under GameFlow)
+5. **Package boundary (informational):**
+   - The ugs package may name `GameServiceEvents` only in `GameServiceEventsUGSBridge.cs`;
+     nothing in it may name `GameFlowEvents` or `TempleRunEvents` (it cannot see them)
 
 6. **Additional domains** (added via `/add-event-domain`): run the same check for each —
    the domain's enum name may appear outside its own `Assets/<Domain>/` folder ONLY in
-   bridge files. The authoritative domain list is the set of `EventsPublisher*` singleton
-   subclasses.
+   bridge files. The authoritative domain list is the set of `[EventEnum]`-marked enums
+   (`CrawfisSoftware > Events > List Domains`).
 
-7. **Registry drift:** compare the `EventsPublisher*` subclasses found in `Assets/`
-   against the Domain Registry table in `CLAUDE.md` (Architecture Overview). Flag any
-   domain missing from the table, or any table row with no matching publisher.
+7. **Registry drift:** compare the `[EventEnum]` enums List Domains reports against the
+   Domain Registry table in `CLAUDE.md` (Architecture Overview). Flag any domain missing
+   from the table, or any table row with no matching enum.
 
 **Report format:**
 ```
@@ -170,6 +181,6 @@ Event System Audit Results:
 
 - Event enums: `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs`, `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs`; and from packages, `Runtime/GameServiceEvents.cs` (contracts) and `Runtime/Events/UGS_EventsEnum.cs` (ugs)
 - Auto-flows: `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, and `Runtime/Events/UGSAutoEventFlow.cs` (ugs package)
-- Bridges: `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGSGlue/UGSGameFlowBridge.cs`, `Assets/UGSGlue/TempleRunUGSBridge.cs`, and `Runtime/Events/GameServiceEventsUGSBridge.cs` (ugs package)
-- Any additional `EventsPublisher*` subclasses, `*AutoEventFlow` classes, and `*Bridge` classes from domains added later
+- Bridges: `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs`, `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`, `Assets/UGSGlue/UGSGameFlowBridge.cs`, `Assets/UGSGlue/TempleRunUGSBridge.cs`, and `Runtime/Events/GameServiceEventsUGSBridge.cs` (ugs package)
+- Any additional `[EventEnum]` enums, `*AutoEventFlow` classes, and `*Bridge` classes from domains added later
 - All C# scripts: `Assets/**/*.cs`

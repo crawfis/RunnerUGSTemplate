@@ -1,6 +1,6 @@
 ---
 name: add-event-domain
-description: Create a new event domain — a new [EventEnum] enum, an optional auto-flow, and a bridge — for a genuinely separate bounded context (a new backend, analytics, netcode). Rare; includes the decision gate, where the domain should live, and the registration checklist for docs and skills.
+description: Create a new event domain — a new [EventEnum] enum, an optional auto-flow, and a bridge — for a genuinely separate area of the game or services (a new backend, analytics, netcode). Rare; includes the decision gate, where the domain should live, and the registration checklist for docs and skills.
 allowed-tools: Read, Write, Edit, Grep, Glob
 argument-hint: <DomainName> [purpose]
 ---
@@ -17,8 +17,9 @@ are a new *category* inside an existing enum, not a new domain.
 
 ## Step 0: Decision gate — do you actually need a domain?
 
-A domain is a bounded context with its own enum, its own publisher, and an isolation
-boundary other code may cross only through a bridge. Create one ONLY if all three hold:
+A domain is a self-contained area of the game or services with its own enum, its own bus,
+and an isolation boundary other code may cross only through a bridge. Create one ONLY if
+all three hold:
 
 1. **Separate concern with its own lifecycle** — not app flow (GameFlow), not gameplay
    (TempleRun), not raw input (UserInitiated), not Unity Gaming Services (UGS).
@@ -89,19 +90,21 @@ crossing to `GameServiceEvents` in `com.crawfissoftware.contracts` and bridge it
 
 ### Step 5 (optional): Auto-flow class
 
-Follow the pattern of `UGSAutoEventFlow` (dictionary of same-domain mappings +
-subscribe-to-all dispatch). Skip until the domain actually has same-domain progressions.
+Derive from `AutoEventFlowBase<TEnum, TEnum>` (common package) and declare a `ChainTable`
+pair list, the way `UGSAutoEventFlow` does. Skip until the domain actually has same-domain
+progressions.
 
 ### Step 6: Bridge class — required as soon as the domain talks to another
 
-Follow `UGSGameFlowBridge.cs`: direction dictionaries plus `SubscribeToAllEnumEvents` on
-both publishers. **Never reference the new domain's enum from another domain's code** —
-the bridge is the only crossing point. Precedent for shortcuts: `TempleRunGameFlowBridge`
-carries a third, passthrough dictionary (TempleRun → UGS) to avoid relaying through
-GameFlow — acceptable, but it lives in a bridge file. Add mappings with
-`/add-bridge-mapping`, and add the new bridge to that skill's "Available Bridges" table.
+Follow `UGSGameFlowBridge.cs`: one `EventChainDispatcher` pair table per direction,
+attached in `Awake()` and detached in `OnDestroy()`. **Never reference the new domain's
+enum from another domain's code** — the bridge is the only crossing point. Precedent for
+shortcuts: `TempleRunUGSBridge` maps gameplay events straight onto the contract to avoid
+relaying through GameFlow — acceptable, because it is itself a bridge file. Add mappings
+with `/add-bridge-mapping`, and add the new bridge to that skill's "Available Bridges"
+table.
 
-### Step 7: Register the domain everywhere the current four are listed
+### Step 7: Register the domain everywhere the current five are listed
 
 This is the step people forget. Update every place that enumerates domains:
 
@@ -123,8 +126,8 @@ event logging enabled and inspect the trace.
 
 ```
 Created domain: [Name]
-  Enum:      Assets/[Name]/Scripts/Events/[Name]Events.cs  ([N] events)
-  Publisher: EventsPublisher[Name]  (hosted in: [scenes])
+  Enum:      Assets/[Name]/Scripts/Events/[Name]Events.cs  ([N] events, [EventEnum])
+  Bus:       [Name]Bus = EventsFor<[Name]Events>  (static — no scene object)
   Flow:      [path, or "none yet — no same-domain progressions"]
   Bridge:    [path]  ([n] mappings [Name]->X, [m] mappings X->[Name])
   Registered in: CLAUDE.md, 6 skills, 2 pointer files, README.md

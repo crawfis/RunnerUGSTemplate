@@ -25,9 +25,10 @@ Display a comprehensive view of all events in the event system.
 | GameService | `Runtime/GameServiceEvents.cs` in the `com.crawfissoftware.contracts` package |
 | UGS | `Runtime/Events/UGS_EventsEnum.cs` in the `com.crawfissoftware.ugs` package (read-only here) |
 
-> The authoritative domain list is the set of `EventsPublisher*` singleton subclasses
-> (one per enum). If a domain exists that isn't in this table (added via
-> `/add-event-domain`), include it in the listing and update this table.
+> The authoritative domain list is the set of `[EventEnum]`-marked enums —
+> `CrawfisSoftware > Events > List Domains` sweeps them in edit mode. If a domain exists
+> that isn't in this table (added via `/add-event-domain`), include it in the listing and
+> update this table.
 
 ### Step 2: Read auto-chain mappings
 
@@ -41,9 +42,9 @@ Read the relevant auto-flow file(s) and extract all dictionary entries.
 
 ### Step 3: Read bridge mappings
 
-Read bridge files and extract cross-domain mappings:
-- `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (includes the
-  TempleRun -> UGS passthrough dictionary)
+Read bridge files and extract the cross-domain pair tables:
+- `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` (input -> gameplay)
+- `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`
 - `Assets/UGSGlue/UGSGameFlowBridge.cs` and `Assets/UGSGlue/TempleRunUGSBridge.cs`
 - `Runtime/Events/GameServiceEventsUGSBridge.cs` in the `com.crawfissoftware.ugs` package
 
@@ -53,7 +54,7 @@ For each domain, output a table grouped by category:
 
 ```
 ## [Domain] Events ([count] events)
-Publisher: EventsPublisher[Domain].Instance
+Bus: EventsFor<[Domain]Events> (static; aliased [Domain]Bus)
 
 ### [Category Name]
 | Event | Value | Auto-Chain | Bridge | Notes |
@@ -77,11 +78,14 @@ At the end, show the next available value ranges for adding new events:
 
 | Domain | Last Used | Next Available Range |
 |--------|-----------|---------------------|
-| GameFlow | 123 (QuitCompleted) | 130+ |
-| TempleRun | 285 (TeleportEnded) | 290+ |
-| UserInitiated | 2 (PauseToggle) | 3+ |
-| UGS | [last] | [next]+ |
+| GameFlow | 141 (SessionCoinsChanged) | 150+ |
+| TempleRun | 350 (SegmentGeometryReady) | 360+ |
+| UserInitiated | (implicit values — just append) | — |
+| UGS | (implicit values — append in category) | — |
+| GameService | 40 (CurrencyBalanceChanged) | 50+ (deliberately rare) |
 ```
+
+(Re-derive these from the enums each run — the table above is a snapshot.)
 
 ### Step 6: Show flow summary (if `all`)
 
@@ -90,18 +94,18 @@ When listing all domains, include the cross-domain flow:
 ```
 ## Cross-Domain Event Flow
 
-UserInput -> TempleRun:
-  (no bridges - handled by direct subscription in controllers)
+UserInput -> TempleRun (via Input2TempleRunAutoEventBridge):
+  [list all mappings]
 
-TempleRun -> GameFlow (via TempleRunGameFlowBridge):
-  [list all TempleRun -> GameFlow mappings]
+TempleRun -> GameFlow / GameFlow -> TempleRun (via TempleRunGameFlowBridge):
+  [list both pair tables]
 
-GameFlow -> TempleRun (via TempleRunGameFlowBridge):
-  [list all GameFlow -> TempleRun mappings]
+TempleRun -> GameService (via TempleRunUGSBridge, one-way):
+  [list the pair table]
 
-UGS -> GameFlow (via UGSGameFlowBridge):
-  [list all UGS -> GameFlow mappings]
+GameFlow <-> GameService (via UGSGameFlowBridge):
+  [list both pair tables, plus the hand-written ServicesStatusChanged handling]
 
-GameFlow -> UGS (via UGSGameFlowBridge):
-  [list all GameFlow -> UGS mappings]
+GameService <-> UGS (via GameServiceEventsUGSBridge, ugs package):
+  [list both pair tables, plus the hand-written status/balance handling]
 ```

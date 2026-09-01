@@ -73,7 +73,9 @@ The general-purpose manager. Reads segment definitions from the ScriptableObject
 geometry (or a random value between `MinTrackLength` and `MaxTrackLength` for the fallback
 path when no level is selected).
 
-**Direction logic:** 40% Left, 40% Right, 20% Left (randomised when no definition overrides it).
+**Direction logic:** 40% Left, 40% Right, and the remaining 20% falls through to Left — a
+deliberate-looking 60/40 left bias in `GetNewDirection()` (randomised when no definition
+overrides it).
 
 **Best for:** Most levels. Use this unless you have a specific tiling or fixed-pattern requirement.
 
@@ -371,10 +373,14 @@ testing, but none of your authored segments will appear.
 ## Step 7 — Playtest and Iterate
 
 ### Quick playtest without UGS
-1. Open `0_BootStrap` scene
-2. Disable the `Load_UGS_Init` GameObject in the Hierarchy
-3. Enable **CrawfisSoftware > Play Scene 0 Always** (toggle in menu bar)
-4. Press Play
+1. Open `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only` (or select the
+   `Test_GameOnly_Windows` build profile)
+2. Enable **CrawfisSoftware > Play Scene 0 Always** (toggle in menu bar)
+3. Press Play
+
+> Do **not** do this by disabling `Load_UGS_Init` in `0_BootStrap` — that used to work and no
+> longer does; the boot then sits on the loading screen because nothing publishes
+> `GameplayReady`. See CLAUDE.md, "Test Without UGS".
 
 ### Enable event logging
 Turn on `CrawfisSoftware > Events > Log Events`. Every `TrackSegmentCreated` and `SplineSegmentCreated` event will be printed to the Console, showing the segment ID, direction, length, and spawn mode. Good for verifying the correct segments are selected.
