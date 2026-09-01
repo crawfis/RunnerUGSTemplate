@@ -6,9 +6,14 @@
 > `EventsPublisher*` singletons. The cross-domain hop also goes through `GameServiceEvents` now, not
 > directly between UGS and GameFlow.
 >
-> One caveat this document does not yet reflect: `DifficultyObserver` is constructed by
-> nothing in the package, so `GameServiceEvents.DifficultySettingsAvailable` is not published today.
-> The flow described here is the design, not fully live behaviour.
+> The publisher changed. `DifficultyObserver` is gone: nothing ever constructed it, so
+> `DifficultySettingsFetched` was never published and this whole flow was design rather than
+> behaviour. `RemoteConfigManager` now publishes it from the response it already fetches, which
+> also removes a second Remote Config round trip for a payload the first one had downloaded.
+>
+> Two things still gate it at runtime, and neither is code: the active environment needs a
+> `difficulty_settings` key, and a missing key is deliberately silent - the game simply keeps the
+> local table `LoadDefaultGameConfigs` supplies.
 
 ## Overview
 
@@ -44,16 +49,17 @@ PHASE 2: REMOTE CONFIG FETCH (PARALLEL WITH AUTH)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     ┌─────────────────────────────────────┐
-    │ DifficultyObserver                  │
+    │ RemoteConfigManager                 │
     │ (Runtime/RemoteConfig/  [ugs package])  │
     │                                     │
-    │ 1. Detects player signed in         │
-    │ 2. Calls GetDifficultySettingsAsync()│
-    │ 3. Fetches from RemoteConfig API    │
+    │ 1. Fetches from RemoteConfig API    │
+    │ 2. Publishes RemoteConfigFetched    │
+    │ 3. Reads the difficulty_settings key│
+    │    off the response it already has  │
     │ 4. Deserializes to:                 │
     │    List<DifficultyConfig>           │
     │    (from CrawfisSoftware.Config)    │
-    │ 5. Stores in RuntimeDifficultySettings
+    │ 5. Absent key -> silence, not error │
     └─────────────────────────────────────┘
                     │
                     ▼
@@ -156,39 +162,35 @@ UGSBus.Publish(
 ---
 
 ### Phase 2: RemoteConfig Fetch
-**Component:** `DifficultyObserver`
+**Component:** `RemoteConfigManager`
 **Location:** `Runtime/RemoteConfig/  [ugs package]`
-**Responsibility:** Fetch difficulty settings from RemoteConfig service
+**Responsibility:** Fetch RemoteConfig once, and announce the difficulty table it carries
 **Event Published:**
 - `UGS_EventsEnum.DifficultySettingsFetched` (data: `List<DifficultyConfig>`)
 
 **Key Changes from Coupling Remediation:**
-- ✅ Now imports `CrawfisSoftware.Config` (shared namespace)
-- ✅ Uses shared `DifficultyConfig` type instead of TempleRun's
+- ✅ Uses the shared `DifficultyConfig` from `CrawfisSoftware.Config`, not TempleRun's
 - ✅ No direct coupling to TempleRun domain
+- ✅ One fetch, not two: the table comes out of the response the manager already awaited
 
 **Code Flow:**
 ```csharp
-// In DifficultyObserver.cs
-void OnSignedIn()
+// In RemoteConfigManager.cs - called from ApplyRemoteConfig(), after a successful fetch
+private void PublishDifficultySettings()
 {
-    if (IsSignedIn())
-    {
-        _ = GetDifficultySettingsAsync();
-    }
-}
+    RuntimeConfig appConfig = RemoteConfigService.Instance.appConfig;
+    string key = RemoteConfigConstants.difficultySettingsKey;   // "difficulty_settings"
 
-async Task GetDifficultySettingsAsync()
-{
-    var difficulties = await GetDefinitions();
-    RuntimeDifficultySettings = difficulties;
+    // Absent is not a failure: the game ships its own configs and only lets the
+    // environment override them, so silence leaves those local defaults standing.
+    if (!appConfig.HasKey(key)) return;
 
-    // Publish event with fetched configs
-    UGSBus.Publish(
-        UGS_EventsEnum.DifficultySettingsFetched,
-        this,
-        difficulties  // List<DifficultyConfig>
-    );
+    // config[key] is the raw JSON token, not one of the typed getters: the value is an
+    // array of objects, which RuntimeConfig has no accessor for.
+    List<DifficultyConfig> difficulties = appConfig.config[key]?.ToObject<List<DifficultyConfig>>();
+    if (difficulties == null || difficulties.Count == 0) return;
+
+    UGSBus.Publish(UGS_EventsEnum.DifficultySettingsFetched, this, difficulties);
 }
 
 async Task<List<DifficultyConfig>> GetDefinitions()
@@ -438,7 +440,8 @@ public enum GameFlowEvents
 public enum TempleRunEvents
 {
     // Related to RemoteConfig/Difficulty
-    DifficultySettingsApplied = 320,  // Bridged from GameFlow
+    [EventDelivery(EventDelivery.Sticky)]
+    DifficultySettingsApplied = 320,  // Bridged from GameFlow; the REMOTE table
     DifficultyChanging = 321,
     DifficultyChanged = 322,
     DifficultyChangeFailed = 323,
@@ -453,10 +456,16 @@ public enum TempleRunEvents
 | Step | Component | Event Published | Data Type | Destination |
 |------|-----------|-----------------|-----------|-------------|
 | 1 | PlayerAuthenticationManager | PlayerAuthenticated | null | UGSBus |
-| 2 | DifficultyObserver | DifficultySettingsFetched | List<DifficultyConfig> | UGSBus |
-| 3 | UGSGameFlowBridge | DifficultySettingsApplied | List<DifficultyConfig> | GameFlowBus |
-| 4 | TempleRunGameFlowBridge | DifficultySettingsApplied | List<DifficultyConfig> | TempleRunBus |
-| 5 | GameDifficultyManager | (stores configs) | Dictionary<string, DifficultyConfig> | Local storage |
+| 2 | RemoteConfigManager | DifficultySettingsFetched | List<DifficultyConfig> | UGSBus |
+| 3 | GameServiceEventsUGSBridge | DifficultySettingsAvailable | List<DifficultyConfig> | GameServiceBus |
+| 4 | UGSGameFlowBridge | DifficultySettingsApplied **(Sticky)** | List<DifficultyConfig> | GameFlowBus |
+| 5 | TempleRunGameFlowBridge | DifficultySettingsApplied **(Sticky)** | List<DifficultyConfig> | TempleRunBus |
+| 6 | GameDifficultyManager | (stores them, and latches so the local table cannot overwrite them) | Dictionary<string, DifficultyConfig> | Local storage |
+
+Steps 4 and 5 are declared `[EventDelivery(EventDelivery.Sticky)]`, and the flow does not work
+without it. Step 2 happens during boot, while `TempleRunGameFlowBridge` lives in `Game_Boot_2_Play`
+and `GameDifficultyManager` in a gameplay scene, so both subscribe long after the publish. A
+retained event is delivered on subscribe; a transient one would reach neither of them, ever.
 
 ---
 
@@ -536,12 +545,15 @@ GameDifficultyManager (was in GameFlow folder)
 ```
 RemoteConfig (UGS)
     ↓
-DifficultyObserver (UGS)
+RemoteConfigManager (UGS)
     └─ using CrawfisSoftware.Config;  ✅ shared namespace
-    └─ uses DifficultyConfig from _Common (✅ no cross-domain coupling)
+    └─ uses DifficultyConfig from the common package (✅ no cross-domain coupling)
     └─ publishes UGS_EventsEnum.DifficultySettingsFetched ✅
     ↓
-UGSGameFlowBridge
+GameServiceEventsUGSBridge (UGS package)
+    └─ translates to GameServiceEvents.DifficultySettingsAvailable ✅ (the contract; neither side owns it)
+    ↓
+UGSGameFlowBridge (Assets/UGSGlue)
     └─ translates to GameFlowEvents.DifficultySettingsApplied ✅
     ↓
 TempleRunGameFlowBridge
@@ -558,11 +570,12 @@ GameDifficultyManager (now in TempleRun domain)
 
 | File | Purpose |
 |------|---------|
-| `Runtime/RemoteConfig/  [ugs package]DifficultyObserver.cs` | Fetch RemoteConfig, publish DifficultySettingsFetched |
-| `Runtime/Events/  [ugs package]UGSGameFlowBridge.cs` | Bridge UGS → GameFlow events |
+| `Runtime/RemoteConfig/  [ugs package]RemoteConfigManager.cs` | Fetch RemoteConfig, publish DifficultySettingsFetched |
+| `Runtime/Events/  [ugs package]GameServiceEventsUGSBridge.cs` | Bridge UGS ↔ the GameServiceEvents contract |
+| `Assets/UGSGlue/UGSGameFlowBridge.cs` | Bridge the contract ↔ GameFlow events |
 | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | Bridge GameFlow → TempleRun events |
 | `Assets/TempleRun/Scripts/Config/GameDifficultyManager.cs` | Apply difficulty settings in TempleRun domain |
-| `Assets/_Common/Config/DifficultyConfig.cs` | Shared data type for all domains |
+| `Runtime/Config/DifficultyConfig.cs`  [common package] | Shared data type for all domains |
 | `Runtime/Events/  [ugs package]UGS_EventsEnum.cs` | UGS event definitions |
 | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` | GameFlow event definitions |
 | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` | TempleRun event definitions |

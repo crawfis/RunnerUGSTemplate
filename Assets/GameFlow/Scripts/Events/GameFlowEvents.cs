@@ -77,6 +77,18 @@ namespace CrawfisSoftware.GameFlow.Events
         DifficultyChanging = 91,
         DifficultyChanged = 92,
         DifficultyChangeFailed = 93,
+        /// <summary>
+        /// The difficulty table the services layer supplied, bridged from
+        /// <c>GameServiceEvents.DifficultySettingsAvailable</c>. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>Sticky.</b> A difficulty table is a level, not an edge: self-describing, and
+        /// true whenever it is read. It has to be retained, because the only publisher is the
+        /// services layer during boot and the only consumer is <c>TempleRunGameFlowBridge</c>,
+        /// which lives in <c>Game_Boot_2_Play</c> and does not exist yet when that publish
+        /// happens. As an edge it would reach nothing, every time.</para>
+        /// </remarks>
+        [EventDelivery(EventDelivery.Sticky)]
         DifficultySettingsApplied = 94,
 
         // ---------- Save / Load (optional but useful hooks) ----------
