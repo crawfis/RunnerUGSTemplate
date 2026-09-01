@@ -362,10 +362,12 @@ Three build profiles support isolated development and testing:
 11  UGS/Scenes/UGS/Leaderboards                       ◄── Leaderboards UI panel
 ```
 
-> The profile itself still carries a 13th entry, `UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only`,
-> pointing at a scene deleted in `cd09524`. Remove it in **File → Build Profiles →
-> Test_UGS_Windows → Scene List**; a build profile is a serialized asset, so it cannot be
-> corrected by editing this document.
+> The `.asset` file still carries a 13th entry, `UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only`,
+> pointing at a scene deleted in `cd09524`. **It has no effect and needs no action.** Unity drops an
+> unresolvable path when it loads a profile, so the Build Profiles window shows twelve rows and
+> builds use twelve scenes — the entry never reaches C# and cannot be selected or removed through
+> the window. It is stale YAML that Unity has no reason to rewrite, and it will disappear on its own
+> the next time the scene list is edited.
 
 ### Switching Profiles
 
