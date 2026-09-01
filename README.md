@@ -52,7 +52,8 @@ Student teams can replace the Temple Run gameplay with their own game, add new U
 
 ## Codebase Statistics
 
-> Assembly-CSharp only — excludes `UGS/ThirdParty/Blocks/`, `ThirdParty/`, `CloudCode/`, and generated bindings.
+> Assembly-CSharp only — excludes `ThirdParty/`, `CloudCode/`, and generated bindings. It also
+> excludes the UGS domain entirely, which now ships as a package rather than as project source.
 
 | Metric | Count |
 |--------|-------|
@@ -62,7 +63,12 @@ Student teams can replace the Temple Run gameplay with their own game, add new U
 | ScriptableObjects | 10 |
 | Namespaces | 29 |
 | Unity scenes | 31 |
-| Defined events (across all 4 domains) | 186 |
+| Defined events (the 3 in-repo domains: GameFlow, TempleRun, UserInitiated) | 206 |
+
+The other two domains — `GameServiceEvents` and `UGS_EventsEnum` — are declared in packages and are
+not counted above. **`CrawfisSoftware → Events → List Domains` is the authoritative count**: it
+sweeps every `[EventEnum]` in edit mode and reports all five, so trust it over this table, which is
+a hand-taken snapshot.
 
 ### Types by Domain
 
@@ -283,7 +289,7 @@ Open the project folder in Unity Hub. Allow time for package resolution.
 Services → Cloud Code → Generate All Modules Bindings
 ```
 
-Verify: Check `Assets/CloudCode/GeneratedModulesBindings` folder exists.
+Verify: Check `Assets/CloudCode/GeneratedModuleBindings` folder exists.
 
 ### 4. Configure Play Mode
 
@@ -325,7 +331,7 @@ CrawfisSoftware → Events → Log Events
 
 ### 9. Run the Game
 
-Open `Assets/GameFlow/Scenes/Boot/0_BootStrap` and enter Play Mode.
+Open `Assets/UGS/Scenes/Boot/0_BootStrap` (build index 0) and enter Play Mode.
 
 ---
 
@@ -337,7 +343,7 @@ Three build profiles support isolated development and testing:
 |---------|---------|---------|
 | **Windows** | Full production build | `0_BootStrap` |
 | **Test_UGS_Windows** | UGS testing without gameplay | `0_BootStrap_UGS_Only` |
-| **Test_GameOnly_Windows** | Gameplay without UGS | `0_BootStrap` (UGS disabled) |
+| **Test_GameOnly_Windows** | Gameplay without UGS | `0_BootStrap_Game_Only` |
 
 ### Test_UGS_Windows Scene List
 
@@ -354,8 +360,12 @@ Three build profiles support isolated development and testing:
  9  UGS/Scenes/UGS/AchievementNotifications           ◄── In-game achievement toasts
 10  UGS/Scenes/UGS/Achievements                       ◄── Achievements UI panel
 11  UGS/Scenes/UGS/Leaderboards                       ◄── Leaderboards UI panel
-12  UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only    ◄── UGS init for test-only boot
 ```
+
+> The profile itself still carries a 13th entry, `UGS/Scenes/Test/UGS_Boot_0_Test_Init_UGS_Only`,
+> pointing at a scene deleted in `cd09524`. Remove it in **File → Build Profiles →
+> Test_UGS_Windows → Scene List**; a build profile is a serialized asset, so it cannot be
+> corrected by editing this document.
 
 ### Switching Profiles
 
@@ -895,9 +905,15 @@ The **Test_GameOnly_Windows** profile runs actual Temple Run gameplay **without*
 ### Setup
 
 1. Select **Test_GameOnly_Windows** build profile (File → Build Profiles)
-2. Open `Assets/Scenes/Boot/0_BootStrap` scene
-3. **Disable** the `Load_UGS_Init` GameObject in the hierarchy
-4. Enable event logging (optional): `CrawfisSoftware → Events → Log Events`
+2. Open `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only` scene
+3. Enable event logging (optional): `CrawfisSoftware → Events → Log Events`
+
+> **Do not do this by disabling `Load_UGS_Init` in `0_BootStrap`.** That used to work and no longer
+> does. `0_BootStrap` also carries `Load_UGS_Glue`, and the `UGSGameFlowBridge` in that scene is the
+> only publisher of `GameFlowEvents.GameplayReady` there — it fires on
+> `ServicesStatusChanged == Ready`. With UGS init disabled that status never arrives, the main menu
+> is never requested, and the boot sits on the loading screen. `0_BootStrap_Game_Only` wires that
+> path itself, with no services involved.
 5. Enter Play Mode
 
 ### Scene List
@@ -1026,17 +1042,16 @@ After Game Over, player can:
 
 ## Project Structure
 
-The codebase is organized into **four primary domains** with clear separation of concerns:
+The codebase is organized into **two in-repo domains** — GameFlow and TempleRun — plus the UGS
+domain and the shared infrastructure, which arrive as UPM packages rather than living here.
+
+`Assets/_Common/` is gone: its contents ship as `com.crawfissoftware.common`
+(`Runtime/Events/AutoEventFlowBase.cs`, `Runtime/Config/DifficultyConfig.cs`,
+`Runtime/SceneManagement/`, `Runtime/Test/`, `Runtime/Utility/`).
 
 ```
 RunnerUGSTemplate/
 ├── Assets/
-│   ├── _Common/                          # Shared infrastructure
-│   │   ├── Events/                       # AutoEventFlowBase (base class for all auto-flows)
-│   │   ├── Test/                         # Test utilities and test boot scenes
-│   │   │   └── Scenes/                   # Test-only boot scenes
-│   │   └── Utility/                      # Logger, EventLoggerDump, DebugLog
-│   │
 │   ├── GameFlow/                         # Application lifecycle domain
 │   │   ├── Scripts/
 │   │   │   ├── Events/                   # GameFlowEvents, GameFlowAutoEventFlow
@@ -1046,7 +1061,9 @@ RunnerUGSTemplate/
 │   │   │   ├── UI/                       # UIPanelController, MainMenuPanelController
 │   │   │   └── SceneManagement/          # LoadSceneAfterGameControlEvent, FireEventAfterSceneLoads
 │   │   ├── Scenes/
-│   │   │   └── Boot/                     # 0_BootStrap, Game_Boot_0_Initialization, Game_Boot_1_UI, Game_Boot_2_Play
+│   │   │   └── Boot/                     # 0_BootStrap_Game_Only (the no-services entry point),
+│   │   │                                 #   Game_Boot_0_Initialization, Game_Boot_0_Test_Initialization,
+│   │   │                                 #   Game_Boot_1_UI, Game_Boot_2_Play
 │   │   ├── Audio/                        # UI sound effects
 │   │   └── UI Toolkit/                   # UXML, USS for GameFlow UI
 │   │
@@ -1072,33 +1089,30 @@ RunnerUGSTemplate/
 │   │   ├── Scriptables/                  # ScriptableObjects for TempleRun
 │   │   └── UI Toolkit/                   # UXML, USS for gameplay UI
 │   │
-│   ├── UGS/                              # Unity Gaming Services domain
-│   │   ├── Scripts/
-│   │   │   ├── (moved) The UGS domain now ships as the com.crawfissoftware.ugs package
-│   │   │   │                             # UGSGameFlowBridge (bridges UGS → GameFlow)
-│   │   │   ├── Initialization/           # GameManagerUGS, PlayerAuthenticationManager, UGS_State
-│   │   │   ├── Authentication/           # PlayerSignInController
-│   │   │   ├── RemoteConfig/             # RemoteConfigManager (the only fetch; publishes difficulty_settings)
-│   │   │   ├── Leaderboard/              # LeaderboardController, LeaderboardPlayerController
-│   │   │   ├── Achievements/             # AchievementsPrefab, DistanceBasedAchievements
-│   │   │   ├── Economy/                  # PlayerEconomyManager, PlayerEconomyManagerClient
-│   │   │   ├── PlayerData/               # PlayerDataManager, PlayerDataManagerClient
-│   │   │   └── Managers/                 # (Reserved for future managers)
+│   ├── UGSGlue/                          # This game's half of the GameServiceEvents contract.
+│   │                                     #   UGSGameFlowBridge (GameFlow ↔ contract),
+│   │                                     #   TempleRunUGSBridge (gameplay → contract),
+│   │                                     #   Test_SubmitLeaderboardScore, UGS_Glue.unity (build index 1)
+│   │
+│   ├── UGS/                              # What is left of the UGS domain here: assets, not code.
+│   │   │                                 #   The scripts ship as com.crawfissoftware.ugs
 │   │   ├── Scenes/
-│   │   │   ├── Boot/                     # UGS_Boot_0_Initialization, UGS_Boot_1_RemoteConfig
-│   │   │   │                             # UGS_Boot_2_Authentication, UGS_Boot_3_Achievements, UGS_Boot_4_Leaderboards
-│   │   │   ├── Test/                     # Test-specific UGS scenes
+│   │   │   ├── Boot/                     # 0_BootStrap (ENTRY, build index 0), UGS_Boot_0_Initialization,
+│   │   │   │                             #   UGS_Boot_1_RemoteConfig, UGS_Boot_2_Authentication,
+│   │   │   │                             #   UGS_Boot_3_Achievements, UGS_Boot_4_Leaderboards
+│   │   │   ├── Test/                     # 0_BootStrap_UGS_Only, DummyGame_Boot_0_Initialization,
+│   │   │   │                             #   Test_SubmitScoreAndEnd
 │   │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards (UI scenes)
 │   │   ├── CloudCode/
-│   │   │   └── TempleRunUGSCloud~/       # .NET 6.0 Cloud Code project (30+ cloud functions)
+│   │   │   └── TempleRunUGSCloud~/       # .NET Cloud Code module: 6 services, 11 endpoints
+│   │   ├── Economy/                      # COIN.ecc — the currency definition, deployed from the
+│   │   │                                 #   Deployment window. The id comes from the filename
 │   │   ├── Editor/                       # RemoteConfig editor data
-│   │   ├── Prefabs/                      # UGS-related prefabs
-│   │   ├── UI/                           # UGS-only PanelSettings + the login modal UXML/USS
-│   │   └── ThirdParty/Blocks/            # Vendored Unity Building Blocks, pruned to what UGS uses
-│   │                                     #   (see THIRD-PARTY-NOTICES.md)
+│   │   └── Prefabs/                      # AchievementsPrefab, AchievementsNotificationPrefab,
+│   │                                     #   LeaderboardPanel (their scripts come from the package)
 │   │
 │   ├── CloudCode/                        # Cloud Code generated bindings (top-level for Unity)
-│   │   └── GeneratedModulesBindings/
+│   │   └── GeneratedModuleBindings/      # TempleRunUGSCloud only
 │   │
 │   └── [Other Assets]/                   # Audio, Graphics, Input, Materials, Prefabs, Resources, Settings, ThirdParty
 │
@@ -1291,7 +1305,10 @@ Default leaderboard (`DailyDistance`):
 
 ### Achievement Configuration
 
-Achievements are defined in `Assets/UGS/ThirdParty/Blocks/Achievements/Deployment/Achievements.ach`:
+Achievements are defined through the `AchievementDefinitionCatalog` inspector in the
+`com.crawfissoftware.ugs` package, which exports a `.rc` file for the Deployment window. The
+`.ach` file this section used to describe went with the vendored Blocks tree. The shape of a
+definition is unchanged:
 
 ```json
 [{

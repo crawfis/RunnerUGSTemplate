@@ -567,7 +567,7 @@ Assets/
 │   │   │                             #   UGS_Boot_3_Achievements, UGS_Boot_4_Leaderboards
 │   │   ├── Test/                     # 0_BootStrap_UGS_Only, DummyGame_Boot_0_Initialization, Test_SubmitScoreAndEnd
 │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards
-│   ├── CloudCode/TempleRunUGSCloud~/ # .NET Cloud Code module (models + 16 services)
+│   ├── CloudCode/TempleRunUGSCloud~/ # .NET Cloud Code module (models + 6 services, 11 endpoints)
 │   ├── Economy/                      # COIN.ecc - the Economy currency definition; deploy it from the
 │   │                                 #   Deployment window. The id comes from the filename
 │   ├── Editor/                       # RemoteConfig editor data
@@ -584,11 +584,16 @@ Assets/
 
 ### Domain Responsibilities
 
-- **_Common**: Shared base classes and utilities used across all domains
+- **Common** (the `com.crawfissoftware.common` package, not a folder here): shared base classes and
+  utilities used across all domains — the one dispatch implementation, the live `DifficultyConfig`
 - **GameFlow**: Application lifecycle - boot, initialization, menus, level select, pause, quit, scene management
 - **TempleRun**: Gameplay mechanics - player movement, track generation, power-ups, input, audio
-- **UGS**: Unity Gaming Services - authentication, leaderboards, achievements, remote config, economy, player data
-- **Vendored** (`UGS/ThirdParty/Blocks`, CloudCode bindings, ThirdParty, LevelPlay, …): sample and utility code outside the domain rule
+- **UGS** (the `com.crawfissoftware.ugs` package): Unity Gaming Services - authentication,
+  leaderboards, achievements, remote config, economy. What remains under `Assets/UGS/` is assets:
+  scenes, prefabs, the Cloud Code module, `COIN.ecc`
+- **Vendored** (CloudCode bindings, `Assets/ThirdParty/`, LevelPlay, …): sample and utility code
+  outside the domain rule. The `UGS/ThirdParty/Blocks` tree is gone — vendored Asset Store content
+  cannot ship inside a UPM package, which is why the extraction removed it
 
 ### Event Flow Architecture
 
