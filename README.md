@@ -1106,7 +1106,7 @@ RunnerUGSTemplate/
 │   │   │   │                             #   Test_SubmitScoreAndEnd
 │   │   │   └── UGS/                      # Achievements, AchievementNotifications, Leaderboards (UI scenes)
 │   │   ├── CloudCode/
-│   │   │   └── TempleRunUGSCloud~/       # .NET Cloud Code module: 6 services, 11 endpoints
+│   │   │   └── TempleRunUGSCloud~/       # .NET Cloud Code module: 4 services, 7 endpoints
 │   │   ├── Economy/                      # COIN.ecc — the currency definition, deployed from the
 │   │   │                                 #   Deployment window. The id comes from the filename
 │   │   ├── Editor/                       # RemoteConfig editor data

@@ -1,38 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 namespace TempleRunUGSCloud.Models;
 
 public class PlayerData
 {
     [JsonProperty("displayName")]
     public string? DisplayName { get; set; }
-    
-    [JsonProperty("hearts")]
-    public int Hearts { get; set; }
-    
-    [JsonProperty("stars")]
-    public int Stars { get; set; }
-    
-    [JsonProperty("giftHearts")]
-    public int GiftHearts { get; set; }
-    
-    [JsonProperty("gameAreasData")]
-    public List<AreaData>? GameAreasData { get; set; }
-    
-    [JsonProperty("currentArea")]
-    public AreaData? CurrentArea { get; set; }
-    
-    [JsonProperty("hasInfiniteHeartEffectActive")]
-    public bool HasInfiniteHeartEffectActive { get; set; }
 
     public PlayerData(string displayName)
     {
         DisplayName = displayName;
-        
-        GameAreasData = new List<AreaData>();
     }
-    
+
     public PlayerData() : this("") { }
 }
 

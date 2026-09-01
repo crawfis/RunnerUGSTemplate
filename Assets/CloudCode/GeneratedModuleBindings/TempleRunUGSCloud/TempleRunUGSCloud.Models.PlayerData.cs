@@ -8,12 +8,6 @@ namespace Unity.Services.CloudCode.GeneratedBindings.TempleRunUGSCloud.Models
     public partial class PlayerData
     {
         public string DisplayName;
-        public int Hearts;
-        public int Stars;
-        public int GiftHearts;
-        public List<AreaData> GameAreasData;
-        public AreaData CurrentArea;
-        public bool HasInfiniteHeartEffectActive;
 
         [Preserve]
         public PlayerData ()

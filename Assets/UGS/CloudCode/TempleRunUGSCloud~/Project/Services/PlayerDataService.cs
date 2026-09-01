@@ -11,18 +11,20 @@ using Unity.Services.CloudSave.Model;
 namespace TempleRunUGSCloud.Services;
 
 /// <summary>
-/// Central data management service for player information in a mobile game metagame hub.
-/// 
+/// Central data management service for player information.
+///
 /// Core Responsibilities:
-/// - Player lifecycle management (new player onboarding, existing player validation/migration)
+/// - Player lifecycle management (new player onboarding, existing player sign-in)
 /// - Data persistence via Unity Cloud Save (protected and public data)
-/// - Game mechanics (heart system, star progression, level completion handling)
 /// - Profile management (display names, profile pictures)
-/// 
+///
 /// Key Cloud Code Functions:
 /// - OnSignInHandlePlayerInitialization: Main entry point for player setup
-/// - HandleLevelWon/HandleLevelLost: Process gameplay outcomes
 /// - SyncAllPlayerData: Reconnection sync
+/// - GetPlayerData: Read the stored record
+///
+/// Also the generic Cloud Save access layer for the rest of the module:
+/// HandleProfileChangeService and AdRewardsService both depend on it.
 /// 
 /// Documentation:
 /// - Cloud Save in Cloud Code docs: 
@@ -37,10 +39,7 @@ public class PlayerDataService
     public const string k_PublicDisplayNameKey = "DISPLAY_NAME";
     
     private const int k_MaxPreMadeProfilePictures = 9;
-    private const int k_MaxGiftHearts = 3;
-    private const int k_MaxPossibleStars = 25;
-    private const int k_MaxPossibleHearts = 100;
-    private const int k_DefaultAreaMaxProgress = 25;
+
     
     #endregion
     
@@ -49,17 +48,15 @@ public class PlayerDataService
     private readonly IGameApiClient m_GameApiClient;
     private readonly ILogger<PlayerDataService> m_Logger;
     private readonly PlayerEconomyService m_PlayerEconomyService;
-    private readonly GiftHeartCooldownService m_GiftHeartCooldownService;
     private static readonly Random s_Random = new Random();
     
     #endregion
     
-    public PlayerDataService(ILogger<PlayerDataService> logger, IGameApiClient gameApiClient, PlayerEconomyService playerEconomyService, GiftHeartCooldownService giftHeartCooldownService)
+    public PlayerDataService(ILogger<PlayerDataService> logger, IGameApiClient gameApiClient, PlayerEconomyService playerEconomyService)
     {
         m_Logger = logger;
         m_GameApiClient = gameApiClient;
         m_PlayerEconomyService = playerEconomyService;
-        m_GiftHeartCooldownService = giftHeartCooldownService;
     }
     
     #region Cloud Code Functions
@@ -164,62 +161,6 @@ public class PlayerDataService
         return null;
     }
     
-    [CloudCodeFunction("HandleLevelWon")]
-    public async Task<PlayerData?> HandleLevelWon(IExecutionContext context)
-    {
-        // TODO: In your game, consider adding validation such as:
-        // - Does player have hearts to play (unless infinite hearts active)?
-        // - Is the level within player's unlocked progression area?
-        // - Rate limiting: Has player completed levels suspiciously fast?
-        // - Score/time validation: Are completion metrics reasonable?
-
-        try
-        {
-            m_Logger.LogInformation("Handling level won for player {PlayerId}", context.PlayerId);
-        
-            var (success, playerData) = await TryGetPlayerData(context);
-            if (!success || playerData == null)
-            {
-                m_Logger.LogError("Cannot handle level won: Player data not found for player {PlayerId}", context.PlayerId);
-                return null;
-            }
-        
-            var updatedPlayerData = await AddStar(context, playerData);
-            m_Logger.LogInformation("Successfully handled level won for player {PlayerId}", context.PlayerId);
-            return updatedPlayerData;
-        }
-        catch (Exception ex)
-        {
-            m_Logger.LogError(ex, "Failed to handle level won for player {PlayerId}", context.PlayerId);
-            return null; // Or throw, depending on how you want the client to handle it
-        }
-    }
-    
-    [CloudCodeFunction("HandleLevelLost")]
-    public async Task<PlayerData?> HandleLevelLost(IExecutionContext context)
-    {
-        try
-        {
-            m_Logger.LogInformation("Handling level lost for player {PlayerId}", context.PlayerId);
-        
-            var (success, playerData) = await TryGetPlayerData(context);
-            if (!success || playerData == null)
-            {
-                m_Logger.LogError("Cannot handle level lost: Player data not found for player {PlayerId}", context.PlayerId);
-                return null;
-            }
-        
-            var updatedPlayerData = await DeductHeart(context, playerData); // If you modernize this too
-            m_Logger.LogInformation("Successfully handled level lost for player {PlayerId}", context.PlayerId);
-            return updatedPlayerData;
-        }
-        catch (Exception ex)
-        {
-            m_Logger.LogError(ex, "Failed to handle level lost for player {PlayerId}", context.PlayerId);
-            return null;
-        }
-    }
-    
     #endregion
 
     #region Player Lifecycle Management
@@ -276,21 +217,15 @@ public class PlayerDataService
 
         try
         {
-            bool needsSave = false;
-
-            // Validate and migrate existing player data - each operation returns true if changes were made
-            // This ensures players with legacy/corrupted data are automatically fixed on sign-in
-            needsSave |= EnsureGameAreasExist(playerData);
-            needsSave |= FixAreaProgressTracking(playerData);
-            needsSave |= ValidateAndFixPlayerData(playerData);
-            needsSave |= await CheckAndReplenishGiftHearts(context, playerData);
+            // Nothing to validate or migrate: the stored record is a display name and nothing
+            // else. The clamping and back-fill that used to run here existed for hearts, stars
+            // and area progress, all of which went with the Match3 sample this module came from.
 
             // Get economy data and profile picture in parallel
             var economyTask = m_PlayerEconomyService.GetPlayerEconomyData(context);
             var profileTask = GetPlayerProfilePicture(context);
-            var saveTask = needsSave ? SaveAllPlayerData(context, playerData) : Task.CompletedTask;
 
-            await Task.WhenAll(economyTask, profileTask, saveTask);
+            await Task.WhenAll(economyTask, profileTask);
 
             var economyData = await economyTask;
             var profilePicture = await profileTask;
@@ -329,107 +264,20 @@ public class PlayerDataService
         return success ? profilePicture : null;
     }
     
-    private async Task<bool> CheckAndReplenishGiftHearts(IExecutionContext context, PlayerData playerData)
-    {
-        if (playerData.GiftHearts < k_MaxGiftHearts && 
-            await m_GiftHeartCooldownService.CheckGiftHeartReplenish(context))
-        {
-            playerData.GiftHearts = k_MaxGiftHearts;
-            m_Logger.LogInformation("Replenished gift hearts");
-            return true;
-        }
-        return false;
-    }
+
 
     #endregion
 
-    #region Data Validation
-
-    private bool EnsureGameAreasExist(PlayerData playerData)
-    {
-        if (playerData.GameAreasData == null || !playerData.GameAreasData.Any())
-        {
-            playerData.GameAreasData = new List<AreaData> { CreateFirstAreaData() };
-            m_Logger.LogInformation("Added missing game areas data");
-            return true;
-        }
-        return false;
-    }
-
-    private bool FixAreaProgressTracking(PlayerData playerData)
-    {
-        bool needsFix = false;
-
-        foreach (var area in playerData.GameAreasData)
-        {
-            if (area.MaxProgress <= 0)
-            {
-                area.MaxProgress = k_DefaultAreaMaxProgress;
-                needsFix = true;
-            }
-        }
-
-        if (needsFix)
-        {
-            m_Logger.LogInformation("Fixed area progress tracking");
-        }
-
-        return needsFix;
-    }
-
-    private bool ValidateAndFixPlayerData(PlayerData playerData)
-    {
-        bool needsFix = false;
-    
-        var (heartsChanged, newHearts) = ClampValue(playerData.Hearts, 0, k_MaxPossibleHearts, "hearts");
-        var (starsChanged, newStars) = ClampValue(playerData.Stars, 0, k_MaxPossibleStars, "stars");
-        var (giftHeartsChanged, newGiftHearts) = ClampValue(playerData.GiftHearts, 0, k_MaxGiftHearts, "gift hearts");
-    
-        if (heartsChanged) playerData.Hearts = newHearts;
-        if (starsChanged) playerData.Stars = newStars;
-        if (giftHeartsChanged) playerData.GiftHearts = newGiftHearts;
-    
-        return heartsChanged || starsChanged || giftHeartsChanged;
-    }
-    
-    private (bool changed, int clampedValue) ClampValue(int value, int min, int max, string valueName)
-    {
-        int clampedValue = Math.Clamp(value, min, max);
-    
-        if (value != clampedValue)
-        {
-            m_Logger.LogWarning("Player had invalid {ValueName}: {Original}, clamped to {Clamped}", 
-                valueName, value, clampedValue);
-            return (true, clampedValue);
-        }
-    
-        return (false, clampedValue);
-    }
-    
-    #endregion
-    
     #region Data Creation
     
     private PlayerData CreateDefaultPlayerData()
     {
         m_Logger.LogDebug("Creating default player data");
 
-        var initialArea = CreateFirstAreaData();
-        
-        var playerData = new PlayerData
+        return new PlayerData
         {
-            DisplayName = "New Player",
-            Hearts = 8,
-            GiftHearts = 3,
-            Stars = 5,
-            HasInfiniteHeartEffectActive = false,
-            CurrentArea = initialArea,
-            GameAreasData = new List<AreaData>
-            {
-                initialArea
-            },
+            DisplayName = "New Player"
         };
-        return playerData;
     }
 
     private ProfilePicture CreateStartingProfilePicture()
@@ -442,31 +290,6 @@ public class PlayerDataService
         };
     }
     
-    private static AreaData CreateFirstAreaData()
-    { 
-        var newAreaData = new AreaData
-        {
-            AreaName = "Area1",
-            AreaLevel = 1,
-            CurrentProgress = 0,
-            MaxProgress = 25,
-            TotalUpgradableSlots = 5,
-            UnlockRequirement_Stars = 1,
-            UpgradableAreaItems = new List<UpgradableAreaItem>()
-        };
-        
-        newAreaData.UpgradableAreaItems.Add(new UpgradableAreaItem
-        {
-            UpgradableName = "Shark",
-            UpgradableId = 1,
-            IsUnlocked = true,  // First item starts unlocked
-            CurrentLevel = 0,
-            MaxLevel = 5,
-            PerLevelCoinUpgradeRequirement = 20
-        });
-        
-        return newAreaData;
-    }
 
     #endregion
 
@@ -785,101 +608,4 @@ public class PlayerDataService
     
     #endregion
     
-    #region Game Actions
-    
-    public async Task<PlayerData?> DeductPlayerGiftHeart(IExecutionContext context)
-    {
-        var (success, playerData) = await TryGetPlayerData(context);
-        if (!success || playerData == null)
-        {
-            m_Logger.LogError("Cannot deduct gift heart: Player data not found");
-            return null;
-        }
-    
-        if (playerData.GiftHearts <= 0)
-        {
-            m_Logger.LogWarning("Cannot deduct gift heart: No hearts available to send");
-            return null;
-        }
-    
-        playerData.GiftHearts--;
-        m_Logger.LogInformation("Deducted heart from player {PlayerId}. Hearts remaining: {Hearts}", 
-            context.PlayerId, playerData.GiftHearts);
-        
-        try
-        {
-            await SavePlayerData(context, playerData);
-            return playerData;
-        }
-        catch (Exception ex)
-        {
-            m_Logger.LogError(ex, "Failed to save player data after deducting gift heart");
-            return null;
-        }
-    }
-
-    public async Task<PlayerData?> ApplyPlayerGift(IExecutionContext context, PlayerData playerData, int giftsReceived)
-    {
-        if (giftsReceived <= 0)
-        {
-            m_Logger.LogWarning("Cannot apply gift: Invalid gift amount");
-            return null;
-        }
-        
-        playerData.Hearts += giftsReceived;
-        
-        try
-        {
-            await SaveProtectedData(context, k_PlayerDataKey, playerData); 
-            return playerData;
-        }
-        catch (Exception ex)
-        {
-            m_Logger.LogError(ex, "Failed to save player data after applying gift");
-            return null;
-        }
-    }
-    
-    private async Task<PlayerData> AddStar(IExecutionContext context, PlayerData playerData)
-    {
-        playerData.Stars += 1;
-        if (playerData.Stars > k_MaxPossibleStars)
-        {
-            playerData.Stars = k_MaxPossibleStars;
-            m_Logger.LogInformation("Player stars clamped to maximum");
-        }
-        
-        try
-        {
-            await SavePlayerData(context, playerData); // Now throws
-            return playerData;
-        }
-        catch (Exception ex)
-        {
-            m_Logger.LogError(ex, "Failed to save player data after adding star");
-            return null;
-        }
-    }
-
-    private async Task<PlayerData?> DeductHeart(IExecutionContext context, PlayerData playerData)
-    {
-        // If a player has infinite hearts, don't deduct hearts
-        if (playerData.HasInfiniteHeartEffectActive)
-        {
-            m_Logger.LogInformation($"Player {context.PlayerId} has infinite hearts active - no hearts deducted");
-            return playerData;
-        }
-        
-        playerData.Hearts -= 1;
-        if (playerData.Hearts < 0)
-        {
-            playerData.Hearts = 0;
-            m_Logger.LogInformation("Player {PlayerId} is dead :(", context.PlayerId);
-        }
-    
-        await SavePlayerData(context, playerData);
-        return playerData;
-    }
-    
-    #endregion
 }
