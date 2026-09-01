@@ -11,7 +11,8 @@ complete documentation, see [README.md](README.md).
 > resolve the same EventsPublisher package and use the same static `EventsFor<T>` buses, so
 > code and guidance port between them directly. The differences that remain are real ones:
 > this repo has two more domains (GameService and UGS) and eight dispatch classes rather
-> than four.
+> than four. The shared `Assets/TempleRun/` folder is kept in step by deliberate two-way
+> porting, not automatically — `/sync-templerun` classifies the drift and walks the port.
 
 **Course material:** [docs/FUTURE_TASKS.md](docs/FUTURE_TASKS.md) — the 33-task catalog for
 this repo (live services, multiplayer, deeper economy; its sections Q–X continue the sibling
@@ -138,6 +139,7 @@ When adding any new feature or behavior, you MUST follow this workflow:
 | Before starting work on events | `/list-events` to understand current state |
 | Feature needs a whole NEW domain (rare) | `/add-event-domain` — decision gate inside; then `/add-event` for its events |
 | Authoring track segments | Edit the `TrackSegmentSO` / `TrackLevelSO` assets in the Inspector, or use `/generate-segments` for bulk creation |
+| Porting TempleRun changes to/from the sibling repo | `/sync-templerun` — classify drift against EndlessRunnerTemplate, port file by file, keep the expected-differences table current |
 
 ## Architecture Overview
 
@@ -190,6 +192,12 @@ private void OnGameStarting(string eventName, object sender, object data)
 ```
 
 **CRITICAL: Always unsubscribe in OnDestroy()** - failure causes null reference errors after scene unload.
+
+> TempleRun files synced from the sibling repo (track generation, several player
+> controllers) use the typed alternative: `TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.ActiveTrackChanging)`
+> returns an `EventId<T>` whose Subscribe/Publish handlers take the payload already cast.
+> Both styles are valid — match the file you are editing, and do not rewrite synced files
+> back to the classic form (that re-creates cross-repo drift; see `/sync-templerun`).
 
 ### Publishing Events
 

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun.UI

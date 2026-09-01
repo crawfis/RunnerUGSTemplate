@@ -3,7 +3,6 @@ using CrawfisSoftware.TempleRun.GameConfig;
 using System.Collections;
 
 using UnityEngine;
-
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun

@@ -1,11 +1,10 @@
-using CrawfisSoftware.Events;
+﻿using CrawfisSoftware.Events;
 
 using UnityEngine;
 using UnityEngine.InputSystem;
-
-// Note: CrawfisSoftware.Events import needed for EventsPublisherUserInitiated
-
 using UserInputBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Events.UserInitiatedEvents>;
+
+// Note: CrawfisSoftware.Events import needed for EventsFor<UserInitiatedEvents>
 
 namespace CrawfisSoftware.TempleRun.Input
 {

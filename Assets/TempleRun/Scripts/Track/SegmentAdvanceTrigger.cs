@@ -1,6 +1,7 @@
+using CrawfisSoftware.Events;
 using CrawfisSoftware.TempleRun.GameConfig;
-using UnityEngine;
 
+using UnityEngine;
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
@@ -10,10 +11,10 @@ namespace CrawfisSoftware.TempleRun
     /// full lifecycle events: Entering, Entered, Exiting, Exited.
     /// Current implementation: distance-based polling of DistanceTracker in Update().
     /// Future: could be swapped for collider-based triggers or DistanceInterestService callbacks.
-    ///    Dependencies: Blackboard.DistanceTracker, EventsPublisherTempleRun
+    ///    Dependencies: Blackboard.DistanceTracker, EventsFor<TempleRunEvents>
     ///    Subscribes: ActiveTrackChanging — tracks the current segment and exit distance
     ///    Subscribes: TempleRunStarted — enables distance checking
-    ///    Subscribes: TempleRunEvents.TempleRunEnded — stops distance checking, however the run ended
+    ///    Subscribes: TempleRunEnded — disables distance checking, however the run ended
     ///    Publishes: SegmentEntering, SegmentEntered, SegmentExiting, SegmentExited
     /// </summary>
     /// <remarks>
@@ -33,27 +34,30 @@ namespace CrawfisSoftware.TempleRun
         private bool _exitingFired = false;
         private TrackSegmentInfo _currentSegment;
 
+        private static readonly EventId<TrackSegmentInfo> TrackChanging =
+            TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.ActiveTrackChanging);
+        private static readonly EventId<float> DistanceUpdated =
+            TempleRunBus.Id<float>(TempleRunEvents.DistanceUpdated);
+
         private void Awake()
         {
-            TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            TempleRunBus.Subscribe(TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
+            TrackChanging.Subscribe(OnTrackChanging);
+            DistanceUpdated.Subscribe(OnDistanceUpdated);
             TempleRunBus.Subscribe(TempleRunEvents.TempleRunStarted, OnGameStarted);
             TempleRunBus.Subscribe(TempleRunEvents.TempleRunEnded, OnGameEnding);
         }
 
         private void OnDestroy()
         {
-            TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            TempleRunBus.Unsubscribe(TempleRunEvents.DistanceUpdated, OnDistanceUpdated);
+            TrackChanging.Unsubscribe(OnTrackChanging);
+            DistanceUpdated.Unsubscribe(OnDistanceUpdated);
             TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunStarted, OnGameStarted);
             TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunEnded, OnGameEnding);
         }
 
-        private void OnDistanceUpdated(string eventName, object sender, object data)
+        private void OnDistanceUpdated(string eventName, object sender, float distance)
         {
             if (!_isRunning || !_gameStarted) return;
-
-            float distance = (float)data;
 
             // Fire SegmentExiting once when the player approaches the exit.
             if (!_exitingFired && distance >= _currentExitDistance - TempleRunConstants.SegmentExitingTriggerDistance)
@@ -70,9 +74,9 @@ namespace CrawfisSoftware.TempleRun
             }
         }
 
-        private void OnTrackChanging(string eventName, object sender, object data)
+        private void OnTrackChanging(string eventName, object sender, TrackSegmentInfo segment)
         {
-            _currentSegment = (TrackSegmentInfo)data;
+            _currentSegment = segment;
             _isRunning = true;
             _exitingFired = false;
             _currentExitDistance += _currentSegment.Length;

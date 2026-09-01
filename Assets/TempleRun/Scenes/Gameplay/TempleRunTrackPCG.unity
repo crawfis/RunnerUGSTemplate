@@ -263,7 +263,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1009615617
 Transform:
   m_ObjectHideFlags: 0
@@ -286,12 +286,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1009615616}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82bf893c918aab54799322dadc80fd11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _numberOfLookAheadTracks: 2
+  _numberOfLookAheadTracks: 3
   _trackLevels: {fileID: 11400000, guid: 8ffafbd3a502d524d8c1b4cbbb8ea0a0, type: 2}
 --- !u!1 &1283783014
 GameObject:
@@ -354,7 +354,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1839240073
 MonoBehaviour:
   m_ObjectHideFlags: 0

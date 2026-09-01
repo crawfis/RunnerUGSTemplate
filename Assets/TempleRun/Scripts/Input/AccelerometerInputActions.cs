@@ -1,7 +1,6 @@
 using CrawfisSoftware.Events;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 using UserInputBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.Events.UserInitiatedEvents>;
 
 namespace CrawfisSoftware.TempleRun.Input

@@ -1,13 +1,12 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
-
 using TempleRunBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.TempleRun.TempleRunEvents>;
 
 namespace CrawfisSoftware.TempleRun
 {
     /// <summary>
     /// Moves the Character smoothly from the current position to the start of the new spline.
-    ///    Dependency: EventsPublisherTempleRun
+    ///    Dependency: EventsFor<TempleRunEvents>
     ///    Subscribes: TeleportStarted
     /// </summary>
     public class CharacterTeleporter : MonoBehaviour
