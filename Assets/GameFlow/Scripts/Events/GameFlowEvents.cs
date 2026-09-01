@@ -82,11 +82,12 @@ namespace CrawfisSoftware.GameFlow.Events
         /// <c>GameServiceEvents.DifficultySettingsAvailable</c>. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
         /// </summary>
         /// <remarks>
-        /// <para><b>Sticky.</b> A difficulty table is a level, not an edge: self-describing, and
-        /// true whenever it is read. It has to be retained, because the only publisher is the
-        /// services layer during boot and the only consumer is <c>TempleRunGameFlowBridge</c>,
-        /// which lives in <c>Game_Boot_2_Play</c> and does not exist yet when that publish
-        /// happens. As an edge it would reach nothing, every time.</para>
+        /// <para><b>Sticky.</b> A difficulty table is current state, not a one-time announcement:
+        /// self-describing, and true whenever it is read. It has to be retained, because the only
+        /// publisher is the services layer during boot and the only consumer is
+        /// <c>TempleRunGameFlowBridge</c>, which lives in <c>Game_Boot_2_Play</c> and does not
+        /// exist yet when that publish happens. Announced only once, it would reach nothing,
+        /// every time.</para>
         /// </remarks>
         [EventDelivery(EventDelivery.Sticky)]
         DifficultySettingsApplied = 94,
@@ -130,8 +131,8 @@ namespace CrawfisSoftware.GameFlow.Events
         /// run.</para>
         /// <para><b>Sticky</b>, and the first event in this enum to declare a delivery. The
         /// balance arrives once at sign-in, while the HUD that displays it lives in a gameplay
-        /// scene loaded per run. As an edge it would be long gone before any HUD existed, and the
-        /// display would stay blank until a run ended and banked.</para>
+        /// scene loaded per run. Announced only once, it would be long gone before any HUD
+        /// existed, and the display would stay blank until a run ended and banked.</para>
         /// </remarks>
         [EventPayload(typeof(long))]
         [EventDelivery(EventDelivery.Sticky)]
