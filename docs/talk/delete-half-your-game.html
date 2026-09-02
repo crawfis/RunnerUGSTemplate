@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delete Half Your Game and Ship It Anyway — talk slides</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --bg: #0E1216;
+    --surface: #151B22;
+    --surface-2: #1C232B;
+    --ink: #E7ECF1;
+    --ink-2: #B7C2CD;
+    --ink-3: #8E9CAA;
+    --rule: #29323C;
+    --gold: #E8B04B;      /* TempleRun / accent */
+    --blue: #6FB4F5;      /* UserInitiated */
+    --teal: #4FC0CA;      /* GameFlow */
+    --violet: #B08CF5;    /* UGS — the services */
+    --red:  #F0796B;      /* pain */
+    --green:#66C995;      /* good / shown / audit pass */
+    --gold-soft: rgba(232,176,75,.12);
+    --red-soft:  rgba(240,121,107,.10);
+    --teal-soft: rgba(79,192,202,.12);
+    --violet-soft: rgba(176,140,245,.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; overflow: hidden;
+    background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex; align-items: center; justify-content: center;
+  }
+  code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  #stage { width: 1280px; height: 720px; position: relative; flex: none; transform-origin: center center; }
+
+  .slide {
+    position: absolute; inset: 0; padding: 56px 68px 72px;
+    display: none; flex-direction: column;
+    background:
+      linear-gradient(180deg, rgba(232,176,75,.035), rgba(232,176,75,0) 140px),
+      var(--bg);
+  }
+  .slide.current { display: flex; }
+  .slide .notes { display: none; }
+  /* lane-line footer motif */
+  .slide::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+    background: repeating-linear-gradient(90deg, var(--rule) 0 46px, transparent 46px 78px);
+    opacity: .8;
+  }
+
+  .kicker { font-size: 18px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin: 0 0 10px; }
+  h1 { font-size: 68px; line-height: 1.05; margin: 8px 0 12px; font-weight: 700; letter-spacing: -.015em; }
+  h2 { font-size: 44px; line-height: 1.1; margin: 0 0 18px; font-weight: 700; letter-spacing: -.015em; }
+  h2.sm { font-size: 38px; }
+  h2 .dim { color: var(--ink-3); font-weight: 500; }
+  .sub { font-size: 26px; color: var(--ink-2); margin: 0 0 12px; line-height: 1.35; }
+  p, li { font-size: 25px; line-height: 1.4; }
+  ul { margin: 8px 0; padding-left: 30px; }
+  li { margin: 11px 0; }
+  li::marker { color: var(--gold); }
+  b, strong { color: var(--ink); }
+  .gold { color: var(--gold); } .blue { color: var(--blue); } .teal { color: var(--teal); } .violet { color: var(--violet); }
+  .red { color: var(--red); } .green { color: var(--green); } .mut { color: var(--ink-3); }
+  .punch {
+    margin-top: auto; padding: 16px 24px; border-left: 5px solid var(--gold);
+    background: var(--gold-soft); font-size: 28px; font-weight: 600; line-height: 1.3; border-radius: 0 10px 10px 0;
+  }
+  .punch.sm { font-size: 24px; }
+  .punch .mut { font-weight: 400; }
+
+  .chip {
+    display: inline-block; align-self: flex-start; font-size: 17px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+    padding: 7px 16px; border-radius: 999px; margin-bottom: 14px;
+    background: var(--gold); color: #16130a;
+  }
+  .chip.tech { background: var(--teal); color: #08191b; }
+  .chip.all  { background: var(--green); color: #07190f; }
+
+  pre {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+    padding: 18px 22px; margin: 10px 0; font-size: 19px; line-height: 1.5; overflow: hidden;
+  }
+  pre.small { font-size: 17.5px; line-height: 1.46; }
+  pre.xs { font-size: 16px; line-height: 1.42; padding: 14px 18px; }
+  code.inline { background: var(--surface-2); border: 1px solid var(--rule); border-radius: 6px; padding: 1px 8px; font-size: .92em; }
+  .c { color: #7f8d9a; font-style: italic; }        /* comment */
+  .k { color: var(--blue); }                         /* keyword */
+  .t { color: var(--teal); }                         /* type */
+  .e { color: var(--gold); }                         /* event / member */
+  .u { color: var(--violet); }                       /* UGS-side event */
+  .bad { color: var(--red); font-style: italic; }    /* pain comment */
+
+  .cols { display: flex; gap: 32px; align-items: stretch; min-height: 0; }
+  .col { flex: 1; min-width: 0; }
+  .panel { border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); padding: 18px 22px; height: 100%; }
+  .panel h3 { margin: 0 0 12px; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+  .panel.badp  { border-color: rgba(240,121,107,.5); background: linear-gradient(180deg, var(--red-soft),  var(--surface) 90px); }
+  .panel.goodp { border-color: rgba(232,176,75,.55); background: linear-gradient(180deg, var(--gold-soft), var(--surface) 90px); }
+  .panel.svcp  { border-color: rgba(176,140,245,.55); background: linear-gradient(180deg, var(--violet-soft), var(--surface) 90px); }
+  .panel.badp h3 { color: var(--red); } .panel.goodp h3 { color: var(--gold); } .panel.svcp h3 { color: var(--violet); }
+  .panel ul { padding-left: 24px; } .panel li { font-size: 21px; margin: 9px 0; line-height: 1.32; }
+  .panel pre { background: rgba(0,0,0,.25); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 16px 0 8px; }
+  .stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 17px 12px; }
+  .stat .n { font-size: 40px; font-weight: 700; color: var(--gold); line-height: 1.05; }
+  .stat .l { font-size: 18px; color: var(--ink-2); margin-top: 5px; line-height: 1.25; }
+
+  .verbs { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0 6px; }
+  .verbs span { font-size: 27px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--rule); border-radius: 999px; padding: 8px 22px; }
+
+  table.tbl { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  .tbl th { text-align: left; font-size: 18px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); padding: 8px 14px; border-bottom: 2px solid var(--rule); }
+  .tbl td { font-size: 22px; padding: 9px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .tbl td:first-child { white-space: nowrap; }
+  .tbl.tight th { padding: 6px 12px; }
+  .tbl.tight td { padding: 7px 12px; font-size: 19.5px; }
+
+  .bars { margin: 8px 0 2px; }
+  .bar-row { display: grid; grid-template-columns: 340px 1fr 74px; gap: 16px; align-items: center; margin: 8px 0; }
+  .bar-row .lab { font-size: 22px; text-align: right; color: var(--ink-2); line-height: 1.2; }
+  .bar-row .lab b { color: var(--ink); }
+  .bar-track { background: var(--surface); border-radius: 8px; height: 34px; border: 1px solid var(--rule); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 7px 0 0 7px; }
+  .bar-row .val { font-size: 29px; font-weight: 700; }
+
+  .warstory {
+    margin-top: 14px; padding: 13px 20px; border-left: 5px solid var(--red);
+    background: var(--red-soft); border-radius: 0 10px 10px 0; font-size: 21px; line-height: 1.38; color: var(--ink-2);
+  }
+  .warstory > b:first-child { color: var(--red); letter-spacing: .06em; text-transform: uppercase; font-size: 17px; display: block; margin-bottom: 4px; }
+  .warstory.good { border-color: var(--green); background: rgba(102,201,149,.09); }
+  .warstory.good > b:first-child { color: var(--green); }
+
+  .quoteline { font-size: 26px; font-style: italic; color: var(--ink-2); border-left: 5px solid var(--teal); padding: 10px 22px; margin: 8px 0 14px; line-height: 1.35; }
+  .quoteline .src { display: block; font-size: 18px; font-style: normal; color: var(--ink-3); margin-top: 8px; }
+
+  /* ---- the running motif: a rubber stamp on every swap ---- */
+  .stamp {
+    position: absolute; right: 58px; top: 46px; transform: rotate(-7deg);
+    border: 3px solid var(--green); border-radius: 12px; padding: 9px 18px 8px;
+    text-align: center; background: rgba(102,201,149,.07); z-index: 2;
+  }
+  .stamp b { display: block; font-size: 30px; color: var(--green); line-height: 1; letter-spacing: -.01em; }
+  .stamp i { display: block; font-size: 15.5px; color: var(--green); font-style: normal; letter-spacing: .12em; text-transform: uppercase; margin-top: 5px; opacity: .95; }
+
+  /* ---- the running motif: the claims board ---- */
+  .claims { display: flex; gap: 11px; margin: 14px 0 6px; }
+  .clm {
+    flex: 1; border: 1.5px solid var(--rule); border-radius: 11px; padding: 11px 12px 10px;
+    background: var(--surface); text-align: center; color: var(--ink-3);
+  }
+  .clm .k { display: block; font-size: 15px; letter-spacing: .16em; color: var(--ink-3); margin-bottom: 5px; }
+  .clm .w { font-size: 21px; font-weight: 600; }
+  .clm.done { border-color: var(--gold); background: var(--gold-soft); color: var(--ink); }   /* shown running */
+  .clm.done .k { color: var(--gold); }
+  .clm.done .w::after { content: " ✓"; color: var(--green); }
+  .clm.next { border-color: var(--green); background: rgba(102,201,149,.10); color: var(--ink); }  /* up next */
+  .clm.next .k { color: var(--green); }
+  .clm.later { border-color: rgba(232,176,75,.45); border-style: dashed; background: none; color: var(--ink-2); }
+  .clm.later .k { color: rgba(232,176,75,.72); }
+  /* A pill that lights on cue: it carries its target state class from the start, but stays
+     dim until its step arrives — so the board fills in as you talk instead of pre-answering. */
+  .clm.frag:not(.on) {
+    border-color: var(--rule); border-style: solid; background: var(--surface); color: var(--ink-3);
+  }
+  .clm.frag:not(.on) .k { color: var(--ink-3); }
+  .clm.frag:not(.on) .w::after { content: none; }
+  /* compact strip: for slides that carry the board under other content */
+  .claims.compact { gap: 9px; }
+  .claims.compact .clm { padding: 7px 10px 6px; }
+  .claims.compact .clm .k { font-size: 13px; margin-bottom: 3px; }
+  .claims.compact .clm .w { font-size: 17.5px; }
+
+  .frag { opacity: 0; transform: translateY(10px); transition: opacity .26s ease, transform .26s ease; }
+  .frag.on { opacity: 1; transform: none; }
+  /* .hold = takes its turn in the step sequence without appearing: it is on screen the whole
+     time and .on changes how it LOOKS, not whether it exists. Used by the claim pills. */
+  .frag.hold { opacity: 1; transform: none; transition: border-color .32s ease, background-color .32s ease, color .32s ease; }
+
+  /* the coin ladder */
+  .hops { margin: 4px 0 0; }
+  .hop { display: grid; grid-template-columns: 30px 1fr 330px; gap: 12px; align-items: center; padding: 4px 10px; border-left: 4px solid var(--rule); margin: 3px 0; background: rgba(0,0,0,.14); border-radius: 0 8px 8px 0; }
+  .hop .n { font-size: 16px; color: var(--ink-3); font-weight: 700; text-align: right; }
+  .hop .ev { font-size: 17px; }
+  .hop .who { font-size: 15px; color: var(--ink-3); text-align: right; }
+  .hop.tr { border-color: var(--gold); } .hop.gf { border-color: var(--teal); } .hop.ct { border-color: var(--ink); } .hop.ug { border-color: var(--violet); }
+  .hop.sep { border-color: transparent; background: none; padding: 0 10px; }
+  .hop.sep .ev { font-size: 16px; color: var(--ink-3); font-style: italic; letter-spacing: .08em; text-transform: uppercase; }
+
+  svg text { font-family: "IBM Plex Sans", system-ui, sans-serif; }
+  svg .mono { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+
+  /* chrome */
+  #hud {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 34px; padding: 0 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13.5px; color: var(--ink-3); pointer-events: none; z-index: 5;
+  }
+  #hud .warn { color: var(--gold); }
+  #progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--gold); width: 0; z-index: 6; transition: width .2s ease; }
+  #notes {
+    position: fixed; left: 0; right: 0; bottom: 0; max-height: 40vh; overflow: auto; z-index: 9;
+    background: rgba(14,18,22,.97); border-top: 2px solid var(--gold);
+    padding: 14px 26px 20px; font-size: 15.5px; line-height: 1.55; color: var(--ink-2); display: none;
+  }
+  #notes.open { display: block; }
+  #notes h4 { margin: 0 0 6px; color: var(--gold); font-size: 13px; letter-spacing: .18em; text-transform: uppercase; }
+  #blank { position: fixed; inset: 0; background: #000; z-index: 20; display: none; }
+  #blank.on { display: block; }
+  #index {
+    position: fixed; inset: 0; background: rgba(10,13,16,.985); z-index: 15; display: none;
+    padding: 34px 40px; overflow: auto;
+  }
+  #index.open { display: block; }
+  #index h4 { margin: 0 0 16px; color: var(--gold); font-size: 14px; letter-spacing: .2em; text-transform: uppercase; }
+  #index .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px 26px; }
+  #index .row { font-size: 15px; color: var(--ink-2); padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+  #index .row:hover { background: var(--surface-2); }
+  #index .row.here { background: var(--gold-soft); color: var(--ink); }
+  #index .row .no { display: inline-block; width: 30px; color: var(--ink-3); }
+  #index .row.act { color: var(--gold); margin-top: 9px; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; cursor: default; }
+  #index .row.act:hover { background: none; }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    body { overflow: visible; display: block; }
+    #stage { transform: none !important; width: 1280px; height: auto; }
+    .slide { position: relative; display: flex !important; width: 1280px; height: 720px; page-break-after: always; break-after: page; }
+    .frag { opacity: 1; transform: none; }
+    #hud, #notes, #progress, #index, #blank { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage">
+
+<!-- ==================== ACT I — DELETE HALF THE GAME ==================== -->
+
+<!-- 1 -->
+<section class="slide" data-act="Act I · Delete half the game" data-title="Cold open: two builds" data-mark="0">
+  <span class="chip">Demo</span>
+  <h2>Two builds. No slides yet.</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="panel goodp">
+        <h3>A · The game, services deleted</h3>
+        <ul>
+          <li>Loading screen → main menu → a full run → game over</li>
+          <li>No sign-in. No leaderboard. No cloud anywhere.</li>
+          <li class="gold"><b>It ships.</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel svcp">
+        <h3>B · The services, game deleted</h3>
+        <ul>
+          <li>Sign-in → config → two random scores → leaderboard → achievements → banked coins</li>
+          <li>No runner. A dummy game that announces “a session ended” with a random score.</li>
+          <li class="violet"><b>It ships too.</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="punch">One question while you watch: <span class="gold">how many lines did we change to delete half?</span></div>
+  <aside class="notes">SAY: “Before any slides — two builds.” Run A first (the whole runner, no services), then B (the services with no runner). B is the one that surprises people, so it goes second.
+
+PREP: build both profiles the day before — Test_GameOnly_Windows and Test_UGS_Windows — and run the executables, not the editor. If you must use the editor: “CrawfisSoftware ▸ Play Scene 0 Always” forces the FULL boot (build index 0), so turn it OFF, open 0_BootStrap_Game_Only, play; then 0_BootStrap_UGS_Only, play. B needs network and the initial-development environment; if the venue's network is unproven, use the recording.
+
+Ask the room for a number out loud. Take two answers. Do NOT respond — slide 3 pays it off.</aside>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-act="Act I · Delete half the game" data-title="Title" data-mark="3">
+  <p class="kicker">An open-source Unity 6 template · Unity Gaming Services</p>
+  <h1>Delete <i class="gold">Half</i> Your Game<br>and Ship It Anyway</h1>
+  <p class="sub" style="font-size:31px">Live services on the same seam as a sound effect</p>
+  <svg viewBox="0 0 1140 128" style="width:980px;margin:10px 0 0" aria-hidden="true">
+    <line x1="0" y1="108" x2="1140" y2="108" stroke="#29323C" stroke-width="3"/>
+    <line x1="0" y1="66"  x2="1140" y2="66"  stroke="#29323C" stroke-width="2" stroke-dasharray="34 22" opacity=".7"/>
+    <line x1="0" y1="24"  x2="1140" y2="24"  stroke="#29323C" stroke-width="3"/>
+    <rect x="160" y="44" width="30" height="50" rx="15" fill="#E8B04B"/>
+    <ellipse cx="175" cy="100" rx="24" ry="5" fill="#000" opacity=".45"/>
+    <rect x="560" y="28" width="26" height="36" rx="4" fill="#3E4854"/>
+    <circle cx="700" cy="52" r="9" fill="none" stroke="#E8B04B" stroke-width="3"/>
+    <line x1="720" y1="66" x2="900" y2="66" stroke="#B08CF5" stroke-width="2" stroke-dasharray="4 6" opacity=".7"/>
+    <path d="M 935 82 a 22 22 0 0 1 12 -42 a 30 30 0 0 1 58 -6 a 22 22 0 0 1 10 48 z" fill="none" stroke="#B08CF5" stroke-width="3"/>
+    <text x="982" y="112" font-size="14" fill="#B08CF5" text-anchor="middle" letter-spacing="2">SERVICES</text>
+  </svg>
+  <p class="sub" style="margin-top:12px;font-size:23px"><b class="gold">One rule.</b> <b class="teal">Five claims.</b> <b>Three demos.</b> <span class="mut">Four slides in the middle go deep for programmers — they're marked.</span></p>
+  <p style="margin-top:auto;font-size:23px" class="mut">Roger Crawfis · The Ohio State University<br>
+  <span class="mono" style="font-size:19px">github.com/crawfis/RunnerUGSTemplate &nbsp;·&nbsp; github.com/crawfis/EventDrivenUGS</span></p>
+  <aside class="notes">SAY: “I teach with an open-source endless runner. The last talk was about the one rule that holds it together. This one is about what that rule buys you the day you bolt a data center onto it.”
+
+Set the contract out loud: one rule, five claims each shown running, three demos, four marked slides for programmers. The five claims are a scoreboard the audience keeps for you — that is the point.
+
+Standalone: nobody needs to have seen the sibling talk. Act II re-states the rule in three slides.
+
+DECK KEYS: ←/→ navigate · N notes · O index · T timer · B blank · F fullscreen · print = PDF.</aside>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-act="Act I · Delete half the game" data-title="Zero. A different first scene." data-mark="4">
+  <h2>Zero. <span class="dim">A different first scene.</span></h2>
+  <p class="sub" style="font-size:23px;margin-bottom:6px">Three boot scenes. Same shape. One row swapped.</p>
+  <div class="cols" style="gap:20px">
+    <div class="col">
+      <div class="panel">
+        <h3 class="mut">0_BootStrap · full</h3>
+        <pre class="xs" style="margin:0"><span class="u">Load_UGS_Init</span>  → UGS_Boot_0
+<span class="t">Load_Game_Init</span> → Game_Boot_0
+<span class="u">Load_UGS_Glue</span>  → UGS_Glue</pre>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel goodp">
+        <h3>Game only</h3>
+        <pre class="xs" style="margin:0"><span class="t">Load_Game_Init</span> → Game_Boot_0
+<span class="e">fire GameplayReady</span> on Start
+<span class="c">(no services, no glue)</span></pre>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel svcp">
+        <h3>Services only</h3>
+        <pre class="xs" style="margin:0"><span class="u">Load_UGS_Init</span>  → UGS_Boot_0
+<span class="u">Load_UGS_Glue</span>  → UGS_Glue
+<span class="e">Load_DummyGame</span> → DummyGame_0</pre>
+      </div>
+    </div>
+  </div>
+  <ul style="font-size:23px;margin-top:14px">
+    <li class="frag" data-step="1">A domain is <b>a scene that speaks the right events.</b> Replace it by loading a different scene.</li>
+    <li class="frag" data-step="2">Three build profiles. <b>No <code class="inline">#if</code>. No feature flag. No edit to either half.</b></li>
+  </ul>
+  <div class="punch frag" data-step="3">Somebody said “a few hundred lines.” <b class="gold">It was a different first scene.</b> The rest of the talk is why that's possible.</div>
+  <aside class="notes">SAY: pay off slide 1's question. Read the three panels left to right: the full boot loads three scenes — the services, the game, and the glue between them. The game-only boot drops the two service rows and fires GameplayReady itself from a one-line test component. The services-only boot keeps the services and the glue and swaps the game for a dummy.
+
+The three loader names are real objects in the three bootstrap scenes (LoadSceneAdditively components). Don't read the scene names aloud; point at the pattern.
+
+Hold the punch for a beat. “Different first scene” is the phrase people will repeat.</aside>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-act="Act I · Delete half the game" data-title="The bill: “just a leaderboard”" data-mark="5" style="padding-top:44px">
+  <h2 style="margin-bottom:12px">“It's just a leaderboard.” Here's the bill.</h2>
+  <div class="verbs" style="margin:8px 0 4px">
+    <span>sign in</span><span>fetch config</span><span>submit score</span><span>bank coins</span><span>unlock</span><span>show the board</span>
+  </div>
+  <div class="stat-grid" style="margin:16px 0 4px">
+    <div class="stat frag" data-step="1"><div class="n">271</div><div class="l">named events, 5 isolated domains</div></div>
+    <div class="stat frag" data-step="1"><div class="n">49 + 36</div><div class="l">chain rules + bridge mappings, as data</div></div>
+    <div class="stat frag" data-step="1"><div class="n">3</div><div class="l">packages: contract, common, services</div></div>
+    <div class="stat frag" data-step="1"><div class="n">7</div><div class="l">Cloud Code endpoints, server-side C#</div></div>
+  </div>
+  <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat frag" data-step="2"><div class="n">28</div><div class="l">scenes across 3 build profiles</div></div>
+    <div class="stat frag" data-step="2"><div class="n">109</div><div class="l">numbered dashboard clicks to stand it up</div></div>
+    <div class="stat frag" data-step="2"><div class="n">33</div><div class="l">tasks still between here and “live”</div></div>
+  </div>
+  <div class="punch frag" data-step="3">The pitch is one noun. The build is sign-in, session expiry, three environments, a config key, a currency, server code — <b class="gold">and a loading screen that knows slow from dead.</b></div>
+  <aside class="notes">SAY: “Somebody in a design meeting said ‘just add a leaderboard.’ Here is what shipped around that noun.”
+
+CRITICAL: do not let this read as bloat. This is what “done” looks like for one leaderboard, one currency and a handful of achievements. The 33-task catalog is what is still MISSING.
+
+The 109 is real: the setup document is a click-by-click walkthrough with 109 numbered steps — environments, a leaderboard, Cloud Code deployment. It is the honest cost of live services and Act V comes back to it.
+
+Numbers verified on main: 76 GameFlow + 121 TempleRun + 9 UserInitiated + 10 contract + 55 UGS = 271. The fact sheet is the appendix slide “The numbers, and how counted.”</aside>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-act="Act I · Delete half the game" data-title="Five vocabularies, one shared" data-mark="7">
+  <h2 style="margin-bottom:8px">Five vocabularies. <span class="dim">One is shared.</span></h2>
+  <p class="sub" style="margin-bottom:0;font-size:23px">The same 271 events, sorted by who speaks them:</p>
+  <div class="bars">
+    <div class="bar-row">
+      <div class="lab"><b class="blue">UserInitiated</b><br><span style="font-size:17px">a human wants to jump</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:7.4%;background:var(--blue)"></div></div>
+      <div class="val blue">9</div>
+    </div>
+    <div class="bar-row">
+      <div class="lab"><b class="gold">TempleRun</b><br><span style="font-size:17px">player, track, coins, collisions</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--gold)"></div></div>
+      <div class="val gold">121</div>
+    </div>
+    <div class="bar-row">
+      <div class="lab"><b class="teal">GameFlow</b><br><span style="font-size:17px">menus, loading, pause, quit</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:62.8%;background:var(--teal)"></div></div>
+      <div class="val teal">76</div>
+    </div>
+    <div class="bar-row">
+      <div class="lab"><b>GameServiceEvents</b><br><span style="font-size:17px">the contract — owned by neither side</span></div>
+      <div class="bar-track" style="border:1.5px dashed rgba(231,236,241,.5)"><div class="bar-fill" style="width:8.3%;background:var(--ink)"></div></div>
+      <div class="val">10</div>
+    </div>
+    <div class="bar-row">
+      <div class="lab"><b class="violet">UGS</b><br><span style="font-size:17px">sign-in, config, boards, achievements, economy</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:45.5%;background:var(--violet)"></div></div>
+      <div class="val violet">55</div>
+    </div>
+  </div>
+  <p class="frag" style="font-size:25px;margin:6px 0 0"><b>A game and a data center talk in ten words.</b> <span class="mut">Neither side owns them.</span></p>
+  <div class="punch sm frag">So how does a coin get from a capsule to a dashboard? <span class="gold">Same rule as a jump sound.</span></div>
+  <aside class="notes">SAY: the three game vocabularies are the sibling talk's 204, grown a little. The two new bars are today's subject: the services speak 55 words to themselves, and the ONLY vocabulary the two halves share is the ten in the middle.
+
+Point at the dashed bar. That enum lives in its own package. The game's assemblies reference it and never the services; the services reference it and never the game. Everything else in this talk hangs off that bar.
+
+Leave the coin question hanging. Advance.</aside>
+</section>
+
+<!-- ==================== ACT II — THE SEAM ==================== -->
+
+<!-- 6 -->
+<section class="slide" data-act="Act II · The seam" data-title="The one rule: nobody calls anybody" data-mark="8">
+  <h2>The one rule: <span class="gold">nobody calls anybody</span></h2>
+  <p class="sub">Want something to happen? <b>Announce it.</b> Care about something? <b>Listen for it.</b><br>Radio broadcast — not phone calls.</p>
+  <pre class="small"><span class="c">// The coin doesn't know a cloud exists:</span>
+TempleRunBus.Publish(<span class="e">TempleRunEvents.CoinCollected</span>, <span class="k">this</span>, Blackboard.Instance.SessionCoinCount);
+
+<span class="c">// The currency controller doesn't know what game it's banking for:</span>
+UGSBus.Subscribe(<span class="u">UGS_EventsEnum.UGS_CoinUpdated</span>, OnCoinUpdated);</pre>
+  <div class="cols" style="align-items:center;margin-top:4px">
+    <div class="col">
+      <p style="font-size:24px;line-height:1.3">Neither file mentions the other. Two doors stand between them — <b>and the rest of this act is about those doors.</b></p>
+    </div>
+    <div class="col" style="flex:0 0 460px">
+      <svg viewBox="0 0 460 190" style="width:460px" aria-hidden="true">
+        <rect x="30" y="82" width="400" height="26" rx="13" fill="#E8B04B" opacity=".92"/>
+        <text x="230" y="101" font-size="16" text-anchor="middle" fill="#16130a" font-weight="700">EVENT BUS</text>
+        <g stroke="#E8B04B" stroke-width="2.5">
+          <line x1="80" y1="42" x2="80" y2="82"/><line x1="180" y1="42" x2="180" y2="82"/>
+          <line x1="280" y1="42" x2="280" y2="82"/><line x1="380" y1="42" x2="380" y2="82"/>
+          <line x1="80" y1="148" x2="80" y2="108"/><line x1="180" y1="148" x2="180" y2="108"/><line x1="280" y1="148" x2="280" y2="108"/><line x1="380" y1="148" x2="380" y2="108"/>
+        </g>
+        <g font-size="16" text-anchor="middle" fill="#B7C2CD">
+          <text x="80" y="32">Input</text><text x="180" y="32">Player</text><text x="280" y="32">Track</text><text x="380" y="32">GameFlow</text>
+          <text x="80" y="168">UI</text><text x="180" y="168">Audio</text><text x="280" y="168" fill="#B08CF5">Leaderboard</text><text x="380" y="168" fill="#B08CF5">Economy</text>
+        </g>
+        <text x="230" y="187" font-size="15.5" fill="#8E9CAA" text-anchor="middle" font-style="italic">every system: exactly one wire</text>
+      </svg>
+    </div>
+  </div>
+  <div class="punch sm">To the game, a cloud service is the same kind of thing as a sound effect. <b class="gold">It reacts to the run ending.</b></div>
+  <aside class="notes">SAY: “Radio, not phone calls.” Repeat that metaphor all talk — it is the one non-technical people carry out.
+
+Both code lines are real lines from the repo (CoinCollectionController and PlayerCurrencyController). Point at the bus diagram: the leaderboard and the economy hang off the bus exactly where a sound effect would.
+
+This is publish/subscribe with zero exceptions. If the room saw the sibling talk, say so and move fast; if not, this slide plus the next two are all they need.</aside>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-act="Act II · The seam" data-title="Five vocabularies, four doors" data-mark="10">
+  <h2 class="sm">Five vocabularies, four doors between them</h2>
+  <svg viewBox="0 0 1140 300" style="width:1136px">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8E9CAA"/></marker></defs>
+    <!-- boxes -->
+    <rect x="6" y="70" width="196" height="120" rx="14" fill="rgba(111,180,245,.08)" stroke="#6FB4F5" stroke-width="1.6"/>
+    <text x="104" y="104" font-size="21" text-anchor="middle" fill="#6FB4F5" font-weight="700">UserInitiated</text>
+    <text x="104" y="130" font-size="15.5" text-anchor="middle" fill="#8E9CAA">Assets/TempleRun</text>
+    <text x="104" y="168" font-size="25" text-anchor="middle" fill="#6FB4F5" font-weight="700">9</text>
+    <rect x="240" y="70" width="196" height="120" rx="14" fill="rgba(232,176,75,.08)" stroke="#E8B04B" stroke-width="1.6"/>
+    <text x="338" y="104" font-size="21" text-anchor="middle" fill="#E8B04B" font-weight="700">TempleRun</text>
+    <text x="338" y="130" font-size="15.5" text-anchor="middle" fill="#8E9CAA">Assets/TempleRun</text>
+    <text x="338" y="168" font-size="25" text-anchor="middle" fill="#E8B04B" font-weight="700">121</text>
+    <rect x="474" y="70" width="196" height="120" rx="14" fill="rgba(79,192,202,.08)" stroke="#4FC0CA" stroke-width="1.6"/>
+    <text x="572" y="104" font-size="21" text-anchor="middle" fill="#4FC0CA" font-weight="700">GameFlow</text>
+    <text x="572" y="130" font-size="15.5" text-anchor="middle" fill="#8E9CAA">Assets/GameFlow</text>
+    <text x="572" y="168" font-size="25" text-anchor="middle" fill="#4FC0CA" font-weight="700">76</text>
+    <rect x="708" y="70" width="196" height="120" rx="14" fill="rgba(231,236,241,.05)" stroke="#E7ECF1" stroke-width="1.6" stroke-dasharray="7 5"/>
+    <text x="806" y="104" font-size="18.5" text-anchor="middle" fill="#E7ECF1" font-weight="700">GameServiceEvents</text>
+    <text x="806" y="130" font-size="15.5" text-anchor="middle" fill="#8E9CAA">package · contracts</text>
+    <text x="806" y="168" font-size="25" text-anchor="middle" fill="#E7ECF1" font-weight="700">10</text>
+    <rect x="942" y="70" width="196" height="120" rx="14" fill="rgba(176,140,245,.08)" stroke="#B08CF5" stroke-width="1.6"/>
+    <text x="1040" y="104" font-size="21" text-anchor="middle" fill="#B08CF5" font-weight="700">UGS</text>
+    <text x="1040" y="130" font-size="15.5" text-anchor="middle" fill="#8E9CAA">package · ugs</text>
+    <text x="1040" y="168" font-size="25" text-anchor="middle" fill="#B08CF5" font-weight="700">55</text>
+    <!-- doors -->
+    <line x1="202" y1="130" x2="236" y2="130" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <text x="221" y="228" font-size="13.5" text-anchor="middle" fill="#8E9CAA" class="mono">Input2TempleRun</text>
+    <line x1="436" y1="118" x2="470" y2="118" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <line x1="470" y1="142" x2="436" y2="142" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <text x="455" y="228" font-size="13.5" text-anchor="middle" fill="#8E9CAA" class="mono">TempleRunGameFlowBridge</text>
+    <line x1="670" y1="118" x2="704" y2="118" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <line x1="704" y1="142" x2="670" y2="142" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <text x="689" y="228" font-size="13.5" text-anchor="middle" fill="#E8B04B" class="mono">UGSGameFlowBridge</text>
+    <text x="689" y="248" font-size="13" text-anchor="middle" fill="#8E9CAA">Assets/UGSGlue</text>
+    <line x1="904" y1="118" x2="938" y2="118" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <line x1="938" y1="142" x2="904" y2="142" stroke="#8E9CAA" stroke-width="2.5" marker-end="url(#ar2)"/>
+    <text x="923" y="228" font-size="13.5" text-anchor="middle" fill="#B08CF5" class="mono">GameServiceEventsUGSBridge</text>
+    <text x="923" y="248" font-size="13" text-anchor="middle" fill="#8E9CAA">inside the ugs package</text>
+    <!-- the over-the-top door: gameplay -> contract, one way -->
+    <path d="M 338 70 C 338 30, 806 30, 806 70" fill="none" stroke="#E8B04B" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ar2)"/>
+    <text x="572" y="20" font-size="14" text-anchor="middle" fill="#E8B04B" class="mono">TempleRunUGSBridge · one-way · Assets/UGSGlue</text>
+    <text x="570" y="288" font-size="16.5" text-anchor="middle" fill="#8E9CAA" font-style="italic">the game's assemblies reference the contract and never UGS — a game-to-UGS reference does not compile</text>
+  </svg>
+  <ul style="margin-top:0;font-size:22px">
+    <li><b>Why a fifth vocabulary?</b> So the game and the services <i>never name each other.</i> Both map into it.</li>
+    <li><b>Why one door on each side?</b> Two files know both sides of the seam. Everything else knows one.</li>
+  </ul>
+  <aside class="notes">SAY: five departments that only talk by memo, and the two that matter today — the game and the data center — don't even share a building. They share a dictionary of ten words, and the dictionary belongs to neither.
+
+THE COMPILE-TIME FENCE is new versus the sibling repo: the services arrive as packages with assembly definitions. The game's assemblies reference the contracts package and not the ugs package, so a game file that names a UGS event is a compile error, not a code-review catch. Inside a domain it is still review plus the audit skill.
+
+The dashed arc over the top: gameplay maps straight into the contract, one way. Nothing maps back into TempleRun, so the game cannot come to depend on a service being present. That asymmetry is claim one.</aside>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-act="Act II · The seam" data-title="What it looked like before" data-mark="12">
+  <h2 class="sm">What it looked like <span class="dim">one repo ago</span></h2>
+  <div class="cols">
+    <div class="col">
+      <div class="panel badp">
+        <h3>The services named the game</h3>
+        <ul>
+          <li>UGS subscribed to <code class="inline">UGS_CoinUpdated</code> — an event that <i>existed only because this game has coins</i></li>
+          <li>Gameplay code published UGS's events back</li>
+          <li class="red"><b>Either way, one side cannot be swapped without editing the other.</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel goodp">
+        <h3>Both map into words neither owns</h3>
+        <pre class="xs" style="margin:0"><span class="c">// the game's glue</span>
+(<span class="e">TempleRunEvents.CoinCollected</span>,
+ <span class="t">GameServiceEvents.CurrencyTotalChanged</span>)
+
+<span class="c">// the services' glue</span>
+(<span class="t">GameServiceEvents.CurrencyTotalChanged</span>,
+ <span class="u">UGS_EventsEnum.UGS_CoinUpdated</span>)</pre>
+        <p style="font-size:19px;margin:10px 0 0">UGS never sees a game type. The game never sees a UGS type.</p>
+      </div>
+    </div>
+  </div>
+  <div class="punch">A services layer consumes “score” <b class="gold">without knowing whether it's meters run, puzzles solved, or laps completed.</b></div>
+  <aside class="notes">SAY: this is the honest before. The first version of this repo had the services subscribing to the game's coin event by name. It worked. It also meant the services layer could never be lifted out and put under a different game — which is exactly what happened when it became a package.
+
+The right panel is two real pairs, one from each glue file. Read the comment in the contract's source aloud if you like: “a game publishes ScoreUpdated however it computes score; the services layer consumes it without knowing whether the score is meters run, puzzles solved, or laps completed.”
+
+The punch is the contract's own remark, near-verbatim.</aside>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-act="Act II · The seam" data-title="The whole contract: ten words" data-mark="13.5">
+  <h2 class="sm">The whole contract: <span class="gold">ten words</span></h2>
+  <div class="cols" style="gap:24px">
+    <div class="col">
+      <table class="tbl tight">
+        <tr><th>Game → Services</th><th>Carries</th></tr>
+        <tr><td class="mono" style="color:var(--gold)">ScoreUpdated</td><td>float — however the game scores</td></tr>
+        <tr><td class="mono" style="color:var(--gold)">CurrencyTotalChanged</td><td>int — this run's <b>running total</b></td></tr>
+        <tr><td class="mono" style="color:var(--gold)">SessionEnding</td><td>float — the final score</td></tr>
+        <tr><td class="mono" style="color:var(--gold)">SessionEnded</td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <table class="tbl tight">
+        <tr><th>Services → Game</th><th>Carries</th></tr>
+        <tr><td class="mono" style="color:var(--violet)">ServicesReady</td><td>— the moment</td></tr>
+        <tr><td class="mono" style="color:var(--violet)">ServicesUnavailable</td><td>— the moment</td></tr>
+        <tr><td class="mono" style="color:var(--violet)">ServicesStatusChanged</td><td>ServicesStatus · <b class="green">retained</b></td></tr>
+        <tr><td class="mono" style="color:var(--violet)">RemoteConfigApplied</td><td>—</td></tr>
+        <tr><td class="mono" style="color:var(--violet)">DifficultySettingsAvailable</td><td><i class="mut">undeclared, on purpose</i></td></tr>
+        <tr><td class="mono" style="color:var(--violet)">CurrencyBalanceChanged</td><td>long — the <b>banked lifetime</b> · <b class="green">retained</b></td></tr>
+      </table>
+    </div>
+  </div>
+  <p style="font-size:22px;margin-top:10px"><b>Deliberately small.</b> “Every member here is a crossing someone must maintain forever, so it carries only what a service genuinely needs.”</p>
+  <div class="punch sm">Two names for a coin, on purpose: <b class="gold">the run's running total</b> goes up; <b class="gold">the banked lifetime balance</b> comes back. Not the mirror. A coin achievement means a lifetime.</div>
+  <aside class="notes">SAY: this is the whole dictionary. Ten words. Read the two columns as “what the game says” and “what the services say back.”
+
+TWO NAMES FOR A COIN is worth thirty seconds: CurrencyTotalChanged is named for what it carries (a running total, because the coin event carries the session count) rather than what it sounds like. CurrencyBalanceChanged is the stored total the service is authoritative for. A HUD that shows a balance must use the second one — the session count is not a balance and resets every run. The contract's comments say all of this; the naming IS the documentation.
+
+“Retained” is the word for Sticky delivery — Act IV. Don't explain it yet.
+
+The quote is verbatim from the enum's remarks. An eleventh word is allowed — the docs say “deliberately rarely.”</aside>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-act="Act II · The seam" data-title="TECH · the payload rule" data-mark="15">
+  <span class="chip tech">Tech</span>
+  <h2 class="sm">“A contract that references the game's types <span class="red">is not a contract.</span>”</h2>
+  <div class="cols" style="gap:24px">
+    <div class="col" style="flex:0.95">
+      <ul style="font-size:19.5px;line-height:1.28;margin-top:0">
+        <li style="margin:7px 0">Payloads are declared <b>only where the type is primitive and unambiguous</b></li>
+        <li style="margin:7px 0">The difficulty payload is <b>deliberately undeclared</b> — today it carries a game-side config type</li>
+        <li style="margin:7px 0">The balance crosses as a <code class="inline">long</code>, not the service's update type — <b>unwrapped by hand</b>; a pair forwards a payload untouched</li>
+      </ul>
+    </div>
+    <div class="col" style="flex:1.3">
+      <pre class="xs" style="margin-top:2px;font-size:15.5px"><span class="c">// the services' side of the seam</span>
+<span class="k">private void</span> OnCurrencyBalanceChanged(
+    <span class="t">string</span> n, <span class="t">object</span> s, <span class="t">object</span> data)
+{
+    <span class="c">// The UGS payload is a type in this package. Forwarding</span>
+    <span class="c">// it would hand a game a services type to cast — the</span>
+    <span class="c">// coupling this bridge exists to prevent.</span>
+    <span class="k">if</span> (data <span class="k">is</span> <span class="t">CurrencyBalanceUpdate</span> update)
+        BalanceChanged.Publish(<span class="k">this</span>, update.Balance);
+        <span class="c">// only the number crosses</span>
+}</pre>
+    </div>
+  </div>
+  <div class="warstory good" style="margin-top:8px;font-size:18.5px"><b>Three values, not a bool</b>
+  <code class="inline">ServicesStatus</code> is <code class="inline">Connecting</code> / <code class="inline">Ready</code> / <code class="inline">Unavailable</code>, because “not ready” is two different situations to a player: <i>still trying</i>, and <i>gave up</i>. A loading screen that can't tell them apart shows the same spinner for a slow connection and a dead one.</div>
+  <aside class="notes">THE RULE, stated once: the contract may name primitives and its own two types (the enum and ServicesStatus). It may not name a type from either side. The moment it does, one side can no longer be replaced without the other recompiling.
+
+The code is condensed from the real handler — comments shortened, one attribute dropped. The behavior is exact: the services' payload type is unwrapped and only the long crosses.
+
+IF ASKED “why not an interface and dependency injection?” — the appendix Q&A has the full answer. Short form: an interface is still a compile-time reference from one side to a type; an enum in a third package plus events-as-data is what buys the logger, the domain listing and the audit.</aside>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-act="Act II · The seam" data-title="The game's half: seven pairs" data-mark="17">
+  <div class="stamp"><b>7 pairs</b><i>a whole game translated</i></div>
+  <h2 class="sm">The game's half of the seam: <span class="gold">seven lines of data</span></h2>
+  <pre class="xs" style="margin:4px 0"><span class="c">// TempleRunUGSBridge — gameplay → contract, one way</span>
+(<span class="e">TempleRunEvents.DistanceUpdated</span>, <span class="t">GameServiceEvents.ScoreUpdated</span>),          <span class="c">// distance is THIS game's score</span>
+(<span class="e">TempleRunEvents.CoinCollected</span>,   <span class="t">GameServiceEvents.CurrencyTotalChanged</span>),
+
+<span class="c">// UGSGameFlowBridge — session lifecycle ↔ contract</span>
+(<span class="e">GameFlowEvents.GameEnding</span>, <span class="t">GameServiceEvents.SessionEnding</span>),                  <span class="c">// score is final</span>
+(<span class="e">GameFlowEvents.GameEnded</span>,  <span class="t">GameServiceEvents.SessionEnded</span>),
+(<span class="t">GameServiceEvents.RemoteConfigApplied</span>,       <span class="e">GameFlowEvents.LoadingScreenHideRequested</span>),  <span class="c">// the host's choice</span>
+(<span class="t">GameServiceEvents.DifficultySettingsAvailable</span>, <span class="e">GameFlowEvents.DifficultySettingsApplied</span>),
+(<span class="t">GameServiceEvents.CurrencyBalanceChanged</span>,     <span class="e">GameFlowEvents.CurrencyBalanceChanged</span>),</pre>
+  <ul style="font-size:22px;margin-top:6px">
+    <li><b>“Swapping the runner for a different game means rewriting this table and nothing else.”</b> UGS never sees a game type.</li>
+    <li><b>One-way from gameplay, by design.</b> Gameplay announces; services observe. Nothing maps back into <code class="inline">TempleRunEvents</code>, so the game cannot come to depend on a service being present.</li>
+    <li><b>Not its own assembly, deliberately.</b> Glue changes whenever either side does, and it's the one place licensed to know both.</li>
+  </ul>
+  <aside class="notes">SAY: this is every line of data the game contributes to the seam. Seven pairs and one hand-written subscription (the status handler, next act). The whole folder is three files and about two hundred lines, and a hundred of those are the dummy game.
+
+Point at the first pair: “distance is this game's score.” A puzzle game maps PuzzleSolved there and the services never learn the difference.
+
+The third bullet answers the obvious programmer question — “why isn't the glue its own assembly?” — before it is asked: an assembly boundary around the glue would enforce nothing (it's allowed to see both sides) and would cost a reference edit every time either side changed.</aside>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-act="Act II · The seam" data-title="How each half runs alone" data-mark="18.5">
+  <h2 class="sm">How each half runs alone</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="panel goodp">
+        <h3>The game alone</h3>
+        <p style="font-size:20px;margin:0 0 8px;line-height:1.3">The game-only boot drops the two service rows and adds one component:</p>
+        <pre class="xs" style="margin:0 0 8px">Test_AutoFireEventOnStart
+  _eventName: <span class="e">GameFlowEvents/GameplayReady</span></pre>
+        <p style="font-size:20px;margin:0;line-height:1.3">The menu appears with no services involved.</p>
+        <div class="warstory" style="margin-top:10px;font-size:18px"><b>The trap</b>Don't do it by disabling the services loader in the full boot. The glue's bridge is the <i>only</i> publisher of <code class="inline">GameplayReady</code> there, and it fires on services status <code class="inline">Ready</code>. No services, no status — the boot sits on the loading screen forever. No error.</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel svcp">
+        <h3>The services alone</h3>
+        <p style="font-size:20px;margin:0 0 8px;line-height:1.3">The services-only boot swaps the game for a dummy scene. Its whole game:</p>
+        <pre class="xs" style="margin:0 0 8px"><span class="k">float</span> score = Random.Range(<span class="e">10</span>, <span class="e">301</span>);
+<span class="c">// the contract event a real game would publish</span>
+GameServiceBus.Publish(
+    <span class="t">GameServiceEvents.SessionEnding</span>, <span class="k">this</span>, score);</pre>
+        <p style="font-size:20px;margin:0;line-height:1.3">Twice, two seconds apart, then <code class="inline">GameEnded</code>. Sign-in, config, the leaderboard, achievements, banked coins — <b>all real.</b></p>
+      </div>
+    </div>
+  </div>
+  <div class="punch sm">Neither half was edited. Each was handed a different neighbor <b class="gold">that speaks the same ten words.</b></div>
+  <aside class="notes">SAY: here is the code behind the cold open. Left: one test component fires the event the services would have fired. Right: the dummy game is one coroutine publishing SessionEnding with a random score, on the contract bus — not through any UGS-internal shortcut, so it exercises the real path.
+
+THE TRAP is a real support case: disabling the services loader used to work and no longer does, because the only GameplayReady publisher moved into the glue scene. It is written up in CLAUDE.md. It is also the perfect setup for Act IV — an event nobody hears is legal, and legal is not the same as fine.</aside>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-act="Act II · The seam" data-title="Five claims (the board)" data-mark="20">
+  <h2>Five claims. <span class="gold">Two you've already watched.</span></h2>
+  <div class="claims" style="margin:18px 0 20px">
+    <div class="clm done frag hold" data-step="1"><span class="k">01</span><span class="w">the game alone</span></div>
+    <div class="clm done frag hold" data-step="2"><span class="k">02</span><span class="w">the services alone</span></div>
+    <div class="clm next frag hold" data-step="3"><span class="k">03</span><span class="w">the backend swaps</span></div>
+    <div class="clm later frag hold" data-step="4"><span class="k">04</span><span class="w">late joiners still hear</span></div>
+    <div class="clm later frag hold" data-step="4"><span class="k">05</span><span class="w">the assistant stays inside</span></div>
+  </div>
+  <ul style="font-size:23px;line-height:1.3">
+    <li class="frag" data-step="1"><b class="gold">1 · The game alone.</b> Delete the services: a different first scene, one component firing <code class="inline">GameplayReady</code>.</li>
+    <li class="frag" data-step="2"><b class="gold">2 · The services alone.</b> Delete the game: a dummy that speaks the ten words.</li>
+    <li class="frag" data-step="3"><b class="green">3 · The backend swaps.</b> Cloud Code or the Economy service — one checkbox, and nothing above the seam notices.</li>
+    <li class="frag" data-step="4"><b>4 · Late joiners still hear</b> and <b>5 · the assistant stays inside</b> — Acts IV and VI.</li>
+  </ul>
+  <div class="punch frag" data-step="5">Claim three sounds like marketing. <span class="gold">Let's follow a coin.</span></div>
+  <aside class="notes">SAY: this is the scoreboard for the rest of the talk. The audience keeps score for you — which you want, because you are going to deliver all five.
+
+THE BOARD FILLS IN AS YOU TALK. Three states, consistent for the rest of the deck:
+  · GOLD + ✓ = shown — the talk has shown it running
+  · GREEN = up next — shown on the very next slides
+  · DASHED = promised, later in the talk
+
+Click 1 lights 01 gold, click 2 lights 02 gold — both were the cold open. Click 3 turns 03 GREEN: the claim is made, the proof is Act III. Click 4 puts 04 and 05 in dashed outline. Click 5 is the punch.
+
+Each claim is a property of shipped code, not aspiration: two build profiles, a flag on the currency manager, a delivery attribute on two contract events, and an audit skill.</aside>
+</section>
+
+<!-- ==================== ACT III — ONE COIN'S JOURNEY ==================== -->
+
+<!-- 14 -->
+<section class="slide" data-act="Act III · One coin's journey" data-title="Demo: one coin, end to end" data-mark="21">
+  <span class="chip">Demo</span>
+  <h2 class="sm" style="margin-bottom:2px">One coin, end to end</h2>
+  <p class="sub mono" style="font-size:19px;margin-bottom:4px">CrawfisSoftware ▸ Events ▸ Log Events → Clear Now → collect coins, die → cloud.unity.com ▸ Economy</p>
+  <div class="hops">
+    <div class="hop tr"><span class="n">1</span><span class="ev mono"><span class="e">CoinCollected</span> <span class="mut">— carries the run's running total</span></span><span class="who">CoinCollectionController</span></div>
+    <div class="hop ct"><span class="n">2</span><span class="ev mono"><span class="t">CurrencyTotalChanged</span></span><span class="who">TempleRunUGSBridge · a pair</span></div>
+    <div class="hop ug"><span class="n">3</span><span class="ev mono"><span class="u">UGS_CoinUpdated</span> <span class="mut">— remembered, not banked yet</span></span><span class="who">a pair → PlayerCurrencyController</span></div>
+    <div class="hop sep"><span class="n"></span><span class="ev">— the run ends —</span><span class="who"></span></div>
+    <div class="hop gf"><span class="n">4</span><span class="ev mono"><span class="e" style="color:var(--teal)">GameEnding</span> → <span class="t">SessionEnding</span> <span class="mut">(score is final)</span></span><span class="who">UGSGameFlowBridge · a pair</span></div>
+    <div class="hop ug"><span class="n">5</span><span class="ev mono"><span class="u">ScoreUpdating</span> + <span class="u">CurrencySyncRequested</span> <span class="mut">— one source, two consequences</span></span><span class="who">GameServiceEventsUGSBridge · two pairs</span></div>
+    <div class="hop ug"><span class="n">6</span><span class="ev mono">banked via <span class="t">ICurrencyBackend</span> → <span class="u">CurrencyBalanceChanged</span> <span class="mut">(services type)</span></span><span class="who">PlayerCurrencyManager</span></div>
+    <div class="hop ct"><span class="n">7</span><span class="ev mono"><span class="t">CurrencyBalanceChanged</span> <span class="mut">— a long, unwrapped by hand, retained</span></span><span class="who">GameServiceEventsUGSBridge · by hand</span></div>
+    <div class="hop gf"><span class="n">8</span><span class="ev mono"><span class="e" style="color:var(--teal)">CurrencyBalanceChanged</span> → HUD <span class="mut">· achievements read the lifetime</span></span><span class="who">UGSGameFlowBridge · a pair</span></div>
+  </div>
+  <div class="punch sm" style="margin-top:6px">Four doors. <b class="gold">Every hop is a named event in the console</b> — and the dashboard agrees.</div>
+  <aside class="notes">PREP: Log Events on before the talk; Clear Now immediately before playing; console font bumped, Collapse off. Have cloud.unity.com open on the Economy page for the initial-development environment in another tab, signed in as the same player. Fallback: a screenshot of the logged run beside the dashboard.
+
+WALK IT: play a run, collect five or six coins, die. Scroll the log: coin events climbing, then the run ends and the fan-out — two consequences from one SessionEnding — then the banked balance coming back. Switch tabs: the dashboard balance matches.
+
+THE THING TO SAY AT HOP 3: the controller remembers the number and does not bank it. Coins bank once, at the end, when the score is final. That is why the two names exist.
+
+If the balance does NOT move, you have found one of Act V's four defects live. Say so — it is a better demo than the working one.</aside>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-act="Act III · One coin's journey" data-title="TECH · one event, several consequences" data-mark="25">
+  <span class="chip tech">Tech</span>
+  <h2 class="sm">One event, several consequences <span class="dim">(and why not a dictionary)</span></h2>
+  <pre class="xs" style="flex:none"><span class="c">// GameServiceEventsUGSBridge — the services' side, contract → UGS</span>
+(<span class="t">GameServiceEvents.ScoreUpdated</span>,          <span class="u">UGS_EventsEnum.UGS_DistanceUpdated</span>),
+(<span class="t">GameServiceEvents.CurrencyTotalChanged</span>,  <span class="u">UGS_EventsEnum.UGS_CoinUpdated</span>),
+(<span class="t">GameServiceEvents.SessionEnding</span>,         <span class="u">UGS_EventsEnum.ScoreUpdating</span>),          <span class="c">// submit the score</span>
+(<span class="t">GameServiceEvents.SessionEnding</span>,         <span class="u">UGS_EventsEnum.CurrencySyncRequested</span>),  <span class="c">// bank the coins</span>
+(<span class="t">GameServiceEvents.SessionEnded</span>,          <span class="u">UGS_EventsEnum.LeaderboardOpening</span>),</pre>
+  <ul style="font-size:21px;margin-top:4px">
+    <li style="margin:8px 0"><b>Chains are a flat list of pairs, not a dictionary</b>, so one source may declare several consequences. Targets fire synchronously, in declaration order.</li>
+    <li style="margin:8px 0">All eight dispatch classes — three auto-flows, five bridges — share <b>one implementation</b> in the common package. A two-way bridge holds two dispatchers.</li>
+  </ul>
+  <div class="warstory" style="font-size:19px;margin-top:8px"><b>War story — the dictionary ceiling</b>
+  This used to be a dictionary: <i>one</i> successor per event. “That ceiling did not produce bugs directly — it produced workarounds. A developer who found a source event's slot already taken published the second consequence by hand inside a controller instead, which is how <b>failure logic came to publish pause events.</b>”</div>
+  <aside class="notes">THE LESSON, and the best line in the act: when the sanctioned path has a ceiling, people don't stop — they route around it, and the workaround is exactly where the coupling leaks back in. Design the data structure for the behavior you want to see.
+
+The war story is quoted from the dispatcher's own source comment in the common package.
+
+Mention that /audit-events checks these tables for cycles, since chains fire synchronously — a cycle is an infinite loop, not a slow frame.</aside>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-act="Act III · One coin's journey" data-title="Claim 3: the backend swaps" data-mark="26.5">
+  <div class="stamp"><b>1 checkbox</b><i>0 edits above the seam</i></div>
+  <h2 class="sm">Claim three: <span class="gold">the backend swaps</span></h2>
+  <pre class="small"><span class="c">// PlayerCurrencyManager — built on first access</span>
+Backend = UseTrustedClient
+    ? <span class="k">new</span> <span class="t">CloudCodeCurrencyBackend</span>(CloudCodeEndpoints)   <span class="c">// server-side C#: the server checks, then writes</span>
+    : <span class="k">new</span> <span class="t">EconomyCurrencyBackend</span>();                  <span class="c">// the Economy SDK, straight from the client</span></pre>
+  <ul style="font-size:23px">
+    <li>The same flag picks <code class="inline">CloudSaveAchievementBackend</code> or <code class="inline">CloudCodeAchievementBackend</code></li>
+    <li>Above the seam nothing changes: the contract still says <code class="inline">CurrencyBalanceChanged</code>, a <code class="inline">long</code></li>
+    <li><b>The trusted path is where anti-cheat lives.</b> Impossible speed? More coins than were spawned? The server decides before it writes.</li>
+  </ul>
+  <div class="claims compact" style="margin-top:14px">
+    <div class="clm done"><span class="k">01</span><span class="w">the game alone</span></div>
+    <div class="clm done"><span class="k">02</span><span class="w">the services alone</span></div>
+    <div class="clm done"><span class="k">03</span><span class="w">the backend swaps</span></div>
+    <div class="clm next"><span class="k">04</span><span class="w">late joiners still hear</span></div>
+    <div class="clm later"><span class="k">05</span><span class="w">the assistant stays inside</span></div>
+  </div>
+  <div class="punch sm">Two swaps inside the services, one across the seam. <b class="gold">Same rule, three sizes.</b></div>
+  <aside class="notes">SAY: claim three, in code. The flag is a checkbox on the currency controller in the boot scene (“use trusted client”). Tick it and coins bank through a Cloud Code endpoint instead of the Economy SDK; the game never learns which.
+
+The three sizes: swap a backend inside the services (this slide); swap the whole services layer (the game-only build); swap the whole game (the services-only build). The rule is the same at every size — talk only through events, and never name the other side's types.
+
+THE BOARD: 03 has gone green → gold. Tap it on the way past.</aside>
+</section>
+
+<!-- ==================== ACT IV — LATE JOINERS ==================== -->
+
+<!-- 17 -->
+<section class="slide" data-act="Act IV · Late joiners" data-title="The boot that stalled with no error" data-mark="28">
+  <h2 class="sm">The boot that stalled <span class="red">with no error</span></h2>
+  <svg viewBox="0 0 1140 250" style="width:1136px">
+    <defs><marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8E9CAA"/></marker></defs>
+    <line x1="60" y1="200" x2="1100" y2="200" stroke="#29323C" stroke-width="2" marker-end="url(#ar5)"/>
+    <text x="1104" y="222" font-size="14" fill="#8E9CAA" text-anchor="end">time →</text>
+    <!-- lane labels -->
+    <text x="60" y="58" font-size="17" fill="#B08CF5" font-weight="700">UGS_Boot_0 · loads first</text>
+    <text x="60" y="140" font-size="17" fill="#E8B04B" font-weight="700">UGS_Glue · loads later</text>
+    <!-- events -->
+    <rect x="330" y="34" width="250" height="40" rx="9" fill="rgba(176,140,245,.12)" stroke="#B08CF5"/>
+    <text x="455" y="60" font-size="16" text-anchor="middle" fill="#B08CF5" class="mono">ServicesReady published</text>
+    <line x1="455" y1="74" x2="455" y2="198" stroke="#B08CF5" stroke-width="1.5" stroke-dasharray="4 5"/>
+    <text x="455" y="218" font-size="14" fill="#8E9CAA" text-anchor="middle">t = 1</text>
+    <rect x="640" y="116" width="300" height="40" rx="9" fill="rgba(232,176,75,.10)" stroke="#E8B04B"/>
+    <text x="790" y="142" font-size="16" text-anchor="middle" fill="#E8B04B" class="mono">Awake: Subscribe(ServicesReady)</text>
+    <line x1="790" y1="156" x2="790" y2="198" stroke="#E8B04B" stroke-width="1.5" stroke-dasharray="4 5"/>
+    <text x="790" y="218" font-size="14" fill="#8E9CAA" text-anchor="middle">t = 2</text>
+    <text x="790" y="182" font-size="15" fill="#F0796B" text-anchor="middle" font-style="italic">nothing. ever.</text>
+    <text x="965" y="142" font-size="15" fill="#8E9CAA">→ no GameplayReady</text>
+    <text x="965" y="162" font-size="15" fill="#8E9CAA">→ no main menu</text>
+  </svg>
+  <ul style="font-size:23px;margin-top:0">
+    <li>Additive scenes finish loading in whatever order they finish. <b>Execution order attributes don't reach across scene loads.</b></li>
+    <li>No exception. No log line. <b>A spinner.</b> Every hop above the missing one fires and looks healthy.</li>
+  </ul>
+  <div class="punch sm">An event with no listener is <i>legal</i>. That's the sharpest edge of this whole design — <b class="gold">and here's where it cut us.</b></div>
+  <aside class="notes">SAY “remember the trap from slide 12?” — same failure, different cause. The glue's bridge lives in an additively-loaded scene. It used to react to the one-shot ServicesReady announcement. If services came up before the glue scene finished loading, the announcement was already gone. GameplayReady never fired, the menu was never requested, the loading screen stayed up.
+
+The bridge's own source comment tells this story: “if it lost that race, GameplayReady was never published and the boot stalled at LoadingScreenHidden — no menu, no error.”
+
+Hold on “legal.” The sibling talk priced this cost as “silent failure”; this is the concrete bill. Then advance to the fix.</aside>
+</section>
+
+<!-- 18 -->
+<section class="slide" data-act="Act IV · Late joiners" data-title="TECH · broadcast the state, not the moment" data-mark="30">
+  <span class="chip tech">Tech</span>
+  <h2 class="sm">Broadcast the <span class="gold">state</span>, not just the moment</h2>
+  <div class="cols" style="gap:24px">
+    <div class="col" style="flex:1.15">
+      <pre class="xs" style="margin-top:2px;font-size:15px"><span class="t">ServicesReady</span>       = 20,   <span class="c">// the moment. Announced once.</span>
+<span class="t">ServicesUnavailable</span> = 21,   <span class="c">// the moment. Announced once.</span>
+
+[<span class="t">EventPayload</span>(<span class="k">typeof</span>(<span class="t">ServicesStatus</span>))]
+[<span class="t">EventDelivery</span>(EventDelivery.<span class="e">Sticky</span>)]
+<span class="t">ServicesStatusChanged</span> = 22, <span class="c">// what is true right now —</span>
+                            <span class="c">// replayed to late subscribers</span></pre>
+      <p style="font-size:19px;line-height:1.3;margin:6px 0 0">The bridge publishes <code class="inline">Connecting</code> in its own <code class="inline">Awake</code>, before anything can ask — so a late host gets <b>a state, not silence.</b></p>
+    </div>
+    <div class="col">
+      <p style="font-size:20px;line-height:1.3;margin:0 0 8px"><b class="gold">A late subscriber gets the current value on subscribe, however late.</b> “The race cannot occur rather than being unlikely.”</p>
+      <p style="font-size:20px;line-height:1.3;margin:0"><b class="red">Why not make both moments sticky?</b> A latecomer would get <i>both</i>, in registration order — two opposing announcements. Retaining is only safe for <b>one event carrying a value.</b></p>
+    </div>
+  </div>
+  <p style="font-size:21px;margin:10px 0 0"><b>Discipline stat: <span class="gold">7 retained out of 271</span></b> — every one a value that stays true: a status, a balance, a difficulty table, a chosen level.</p>
+  <div class="claims compact" style="margin-top:8px">
+    <div class="clm done"><span class="k">01</span><span class="w">the game alone</span></div>
+    <div class="clm done"><span class="k">02</span><span class="w">the services alone</span></div>
+    <div class="clm done"><span class="k">03</span><span class="w">the backend swaps</span></div>
+    <div class="clm done"><span class="k">04</span><span class="w">late joiners still hear</span></div>
+    <div class="clm later"><span class="k">05</span><span class="w">the assistant stays inside</span></div>
+  </div>
+  <div class="punch sm">A scene that loads after the answer <b class="gold">still needs the answer.</b></div>
+  <aside class="notes">THE FIX: one event that carries the current status, marked for retained delivery, and the bridge subscribes to that instead of the moment. The bus replays the last value to a late subscriber. The failure isn't rarer — it's unrepresentable.
+
+“Sticky” is the feature's real name in the EventsPublisher package; “retained” is the plain word. Use either, consistently.
+
+THE TRAP TO NAME OUT LOUD: Paused/Resumed-style pairs are two moments, not a state, and retaining them cannot be made safe. Carry the state in one value-carrying event. The contract's own comment says exactly this about ServicesReady/Unavailable.
+
+THE SEVEN: ServicesStatusChanged and CurrencyBalanceChanged in the contract; DifficultySettingsApplied and CurrencyBalanceChanged in GameFlow; the level and two difficulty-table events in TempleRun. Each has a comment naming the boot stall or blank HUD it prevents. Upgrades are measured, not vibed — Window ▸ Events ▸ Upgrade Audit reports which events actually had a late subscriber after a play session.
+
+THE BOARD: 04 is now gold.</aside>
+</section>
+
+<!-- ==================== ACT V — WHAT COMPILES ISN'T WHAT RUNS ==================== -->
+
+<!-- 19 -->
+<section class="slide" data-act="Act V · What compiles isn't what runs" data-title="Four defects a build could not show" data-mark="32">
+  <span class="chip all">Everyone back in</span>
+  <h2 class="sm" style="margin-bottom:6px">Four defects <span class="dim">a build could not show</span></h2>
+  <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:14px;margin:6px 0 0">
+    <div class="stat frag" data-step="1"><div class="l" style="font-size:19.5px;color:var(--ink);line-height:1.32"><b class="red">1 · The listener that wasn't there.</b> The currency controller is the <i>only</i> subscriber to “bank the coins.” Leave it out of a scene and every hop before it still fires. The log looks healthy. <b>Nothing is written.</b></div></div>
+    <div class="stat frag" data-step="1"><div class="l" style="font-size:19.5px;color:var(--ink);line-height:1.32"><b class="red">2 · The currency in the wrong room.</b> Economy is configured per environment. A <code class="inline">COIN</code> published to <i>production</i> does not exist in <i>initial-development</i>. The name must match exactly; nothing checks it at compile time.</div></div>
+    <div class="stat frag" data-step="2"><div class="l" style="font-size:19.5px;color:var(--ink);line-height:1.32"><b class="red">3 · The key that isn't there.</b> No <code class="inline">difficulty_settings</code> key in Remote Config → silence, by design: the game keeps its local table. Scenes load by name; a name missing from the build list fails <b>at runtime, not at import.</b></div></div>
+    <div class="stat frag" data-step="2"><div class="l" style="font-size:19.5px;color:var(--ink);line-height:1.32"><b class="red">4 · The rig that rotted.</b> Extracting the services into a package moved the only <code class="inline">GameplayReady</code> publisher into the glue scene. The services-only boot never loaded it. Found by a documentation sweep, <b>the day before it would have been shown on stage.</b> One scene-list entry, one loader.</div></div>
+  </div>
+  <div class="punch frag" data-step="3">“Compiling was never the hard part.” <span class="mut" style="font-size:22px">A component can compile, ship, and simply never be placed in a scene.</span></div>
+  <aside class="notes">SAY: two clicks, two defects each. These are all real; the first three are written up in the services package's README and the fourth is a commit from the day before this deck was built.
+
+THE COMMON SHAPE: every one lives outside C#. A scene placement, a dashboard setting, a string key, a scene list. The compiler is not wrong about any of them — it just has no opinion.
+
+Number 4 is the one to be honest about: the prospectus for this very talk flagged it as “fix and play-test before this profile is shown on stage.” It was, and it was one scene-list entry plus one loader — but the point stands: a build that compiles proved nothing.
+
+The quote is from the package README's own retrospective: “the first play session found three defects a build could not have shown, all silent, and the session that closed the currency path found a fourth thing a build cannot show at all.”</aside>
+</section>
+
+<!-- 20 -->
+<section class="slide" data-act="Act V · What compiles isn't what runs" data-title="What it costs (honesty)" data-mark="34">
+  <span class="chip tech">Tech</span>
+  <h2 class="sm">What it costs <span class="dim">(the honesty slide)</span></h2>
+  <div class="cols">
+    <div class="col">
+      <div class="panel badp">
+        <h3>The bill</h3>
+        <ul>
+          <li>You can't ctrl-click from cause to effect</li>
+          <li>An event nobody hears fails <b>silently</b></li>
+          <li>Scene names, currency ids, config keys: <b>strings nothing checks</b></li>
+          <li>Packages pin by commit, not by version number</li>
+          <li>109 dashboard clicks before the first coin</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel goodp">
+        <h3>How we pay it</h3>
+        <ul>
+          <li>Strict naming — the ladder <i>is</i> the docs</li>
+          <li>Assembly definitions at the package seam: <b>game-to-UGS does not compile</b></li>
+          <li>List Domains · Log Events · the Upgrade Audit</li>
+          <li><code class="inline">/audit-events</code> before every merge</li>
+          <li><b>Two delete-test builds, played</b> before any claim is made</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="punch">A build that compiles proves the seam <i>exists</i>. <b class="gold">A build you play proves it works.</b></div>
+  <aside class="notes">CREDIBILITY SLIDE — own the costs before someone in Q&A does it for you. The indirection is real, and live services add a second bill that is not code at all.
+
+“Pin by commit” is a real afternoon-waster: Unity resolves a git-URL package by commit hash, so bumping package.json does not publish a change. The task catalog's Q2 explains the loop.
+
+The punch is one of the three things to steal — plant it here so the callback lands.
+
+Then hand off: “So who is allowed to touch all this? Everyone — including the ones who aren't people.”</aside>
+</section>
+
+<!-- ==================== ACT VI — ASSISTANTS ON THE TEAM ==================== -->
+
+<!-- 21 -->
+<section class="slide" data-act="Act VI · Assistants on the team" data-title="This repo has AI coworkers" data-mark="36">
+  <h2>This repo has <span class="gold">AI coworkers</span></h2>
+  <ul style="font-size:25px;line-height:1.35">
+    <li><code class="inline">AGENTS.md</code> — how to work here. <code class="inline">CLAUDE.md</code>, 651 lines — the law. Written for <i>any</i> tool's agent; <code class="inline">GEMINI.md</code> and the Copilot file are 29-line pointers to the same pair.</li>
+    <li><b>8 skills</b> — procedures as plain markdown: slash commands in one tool, checklists in every other</li>
+    <li>The required loop for every feature:<br>
+      <span class="mono" style="font-size:23px;color:var(--gold)">/list-events → /add-event → implement → /audit-events</span></li>
+    <li>Every task in the catalog says <b>where the code lands</b>: <span class="mono" style="font-size:21px">game · package · contract · module · dashboard</span> — <span class="mut">and one of those isn't code at all.</span></li>
+  </ul>
+  <div class="punch">“Know where the code lands <b class="gold">before it writes any.</b>”</div>
+  <aside class="notes">COURSE CONTEXT: students arrive with whatever assistant they have, so the skills are tool-agnostic markdown and the two pointer files route Gemini and Copilot to the same rules. No lock-in, and a human can follow every skill as a checklist.
+
+THE FIVE PLACES is the new idea versus the sibling repo. A live-services feature might land in the game, in a read-only package (fork it or copy it — task Q2), in the contract (deliberately rarely), in the Cloud Code module (server-side C#, redeploy after), or on the dashboard — which is a person clicking, not code. An assistant that doesn't know which is going to write confident nonsense.
+
+The punch is quoted from the task catalog's own instructions to assistants.</aside>
+</section>
+
+<!-- 22 -->
+<section class="slide" data-act="Act VI · Assistants on the team" data-title="Four fences" data-mark="37.5">
+  <h2 class="sm">Four fences, <span class="gold">one for each way it goes wrong</span></h2>
+  <table class="tbl tight">
+    <tr><th>Fence</th><th>Catches</th><th>What it looks like</th></tr>
+    <tr><td><b>The compiler</b> <span class="mut">(asmdefs)</span></td><td>the game naming a services type</td><td class="mono" style="font-size:17.5px;color:var(--red)">UGS_EventsEnum in a game file → does not build</td></tr>
+    <tr><td><b>The procedure</b> <span class="mut">(8 skills)</span></td><td>the wrong enum · a duplicate under another name</td><td class="mono" style="font-size:17.5px;color:var(--gold)">/list-events before /add-event</td></tr>
+    <tr><td><b>The check</b> <span class="mut">(/audit-events)</span></td><td>a missing unsubscribe · a crossing outside a bridge · a chain past a validation gate</td><td class="mono" style="font-size:17.5px;color:var(--gold)">run before every merge</td></tr>
+    <tr><td><b>The habit</b> <span class="mut">(docs are the change)</span></td><td>the seam moved and the docs didn't</td><td style="font-size:18px;color:var(--ink-2)">“not done until the docs stop describing the old world”</td></tr>
+  </table>
+  <p class="frag" data-step="1" style="font-size:23px;margin-top:14px"><b>Honestly:</b> agents fail exactly like fast juniors. They automate past a gate, invent an event that already exists, forget <code class="inline">OnDestroy</code>. <b>Same failures, same fences.</b></p>
+  <div class="punch frag" data-step="2">Fences that keep a fast junior on the rails <b class="gold">keep a model on them too.</b></div>
+  <aside class="notes">SAY: what each fence catches that the others cannot. The compiler catches one class of mistake and has no opinion about the rest. The skills prevent the mistakes you make before typing. The audit catches what got typed anyway. The habit catches the slowest failure — a repo whose docs describe a seam that moved.
+
+The honesty beat matters: don't oversell. Every one of those three failures has happened in this repo with an assistant at the keyboard, and every one was caught by the same audit that catches a student.
+
+If a researcher is in the room: the four fences are a cheap experiment — same task, guidance stripped versus full stack, scored by the audit. The prospectus in the repo lays it out.</aside>
+</section>
+
+<!-- 23 -->
+<section class="slide" data-act="Act VI · Assistants on the team" data-title="Demo: an assistant adds a service" data-mark="39">
+  <span class="chip">Demo</span>
+  <div class="stamp"><b>+1 listener</b><i>0 edits to the game</i></div>
+  <h2 class="sm">An assistant adds a service capability</h2>
+  <p class="sub">Task <b>T2 — achievements that teach the game:</b> wake the coin achievements. Live with a six-minute timebox, or time-lapse.</p>
+  <ul style="font-size:24px">
+    <li>It runs <code class="inline">/list-events UGS</code> and finds the banked balance already crossing the seam as a <code class="inline">long</code></li>
+    <li>One listener, in the services package: thresholds on the <b>lifetime</b> balance. <b>No eleventh word</b> — the contract holds.</li>
+    <li><code class="inline">/audit-events</code>: <span class="green">clean</span> — no coupling, no missing unsubscribe</li>
+  </ul>
+  <div class="claims compact" style="margin-top:14px">
+    <div class="clm done"><span class="k">01</span><span class="w">the game alone</span></div>
+    <div class="clm done"><span class="k">02</span><span class="w">the services alone</span></div>
+    <div class="clm done"><span class="k">03</span><span class="w">the backend swaps</span></div>
+    <div class="clm done"><span class="k">04</span><span class="w">late joiners still hear</span></div>
+    <div class="clm done"><span class="k">05</span><span class="w">the assistant stays inside</span></div>
+  </div>
+  <div class="punch sm">The diff never touched the game. <b class="gold">It couldn't — the compiler wouldn't let it.</b> <span class="mut">Back pocket: a pre-baked T2 branch and the audit output.</span></div>
+  <aside class="notes">PREP: canned prompt saved in a text file — “Read AGENTS.md and follow it. Implement task T2 from docs/FUTURE_TASKS.md, starting from the concrete starting point it gives. Do not add a contract member; the balance already crosses. Finish with /audit-events and show me the result.” The package is read-only here, so the demo machine needs the Q2 loop set up: a local clone of EventDrivenUGS on a file: path.
+
+RIPCORD: a finished branch, plus a screenshot of the audit output. The agent needs network; the time-lapse doesn't. Default to the video unless the venue's network is proven.
+
+TWO APPLAUSE LINES, two audiences: the achievement toast is for everyone, the audit output is for the programmers. Show the toast first.
+
+THE BOARD: all five gold. Point at it for a beat before you advance.</aside>
+</section>
+
+<!-- 24 -->
+<section class="slide" data-act="Act VI · Assistants on the team" data-title="Where it goes next (a menu)" data-mark="42">
+  <h2 class="sm">Where it goes next <span class="dim">(a menu, not a meal)</span></h2>
+  <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);gap:18px">
+    <div class="stat"><div class="l" style="font-size:21px;color:var(--ink);line-height:1.35"><b class="violet">Live tuning · R.</b> Retune difficulty and economy <b>without a rebuild</b>, staged rollouts by audience — then a real A/B test, two scoring models compared on the board.</div></div>
+    <div class="stat"><div class="l" style="font-size:21px;color:var(--ink);line-height:1.35"><b class="violet">Trust · U.</b> Server-authoritative scores: Cloud Code checks the run before it writes. Cloud Save profiles. Ghost racing through the cloud.</div></div>
+    <div class="stat"><div class="l" style="font-size:21px;color:var(--ink);line-height:1.35"><b class="violet">Money · S.</b> A second currency, a shop on Economy, rewarded ads finished, in-app purchase <i>honestly stubbed</i>, a daily reward with a streak.</div></div>
+    <div class="stat"><div class="l" style="font-size:21px;color:var(--ink);line-height:1.35"><b class="violet">Other people · T, V.</b> Friends, a friends board, display names — then Lobby, Matchmaker, Relay + Netcode, and voice with Vivox.</div></div>
+  </div>
+  <p style="font-size:22px;margin-top:16px"><b>33 tasks, sections Q–W</b>, each with a hand-off brief for an assistant and a tag for where the code lands. Section X carries the sibling's 127 over — some get a cloud upgrade.</p>
+  <p class="mut" style="font-size:20px;margin-top:6px">Fair warning: Q1 is standing it up and Q2 is the package-change loop. Do them first, or nothing else in the catalog is reachable.</p>
+  <aside class="notes">A MENU, NOT A MEAL — one sentence per cell, resist the urge to teach any of them. If you are behind schedule, this is the first slide to cut.
+
+The honesty note about Q1 and Q2 is what keeps the menu credible with anyone who has actually stood UGS up. The catalog is blunt about it: the package is read-only here, so half the tasks need the copy-or-fork loop first.</aside>
+</section>
+
+<!-- ==================== CLOSE ==================== -->
+
+<!-- 25 -->
+<section class="slide" data-act="Close" data-title="Five claims. Five shown." data-mark="43.5">
+  <h2>Five claims. <span class="gold">Five shown.</span></h2>
+  <div class="claims" style="margin:18px 0 22px">
+    <div class="clm done"><span class="k">01</span><span class="w">the game alone</span></div>
+    <div class="clm done"><span class="k">02</span><span class="w">the services alone</span></div>
+    <div class="clm done"><span class="k">03</span><span class="w">the backend swaps</span></div>
+    <div class="clm done"><span class="k">04</span><span class="w">late joiners still hear</span></div>
+    <div class="clm done"><span class="k">05</span><span class="w">the assistant stays inside</span></div>
+  </div>
+  <ul style="font-size:25px;line-height:1.35">
+    <li>Deleted the <b>services</b> — a different first scene</li>
+    <li>Deleted the <b>game</b> — a dummy that speaks ten words</li>
+    <li>Swapped the <b>backend</b> — one checkbox, nothing above the seam noticed</li>
+    <li>A <b>late scene</b> got the answer anyway — the state, retained</li>
+    <li>An <b>assistant</b> shipped a service through the same door — and the audit passed</li>
+  </ul>
+  <div class="punch frag">Delete half. Ship it anyway. <b class="gold">That's what a seam is for.</b></div>
+  <aside class="notes">Thirty seconds. Read the five fast — the audience has been keeping score since slide 13, so this is confirmation, not new information. Then the punch, and advance on the beat.</aside>
+</section>
+
+<!-- 26 -->
+<section class="slide" data-act="Close" data-title="Three things to steal" data-mark="44.5">
+  <h2>Three things to steal</h2>
+  <ul style="font-size:27px;line-height:1.35">
+    <li class="frag" data-step="1" style="margin:16px 0"><b>1 · Put the shared words where neither side owns them.</b> Ten words, their own package, payloads primitive or undeclared.</li>
+    <li class="frag" data-step="2" style="margin:16px 0"><b>2 · Broadcast the state, not just the moment.</b> A scene that loads after the answer still needs the answer.</li>
+    <li class="frag" data-step="3" style="margin:16px 0"><b>3 · What compiles isn't what runs.</b> Keep a build that deletes each half — and play it before you believe it.</li>
+  </ul>
+  <div style="margin-top:auto">
+    <p class="mono" style="font-size:24px;color:var(--gold);margin-bottom:4px">github.com/crawfis/RunnerUGSTemplate</p>
+    <p class="mono" style="font-size:24px;color:var(--violet);margin-bottom:10px">github.com/crawfis/EventDrivenUGS</p>
+    <p class="mut" style="font-size:21px">Both CC0. Clone it · build both test profiles · pick one of the 33. <b style="color:var(--ink)">Thank you.</b></p>
+  </div>
+  <aside class="notes">Reveal the three one at a time, ten seconds each. Say number three in the same words you used on the honesty slide — the repetition is what makes it stick.
+
+CTA: both repos are public domain (CC0) — no attribution owed, commercial use included. The task catalog's Q1 is the honest first step.
+
+OPTIONAL CLOSER: “The sibling talk is the trailer for the rule. This one was the rule leaving the building.” Then Q&A — the cheat sheet is two slides into the appendix (press O).</aside>
+</section>
+
+<!-- ==================== APPENDIX ==================== -->
+
+<!-- A1 -->
+<section class="slide" data-act="Appendix · Q&amp;A backup" data-title="The numbers, and how counted" data-appendix>
+  <h2 class="sm">The numbers, and how they were counted</h2>
+  <table class="tbl tight">
+    <tr><th>Claim</th><th>Value</th><th>How</th></tr>
+    <tr><td>Events total</td><td><b class="gold">271</b></td><td>76 GameFlow + 121 TempleRun + 9 UserInitiated + 10 contract + 55 UGS (incl. its <code class="inline">None</code> placeholder)</td></tr>
+    <tr><td>Chain entries</td><td><b class="gold">49</b></td><td>19 GameFlow + 17 TempleRun + 13 UGS active pairs</td></tr>
+    <tr><td>Bridge mappings</td><td><b class="gold">36</b></td><td>9 input→gameplay · 11 TempleRun↔GameFlow · 2 + 5 in UGSGlue · 9 in the UGS package</td></tr>
+    <tr><td>Contract subscribers, hand-written</td><td><b class="gold">1</b></td><td>the status handler in <code class="inline">UGSGameFlowBridge</code>; everything else crosses via pair tables</td></tr>
+    <tr><td>Retained (Sticky) events</td><td><b class="gold">7</b></td><td>2 contract + 2 GameFlow + 3 TempleRun <code class="inline">[EventDelivery(Sticky)]</code></td></tr>
+    <tr><td>Scripts</td><td><b class="gold">135 + 69</b></td><td><code class="inline">*.cs</code> in the three game domains · Runtime of the three packages</td></tr>
+    <tr><td>Scenes · profiles · endpoints</td><td><b class="gold">28 · 3 · 7</b></td><td><code class="inline">*.unity</code> under Assets · Build Profiles · <code class="inline">[CloudCodeFunction]</code> in 4 services</td></tr>
+    <tr><td>Setup clicks · tasks · skills</td><td><b class="gold">109 · 33 · 8</b></td><td>numbered steps in the setup doc · numbered tasks in Q–W · <code class="inline">.claude/skills/*</code></td></tr>
+  </table>
+  <p class="mut" style="font-size:19px;margin-top:10px">Counted on <span class="mono">main</span>, 2026-09-02, against packages pinned at EventDrivenUGS <span class="mono">c5ecaef</span>. <span class="mono">CrawfisSoftware ▸ Events ▸ List Domains</span> is the authoritative event count.</p>
+  <aside class="notes">The defensive slide. If anyone challenges a number, put this up rather than arguing from memory.
+
+The one to be careful about is 271: it includes the UGS enum's None placeholder, because that is what List Domains reports. Say “about 270” and you are safe.
+
+The bridge count excludes the hand-written subscriptions (one in the game's glue, seven members in the services' bridge) because those transform a payload rather than forward one.</aside>
+</section>
+
+<!-- A2 -->
+<section class="slide" data-act="Appendix · Q&amp;A backup" data-title="Q&amp;A cheat sheet" data-appendix>
+  <h2 class="sm">Q&amp;A cheat sheet</h2>
+  <table class="tbl tight" style="font-size:17.5px">
+    <tr><th style="width:31%">If they ask…</th><th>Say</th></tr>
+    <tr><td style="white-space:normal;font-size:18px"><b>Why an enum contract, not an interface and dependency injection?</b></td><td style="font-size:18px">An interface is still a compile-time reference to a type someone owns. Ten enum members in a third package are owned by neither — and events-as-data is what buys the logger, List Domains, the chain tables and the audit.</td></tr>
+    <tr><td style="white-space:normal;font-size:18px"><b>Isn't retained delivery just a global variable?</b></td><td style="font-size:18px">A last-value cache per event, replayed on subscribe — used only for values that stay true (7 of 271). The Upgrade Audit reports which events actually had a late subscriber: evidence first, then upgrade.</td></tr>
+    <tr><td style="white-space:normal;font-size:18px"><b>Why assembly definitions here and none in the sibling?</b></td><td style="font-size:18px">The sibling is one assembly for onboarding speed. Here the services arrive as packages, so the boundary comes free — and game-to-UGS not compiling is worth the reference edits.</td></tr>
+    <tr><td style="white-space:normal;font-size:18px"><b>Why is the services code read-only in the game repo?</b></td><td style="font-size:18px">Resolved by git URL so it can sit under a different game unchanged. To edit it: copy it into Assets, embed it, or fork it — task Q2 walks all three, and CC0 means you may.</td></tr>
+    <tr><td style="white-space:normal;font-size:18px"><b>Does the AI break the architecture?</b></td><td style="font-size:18px">Yes, the same ways juniors do — automating past a gate, duplicating an event, forgetting OnDestroy. So the rules live in files the agent must read, and the audit runs before merge.</td></tr>
+  </table>
+  <aside class="notes">Five questions that come up every time. Put the slide up while you answer — it buys thinking time and reads as preparation rather than defensiveness.
+
+For “performance of all that indirection”: events fire on state transitions, not per frame — the hottest is the distance tick. Dispatch is synchronous, no reflection at publish. It has not been a bottleneck; profile before believing anyone, including me.</aside>
+</section>
+
+<!-- A3 -->
+<section class="slide" data-act="Appendix · Q&amp;A backup" data-title="The 30-minute cut" data-appendix>
+  <h2 class="sm">The 30-minute cut</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="panel badp">
+        <h3>Cut, in this order</h3>
+        <ul>
+          <li><b>24</b> — the menu (fold one cell into 26)</li>
+          <li><b>8</b> — what it looked like before (one sentence on 7)</li>
+          <li><b>15</b> — the dictionary war story (one line on 14)</li>
+          <li><b>10</b> — the payload rule → one bullet on 9</li>
+          <li><b>22</b> — four fences → fold the honesty line into 21</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel goodp">
+        <h3>Protect at all costs</h3>
+        <ul>
+          <li><b>1</b> cold open · <b>3</b> zero · <b>4</b> the bill</li>
+          <li><b>7</b> four doors · <b>9</b> ten words · <b>11</b> seven pairs</li>
+          <li><b>13</b> the board · <b>14</b> the coin · <b>16</b> the backend</li>
+          <li><b>17–18</b> the stall and the fix · <b>19</b> four defects</li>
+          <li><b>23</b> the assistant · <b>25–26</b> the close</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="punch sm">The agent demo becomes the <b class="gold">90-second time-lapse</b>, never live. The coin demo stays live — it is the talk.</div>
+  <aside class="notes">Your own reference. The principle behind the cut list: every protected slide either lights a claim or lands a stamp. Everything else is elaboration, and elaboration is what a shorter room trades away.
+
+If you are cutting live rather than in advance: skip 24, run the agent video instead of the live agent, and skip 8.</aside>
+</section>
+
+<!-- A4 -->
+<section class="slide" data-act="Appendix · Q&amp;A backup" data-title="The five places code lands" data-appendix>
+  <h2 class="sm">Where a live-services change lands <span class="dim">(for students)</span></h2>
+  <table class="tbl tight">
+    <tr><th>Tag</th><th>The work happens in</th><th>Editable how</th></tr>
+    <tr><td><b>game</b></td><td>this repo: the game domains, <code class="inline">Assets/UGSGlue/</code>, boot scenes, prefabs</td><td>directly</td></tr>
+    <tr><td><b>package</b></td><td>the <code class="inline">com.crawfissoftware.ugs</code> package, from EventDrivenUGS</td><td>copy, embed or fork — task Q2; read-only as shipped</td></tr>
+    <tr><td><b>contract</b></td><td><code class="inline">GameServiceEvents</code> in <code class="inline">com.crawfissoftware.contracts</code></td><td>the same copy; <b>deliberately rare</b></td></tr>
+    <tr><td><b>module</b></td><td>the Cloud Code C# module under <code class="inline">Assets/UGS/CloudCode/</code></td><td>directly; redeploy and regenerate bindings after</td></tr>
+    <tr><td><b>dashboard</b></td><td>cloud.unity.com — services configuration, per environment</td><td>a person clicking. <b>Not code at all</b></td></tr>
+  </table>
+  <div class="punch sm">The standard recipe for a new capability: <span class="mono" style="font-size:20px">/list-events UGS → lifecycle events → an adapter → a contract crossing (if the game must react) → a boot scene → /audit-events</span></div>
+  <aside class="notes">Pull this up if a student asks “where do I even start?” It is the table from the top of the task catalog, verbatim in spirit. The recipe is the catalog's “standard recipe” — most of the 33 tasks are this recipe with different nouns.
+
+The point to land: the tag is the first question, not an afterthought — and one of the five places is a person clicking on a website.</aside>
+</section>
+
+</div>
+
+<div id="hud">
+  <span id="hud-act"></span>
+  <span><span class="mono">←/→</span> nav · <span class="mono">N</span> notes · <span class="mono">O</span> index · <span class="mono">T</span> timer · <span class="mono">B</span> blank&nbsp;&nbsp;|&nbsp;&nbsp;<span id="hud-time"></span>&nbsp;&nbsp;<span id="hud-count"></span></span>
+</div>
+<div id="notes"><h4>Speaker notes</h4><div id="notes-body"></div></div>
+<div id="index"><h4>Slide index — click to jump, or type a number</h4><div class="grid" id="index-grid"></div></div>
+<div id="blank"></div>
+
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var hudAct = document.getElementById('hud-act');
+  var hudCount = document.getElementById('hud-count');
+  var hudTime = document.getElementById('hud-time');
+  var progress = document.getElementById('progress');
+  var notes = document.getElementById('notes');
+  var notesBody = document.getElementById('notes-body');
+  var indexEl = document.getElementById('index');
+  var indexGrid = document.getElementById('index-grid');
+  var blank = document.getElementById('blank');
+  var cur = 0;
+  var qs = location.search;
+  var allMode = /[?&]all/.test(qs);      // ?all reveals every fragment (review / screenshots)
+  var mainCount = slides.filter(function (s) { return !s.hasAttribute('data-appendix'); }).length;
+
+  function fit() {
+    stage.style.transform = 'scale(' + Math.min(window.innerWidth / 1280, window.innerHeight / 720) + ')';
+  }
+
+  /* Fragments reveal in document order, unless they carry data-step. Fragments that share a
+     data-step reveal TOGETHER on one click — which is how a slide can stack up several claims
+     before answering any of them, without costing extra clicks. */
+  function groups(slide) {
+    var out = [], byStep = {};
+    Array.prototype.slice.call(slide.querySelectorAll('.frag')).forEach(function (el, i) {
+      var s = el.getAttribute('data-step');
+      if (s === null) { out.push({ order: i, els: [el] }); return; }  // implicit: document order
+      var key = 's' + parseFloat(s);
+      if (!byStep[key]) { byStep[key] = { order: parseFloat(s), els: [] }; out.push(byStep[key]); }
+      byStep[key].els.push(el);
+    });
+    return out.sort(function (a, b) { return a.order - b.order; });
+  }
+
+  function setGroup(g, on) { g.els.forEach(function (el) { el.classList.toggle('on', on); }); }
+  function groupOn(g) { return g.els.every(function (el) { return el.classList.contains('on'); }); }
+
+  function show(i, revealAll) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function (s, j) { s.classList.toggle('current', j === cur); });
+    groups(slides[cur]).forEach(function (g) { setGroup(g, !!revealAll || allMode); });
+
+    var s = slides[cur];
+    hudAct.textContent = s.getAttribute('data-act') || '';
+    if (s.hasAttribute('data-appendix')) {
+      var ai = slides.slice(0, cur + 1).filter(function (x) { return x.hasAttribute('data-appendix'); }).length;
+      hudCount.textContent = 'appendix ' + ai + ' / ' + (slides.length - mainCount);
+      progress.style.width = '100%';
+    } else {
+      hudCount.textContent = (cur + 1) + ' / ' + mainCount;
+      progress.style.width = ((cur + 1) / mainCount * 100) + '%';
+    }
+    var n = s.querySelector('.notes');
+    notesBody.textContent = n ? n.textContent.trim() : '(no notes)';
+    paintIndex();
+    tick();
+    if (location.hash !== '#' + (cur + 1)) history.replaceState(null, '', '#' + (cur + 1));
+  }
+
+  function next() {
+    var pending = groups(slides[cur]).filter(function (g) { return !groupOn(g); });
+    if (pending.length) { setGroup(pending[0], true); return; }
+    if (cur < slides.length - 1) show(cur + 1, false);
+  }
+  function prev() {
+    var on = groups(slides[cur]).filter(groupOn);
+    if (on.length) { setGroup(on[on.length - 1], false); return; }
+    if (cur > 0) show(cur - 1, true);
+  }
+
+  /* Presenter clock. T starts/pauses, shift+T resets. When a slide declares data-mark
+     (the minute you should reach it), the HUD turns gold once you are 2+ minutes late. */
+  var t0 = null, elapsed = 0, running = false;
+  function secs() { return elapsed + (running && t0 ? (Date.now() - t0) / 1000 : 0); }
+  function mmss(s) {
+    var m = Math.floor(s / 60), r = Math.floor(s % 60);
+    return m + ':' + (r < 10 ? '0' : '') + r;
+  }
+  function tick() {
+    if (!running && elapsed === 0) { hudTime.textContent = ''; hudTime.className = ''; return; }
+    var mark = slides[cur].getAttribute('data-mark');
+    var txt = (running ? '▶ ' : '❚❚ ') + mmss(secs());
+    if (mark !== null) {
+      txt += ' / ' + mark + ':00';
+      hudTime.className = (secs() / 60 - parseFloat(mark) >= 2) ? 'warn' : '';
+    } else { hudTime.className = ''; }
+    hudTime.textContent = txt;
+  }
+  setInterval(tick, 1000);
+
+  function paintIndex() {
+    if (!indexEl.classList.contains('open')) return;
+    Array.prototype.slice.call(indexGrid.children).forEach(function (row) {
+      row.classList.toggle('here', row.dataset.i === String(cur));
+    });
+  }
+  function buildIndex() {
+    var act = null;
+    slides.forEach(function (s, i) {
+      var a = s.getAttribute('data-act') || '';
+      if (a !== act) {
+        act = a;
+        var h = document.createElement('div');
+        h.className = 'row act'; h.textContent = a;
+        indexGrid.appendChild(h);
+      }
+      var row = document.createElement('div');
+      row.className = 'row'; row.dataset.i = String(i);
+      row.innerHTML = '<span class="no">' + (s.hasAttribute('data-appendix') ? 'A' : (i + 1)) + '</span>' +
+                      (s.getAttribute('data-title') || '');
+      row.addEventListener('click', function () { indexEl.classList.remove('open'); show(i, false); });
+      indexGrid.appendChild(row);
+    });
+  }
+
+  var typed = '';
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^[0-9]$/.test(e.key)) { typed += e.key; return; }
+    if (e.key === 'Enter' && typed) { show(parseInt(typed, 10) - 1, false); typed = ''; return; }
+    typed = '';
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { show(0, false); }
+    else if (e.key === 'End') { show(slides.length - 1, true); }
+    else if (e.key === 'n' || e.key === 'N') { notes.classList.toggle('open'); }
+    else if (e.key === 'o' || e.key === 'O') { indexEl.classList.toggle('open'); paintIndex(); }
+    else if (e.key === 'Escape') { indexEl.classList.remove('open'); }  // Esc only closes — it also exits fullscreen
+    else if (e.key === 'b' || e.key === 'B') { blank.classList.toggle('on'); }
+    else if (e.key === 'T') { elapsed = 0; t0 = Date.now(); tick(); }
+    else if (e.key === 't') { if (running) { elapsed = secs(); running = false; t0 = null; } else { running = true; t0 = Date.now(); } tick(); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (document.fullscreenElement) { document.exitFullscreen(); }
+      else { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
+    }
+  });
+
+  window.addEventListener('resize', fit);
+  window.addEventListener('hashchange', function () {
+    var h = parseInt(location.hash.slice(1), 10);
+    if (!isNaN(h) && h - 1 !== cur) show(h - 1, false);
+  });
+
+  fit();
+  buildIndex();
+  if (/[?&]notes/.test(qs)) notes.classList.add('open');
+  var start = parseInt(location.hash.slice(1), 10);
+  show(!isNaN(start) ? start - 1 : 0, false);
+})();
+</script>
+</body>
+</html>
