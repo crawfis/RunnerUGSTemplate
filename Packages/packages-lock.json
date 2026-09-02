@@ -21,7 +21,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "bfea2463e60ab9c57519a7d72a3488eefbb758ac"
+      "hash": "93772ec1d84b7bccef6286b0d84b79dca7bf41e8"
     },
     "com.crawfissoftware.ugs": {
       "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.ugs",
