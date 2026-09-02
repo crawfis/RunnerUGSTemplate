@@ -113,6 +113,14 @@ already exists.
 
 ### The talk (Thesis B, 40 min)
 
+> **The built deck lives at [talk/delete-half-your-game.html](talk/delete-half-your-game.html)**
+> — a self-contained HTML slide deck in the same format as the sibling repo's, expanding this
+> outline to 26 slides plus a four-slide appendix (the counted numbers, a Q&A sheet, the
+> 30-minute cut, and the five places a live-services change lands). Keys: `←`/`→` advance,
+> `N` speaker notes, `O` index, `T` timer, `B` blank, `F` fullscreen; append `?all` to the URL
+> to reveal every fragment; print to PDF for a handout. Every number on its slides was
+> re-counted against `main` on 2026-09-02 and the commands are in the appendix.
+
 1. **Cold open** (3 min): build the game with the services layer deleted — it ships. Build
    the services with the game deleted — they run against a dummy game. No slides yet, just
    the two profiles.
