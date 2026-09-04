@@ -68,8 +68,16 @@ diff -u <(norm "$SIB/Assets/TempleRun/$f") <(norm "$UGS/Assets/TempleRun/$f")
   Common, ThirdParty, EventsPublisher, InputSystem and the GTMY audio manager — nothing
   else. A ported script referencing anything outside those will not compile here (in the
   sibling everything is Assembly-CSharp, so its code can quietly reach further).
+- **Countdown files are not TempleRun files.** The pre-run ceremony is its own domain in
+  both repos now (`Assets/Countdown/`, `CountdownEvents`), so it is outside this skill's
+  compare scope — but a sibling TempleRun change may still *reference* it indirectly via
+  `PlayerActivateRequested`. Here it also has its own assembly,
+  `CrawfisSoftware.Countdown.asmdef` (GameFlow → Countdown → TempleRun); the sibling has
+  none. Port ceremony work as a separate pass, not inside a TempleRun sync.
 - Both repos resolve the same EventsPublisher commit (check `Packages/packages-lock.json`
-  hashes if in doubt); sibling code using the typed `EventId<T>` API compiles here as-is.
+  hashes if in doubt), and both are now on the same subscribe/publish style — bus alias plus
+  a bare payload cast in the handler. The `EventId<T>` mint pattern was removed by owner
+  ruling (2026-09) in both, so a ported file must not carry one in either direction.
 
 ## Step 5 — Verify
 
@@ -106,7 +114,7 @@ Reconciling that is a design decision, not a sync task.
 | File | Why it differs |
 |---|---|
 | `Scripts/Config/GameDifficultyManager.cs` | The fork itself: remote-latch here vs level-variant resolution there |
-| `Scripts/Config/Blackboard.cs` | Here: `TempleRunConfigApplied`/`TempleRunLevelApplied` handlers + `SelectedLevel`; there: single-writer `GameConfig` via typed `DifficultyChanging` |
+| `Scripts/Config/Blackboard.cs` | Here: `TempleRunConfigApplied`/`TrackLevelApplied` handlers + `SelectedLevel`; there: single-writer `GameConfig` via `DifficultyChanging` |
 | `Scripts/Config/LoadDefaultGameConfigs.cs` | Here publishes the local table unconditionally (the remote latch protects); there it stands down when a level already published one |
 | `Scripts/Track/TrackManager.cs` | Shared base, plus here-only `TempleRunConfigApplied` early-init (`_isInitialized`) |
 | `Scripts/Events/TempleRunEvents.cs` | Same members/values; bridged- and difficulty-section comments are repo-truthful, and `DifficultySettingsApplied = 320` carries the remote-table doc + Sticky only here |
@@ -118,7 +126,9 @@ Reconciling that is a design decision, not a sync task.
 | `CrawfisSoftware.TempleRun.asmdef`, `Editor/...Editor.asmdef` (only here) | This repo compiles domains as assemblies; the sibling uses Assembly-CSharp |
 | `Scripts/Config/PlayerPrefKeys.cs` (only here) | Same class both repos; the sibling keeps it under `Assets/GameFlow/` (visible without asmdefs), here it must live inside the TempleRun assembly |
 
-One style note: TempleRun files synced from the sibling use the typed
-`TempleRunBus.Id<T>(...)` / `EventId<T>` subscription API; the rest of this repo uses the
-classic `Subscribe(enum, handler)` form. Both are valid — match the file you are editing,
-and do not "normalize" synced files back to the classic form (that re-creates drift).
+One style note, now settled: there is a single subscribe/publish form in both repos —
+`Bus.Subscribe(enum, handler)` with the payload cast on the handler's first line. The typed
+`TempleRunBus.Id<T>(...)` / `EventId<T>` mint pattern that synced files used to carry was
+removed by owner ruling (2026-09) and both repos were converted, so a drift row showing one
+side minting `EventId<T>` is a file that missed the conversion — port the converted side,
+never the other way. `/audit-events` flags any remaining field.

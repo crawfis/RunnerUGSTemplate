@@ -44,7 +44,10 @@ Apply ERT's finished versions/pattern 1:1:
 - `Assets/GameFlow/Scripts/UI/MainMenuPanelController.cs` (show/hide)
 - `Assets/GameFlow/Scripts/UI/LevelSelectorPanelController.cs` (show/hide)
 - `Assets/GameFlow/Scripts/UI/GameFlowUIPanelController.cs` (show/hide ×2: loading + gameOver)
-- `Assets/TempleRun/Scripts/UI/CountdownUIController.cs` (query + show/hide)
+- `Assets/TempleRun/Scripts/UI/CountdownUIController.cs` (query + show/hide) — **moved
+  2026-09** to `Assets/Countdown/Scripts/UI/CountdownUIController.cs` (namespace
+  `CrawfisSoftware.Countdown.UI`) when the countdown became its own domain; its UXML moved
+  with it to `Assets/Countdown/UI Toolkit/Countdown.uxml`
 - `Assets/TempleRun/Scripts/UI/GUIController.cs` (query, HUD)
 
 > Diff each against ERT before pasting — RUGS versions may retain UGS-specific bits ERT stripped

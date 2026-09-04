@@ -28,9 +28,6 @@ namespace CrawfisSoftware.UGS.Events
     /// </remarks>
     internal class UGSGameFlowBridge : MonoBehaviour
     {
-        private static readonly EventId<ServicesStatus> StatusChanged =
-            GameServiceBus.Id<ServicesStatus>(GameServiceEvents.ServicesStatusChanged);
-
         private static readonly (GameFlowEvents From, GameServiceEvents To)[] GameFlowToGameService =
         {
             // A run has finished: its score is final, then the session is over.
@@ -65,7 +62,7 @@ namespace CrawfisSoftware.UGS.Events
             _gameServiceToGameFlow.Attach();
 
             // Sticky: if services are already up, this fires immediately on subscribe.
-            StatusChanged.Subscribe(OnServicesStatusChanged);
+            GameServiceBus.Subscribe(GameServiceEvents.ServicesStatusChanged, OnServicesStatusChanged);
 
         }
 
@@ -74,11 +71,12 @@ namespace CrawfisSoftware.UGS.Events
             _gameFlowToGameService.Detach();
             _gameServiceToGameFlow.Detach();
 
-            StatusChanged.Unsubscribe(OnServicesStatusChanged);
+            GameServiceBus.Unsubscribe(GameServiceEvents.ServicesStatusChanged, OnServicesStatusChanged);
         }
 
-        private void OnServicesStatusChanged(string eventName, object sender, ServicesStatus status)
+        private void OnServicesStatusChanged(string eventName, object sender, object data)
         {
+            var status = (ServicesStatus)data;
             switch (status)
             {
                 case ServicesStatus.Ready:

@@ -11,7 +11,7 @@ Add new events to the RunnerUGS event-driven architecture. Every action in this 
 
 ## Arguments
 
-- `$ARGUMENTS` - Feature name and optionally the domain (GameFlow, TempleRun, UserInitiated, UGS)
+- `$ARGUMENTS` - Feature name and optionally the domain (GameFlow, TempleRun, Countdown, UserInitiated, UGS)
 
 ## Procedure
 
@@ -22,7 +22,8 @@ Ask the user if not obvious from context:
 | Domain | Enum File | When to use |
 |--------|-----------|-------------|
 | **GameFlow** | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` | App lifecycle: loading, menus, pause, quit, scenes, config |
-| **TempleRun** | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` | Gameplay: player actions, countdown, turns, track, collisions, coins, power-ups |
+| **TempleRun** | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` | Gameplay: player actions and activation, turns, track, collisions, coins, power-ups |
+| **Countdown** | `Assets/Countdown/Scripts/Events/CountdownEvents.cs` | Session ceremony: the pre-run 3…2…1 (start, ticks, end) |
 | **UserInitiated** | `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs` | Raw input: new player-triggered actions |
 | **GameServiceEvents** | `Runtime/GameServiceEvents.cs` in the `com.crawfissoftware.contracts` package | The game/service contract. Add here only when a crossing is genuinely game-agnostic |
 | **UGS** | `Runtime/Events/UGS_EventsEnum.cs` in the `com.crawfissoftware.ugs` package (read-only here) | Unity Gaming Services: auth, leaderboards, achievements, remote config, economy |

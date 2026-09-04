@@ -11,7 +11,7 @@ Display a comprehensive view of all events in the event system.
 
 ## Arguments
 
-- `$ARGUMENTS` - Optional domain filter: `GameFlow`, `TempleRun`, `UserInitiated`, `UGS`, or `all` (default)
+- `$ARGUMENTS` - Optional domain filter: `GameFlow`, `TempleRun`, `Countdown`, `UserInitiated`, `UGS`, or `all` (default)
 
 ## Procedure
 
@@ -21,6 +21,7 @@ Display a comprehensive view of all events in the event system.
 |--------|------|
 | GameFlow | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | TempleRun | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs` |
+| Countdown | `Assets/Countdown/Scripts/Events/CountdownEvents.cs` |
 | UserInitiated | `Assets/TempleRun/Scripts/Events/UserInitiatedEvents.cs` |
 | GameService | `Runtime/GameServiceEvents.cs` in the `com.crawfissoftware.contracts` package |
 | UGS | `Runtime/Events/UGS_EventsEnum.cs` in the `com.crawfissoftware.ugs` package (read-only here) |
@@ -38,6 +39,7 @@ Read the relevant auto-flow file(s) and extract all dictionary entries.
 |--------|------|
 | GameFlow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs` |
 | TempleRun | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs` |
+| Countdown | `Assets/Countdown/Scripts/Events/CountdownAutoEventFlow.cs` |
 | UGS | `Runtime/Events/UGSAutoEventFlow.cs` in the `com.crawfissoftware.ugs` package (read-only here) |
 
 ### Step 3: Read bridge mappings
@@ -45,6 +47,8 @@ Read the relevant auto-flow file(s) and extract all dictionary entries.
 Read bridge files and extract the cross-domain pair tables:
 - `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` (input -> gameplay)
 - `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs`
+- `Assets/GameFlow/Scripts/CountdownSpecific/CountdownGameFlowBridge.cs` (session -> ceremony)
+- `Assets/Countdown/Scripts/TempleRunSpecific/Countdown2TempleRunBridge.cs` (ceremony -> gameplay)
 - `Assets/UGSGlue/UGSGameFlowBridge.cs` and `Assets/UGSGlue/TempleRunUGSBridge.cs`
 - `Runtime/Events/GameServiceEventsUGSBridge.cs` in the `com.crawfissoftware.ugs` package
 
@@ -80,6 +84,7 @@ At the end, show the next available value ranges for adding new events:
 |--------|-----------|---------------------|
 | GameFlow | 141 (SessionCoinsChanged) | 150+ |
 | TempleRun | 350 (SegmentGeometryReady) | 360+ |
+| Countdown | 5 (CountdownEnded) | 10+ |
 | UserInitiated | (implicit values — just append) | — |
 | UGS | (implicit values — append in category) | — |
 | GameService | 40 (CurrencyBalanceChanged) | 50+ (deliberately rare) |
@@ -99,6 +104,12 @@ UserInput -> TempleRun (via Input2TempleRunAutoEventBridge):
 
 TempleRun -> GameFlow / GameFlow -> TempleRun (via TempleRunGameFlowBridge):
   [list both pair tables]
+
+GameFlow -> Countdown (via CountdownGameFlowBridge, one-way):
+  [list the pair table]
+
+Countdown -> TempleRun (via Countdown2TempleRunBridge, one-way):
+  [list the pair table]
 
 TempleRun -> GameService (via TempleRunUGSBridge, one-way):
   [list the pair table]

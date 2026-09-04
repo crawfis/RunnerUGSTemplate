@@ -1,0 +1,10 @@
+{
+    "name": "CrawfisSoftware.Countdown",
+    "rootNamespace": "CrawfisSoftware.Countdown",
+    "references": [
+        "CrawfisSoftware.Common",
+        "CrawfisSoftware.EventsPublisher",
+        "CrawfisSoftware.TempleRun"
+    ],
+    "autoReferenced": true
+}

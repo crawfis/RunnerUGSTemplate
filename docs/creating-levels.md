@@ -347,7 +347,7 @@ GameFlow:
 ```
 GameFlow: LevelConfigApplier publishes LevelApplied(int LevelNumber)
     ↓  TempleRunGameFlowBridge
-TempleRun: TempleRunLevelApplied → stored on Blackboard.SelectedLevel
+TempleRun: TrackLevelApplied → stored on Blackboard.SelectedLevel
     ↓  at TrackManager init
 TrackLibraryLoader.Load(_trackLevels, Blackboard.Instance.SelectedLevel)
     → finds the TrackLevelSO with a matching LevelNumber

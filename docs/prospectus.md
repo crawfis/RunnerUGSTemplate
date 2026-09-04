@@ -9,17 +9,21 @@ the venue timing, the one experiment worth running, and what to fix before writi
 ```
 Input         UserInitiatedEvents  ·   9
       →  Input2TempleRun
-Gameplay      TempleRunEvents      · 121
-      ⇄  TempleRunGameFlow
+Gameplay      TempleRunEvents      · 117
+      ⇄  TempleRunGameFlow          ↑  Countdown2TempleRun
 Session       GameFlowEvents       ·  76
-      ⇄  UGSGlue
+      ↓  CountdownGameFlow
+Ceremony      CountdownEvents      ·   6
+      ⇄  UGSGlue  (from Session)
 The Contract  GameServiceEvents    ·  12
       ⇄  GameServiceEventsUGS
 Services      UGS_EventsEnum       ·  47
 ```
 
-Five `[EventEnum]` domains, eight dispatch classes on one pair-table base. Either end runs
-with the other absent — and that is the story.
+Six `[EventEnum]` domains, eleven dispatch classes on one pair-table base. Either end runs
+with the other absent — and that is the story. The Ceremony domain (added 2026-09) is the
+same argument in miniature: six events, two one-way bridges, and a countdown that can be
+replaced by a cutscene or by nothing at all without either neighbour being edited.
 
 ## 01 — The claims: three theses, one recommendation
 
@@ -124,7 +128,7 @@ already exists.
 1. **Cold open** (3 min): build the game with the services layer deleted — it ships. Build
    the services with the game deleted — they run against a dummy game. No slides yet, just
    the two profiles.
-2. **The registry** (5 min): five domains, one rule — cross-domain references live only in
+2. **The registry** (5 min): six domains, one rule — cross-domain references live only in
    bridges. Why the rule buys replaceability, not tidiness.
 3. **One coin's journey** (7 min): live event log from `CoinCollected` to a
    dashboard-visible Economy balance, naming every hop and both halves of the glue.
