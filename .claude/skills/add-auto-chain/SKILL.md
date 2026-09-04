@@ -19,6 +19,7 @@ Add an auto-event chain mapping within a single event domain. Auto-chains fire a
 |--------|------|
 | **GameFlow** | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs` |
 | **TempleRun** | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs` |
+| **Countdown** | `Assets/Countdown/Scripts/Events/CountdownAutoEventFlow.cs` |
 | **UGS** | `Runtime/Events/UGSAutoEventFlow.cs` in the `com.crawfissoftware.ugs` package (read-only here) — edit it in the EventDrivenUGS repo |
 
 Note: `UserInitiatedEvents` does NOT have an auto-flow — input events are always handled by subscribers directly.

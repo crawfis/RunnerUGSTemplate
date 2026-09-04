@@ -8,8 +8,13 @@ argument-hint: <DomainName> [purpose]
 # Add Event Domain
 
 Stand up a new event domain alongside `GameFlowEvents`, `TempleRunEvents`,
-`UserInitiatedEvents`, and `UGS_EventsEnum`. This is rare and structural — most features
-are a new *category* inside an existing enum, not a new domain.
+`UserInitiatedEvents`, `CountdownEvents`, `GameServiceEvents`, and `UGS_EventsEnum`. This is
+rare and structural — most features are a new *category* inside an existing enum, not a new
+domain. The Countdown domain (2026-09) is this repo's in-repo worked example, and the
+smallest one: a session-ceremony bounded context of six events whose bridges **translate
+rather than relay** (`GameStarting → CountdownStartRequested` in,
+`CountdownEnded → PlayerActivateRequested` out). It shows the pattern at a scale the UGS
+domain's size can obscure.
 
 ## Arguments
 
@@ -22,13 +27,16 @@ and an isolation boundary other code may cross only through a bridge. Create one
 all three hold:
 
 1. **Separate concern with its own lifecycle** — not app flow (GameFlow), not gameplay
-   (TempleRun), not raw input (UserInitiated), not Unity Gaming Services (UGS).
+   (TempleRun), not raw input (UserInitiated), not the session ceremony (Countdown), not
+   Unity Gaming Services (UGS).
 2. **The rest of the game must stay decoupled from it** — you want to add, remove, or swap
    it without touching other domains' code. The bridge is what buys that. The operational
    test: could a trivial **stub** — same events consumed and published, same data shapes,
    nothing real behind them — sit in its place and keep the game running? This repo's UGS
    domain is the worked proof at full scale: the `Test_GameOnly_Windows` build profile
-   runs the entire game with the UGS domain absent.
+   runs the entire game with the UGS domain absent. Countdown passes the same test at
+   small scale: replace it with a cutscene, a "tap to start" gate, or nothing that publishes
+   `PlayerActivateRequested` directly, and neither GameFlow nor TempleRun is edited.
 3. **It will grow a family of events** — several lifecycle groups, not one or two events.
 
 A strong **capture-point purpose** reinforces criterion 2: a stream worth logging and
@@ -81,12 +89,27 @@ code sits on:
 
 | If the domain… | Put it in |
 |---|---|
-| is specific to this game | `Assets/<Domain>/Scripts/Events/` |
+| is specific to this game | `Assets/<Domain>/Scripts/Events/`, with its own `CrawfisSoftware.<Domain>.asmdef` — see `Assets/Countdown/` |
 | is a backing service the game should be able to run without | its own UPM package, talking to the game only through `GameServiceEvents` — the way `com.crawfissoftware.ugs` does |
 
 If you pick the second, the game must not reference the domain's enum at all. Add the
 crossing to `GameServiceEvents` in `com.crawfissoftware.contracts` and bridge it on both sides —
 `Assets/UGSGlue/` is the worked example.
+
+**This repo compiles domains as assemblies, so a new in-repo domain needs an `.asmdef`** —
+the sibling EndlessRunnerTemplate does not, which is why ported guidance omits this step.
+Reference only what the domain's own code names, and check the direction is acyclic before
+adding it: `CrawfisSoftware.Countdown` references `CrawfisSoftware.TempleRun` (its outbound
+bridge names `TempleRunEvents`), and `CrawfisSoftware.GameFlow` references
+`CrawfisSoftware.Countdown` (it hosts the inbound bridge), giving
+**GameFlow → Countdown → TempleRun**. A reference back up that chain will not compile, which
+is the boundary being enforced by the compiler rather than by review.
+
+**Scene hosting.** The flow and bridge MonoBehaviours still need a GameObject somewhere,
+even though the buses do not. Follow the existing placements — an app-lifetime domain goes
+in `0_BootStrap`; a session-lifetime one goes in `Game_Boot_2_Play` (the Countdown domain's
+flow and both its bridges sit together on one `CountdownDomain` object there); a
+per-run one goes in `TempleRunGameplay`.
 
 ### Step 5 (optional): Auto-flow class
 
@@ -104,17 +127,20 @@ relaying through GameFlow — acceptable, because it is itself a bridge file. Ad
 with `/add-bridge-mapping`, and add the new bridge to that skill's "Available Bridges"
 table.
 
-### Step 7: Register the domain everywhere the current five are listed
+### Step 7: Register the domain everywhere the current six are listed
 
 This is the step people forget. Update every place that enumerates domains:
 
-- `CLAUDE.md` — the Domain Registry table, Domain Isolation table, Namespaces block,
-  Key Files table, folder tree
+- `CLAUDE.md` — the Domain Registry table, Domain Isolation table (plus the asmdef
+  dependency-direction note), Namespaces block, Key Files table, folder tree, Event Flow
+  Architecture diagram, and every "N domains / N dispatch classes" count
 - Skills — `list-events`, `add-event`, `add-auto-chain` (their domain/file tables),
   `add-bridge-mapping` (Available Bridges), `audit-events` (isolation + registry checks)
 - Pointer files — `GEMINI.md` and `.github/copilot-instructions.md` (the domain-isolation
   bullet; keep the two mirrored)
-- `README.md`'s architecture section
+- `README.md`'s architecture section, its bus/bridge lists, and the Codebase Statistics
+  event counts
+- `AGENTS.md`'s sibling-repo parity note (it states the domain and dispatch-class counts)
 
 ### Step 8: Verify
 
@@ -130,5 +156,5 @@ Created domain: [Name]
   Bus:       [Name]Bus = EventsFor<[Name]Events>  (static — no scene object)
   Flow:      [path, or "none yet — no same-domain progressions"]
   Bridge:    [path]  ([n] mappings [Name]->X, [m] mappings X->[Name])
-  Registered in: CLAUDE.md, 6 skills, 2 pointer files, README.md
+  Registered in: CLAUDE.md, AGENTS.md, 6 skills, 2 pointer files, README.md
 ```

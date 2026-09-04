@@ -10,8 +10,8 @@ complete documentation, see [README.md](README.md).
 > [EndlessRunnerTemplate](https://github.com/crawfis/EndlessRunnerTemplate). Both repos now
 > resolve the same EventsPublisher package and use the same static `EventsFor<T>` buses, so
 > code and guidance port between them directly. The differences that remain are real ones:
-> this repo has two more domains (GameService and UGS) and eight dispatch classes rather
-> than four. The shared `Assets/TempleRun/` folder is kept in step by deliberate two-way
+> this repo has two more domains (GameService and UGS) and eleven dispatch classes rather
+> than seven. The shared `Assets/TempleRun/` folder is kept in step by deliberate two-way
 > porting, not automatically — `/sync-templerun` classifies the drift and walks the port.
 
 **Course material:** [docs/FUTURE_TASKS.md](docs/FUTURE_TASKS.md) — the 33-task catalog for
@@ -30,10 +30,11 @@ Event Logging:      CrawfisSoftware > Events > Log Events   (same menu: Clear No
                     List Current Subscribers, Clear Events on Exiting Play Mode);
                     or add a DebugEventFileLogger for a file dump
 List Domains:       CrawfisSoftware > Events > List Domains (EventsPublisher 2.5.0+).
-                    All five domain enums are marked [EventEnum], so the menu sweeps and
+                    All six domain enums are marked [EventEnum], so the menu sweeps and
                     lists them in EDIT MODE — per domain: prefix, enum, member / payload /
-                    sticky / replay counts. Three live in Assets (GameFlow, TempleRun,
-                    UserInitiated); GameServiceEvents and UGS_EventsEnum come from packages
+                    sticky / replay counts. Four live in Assets (GameFlow, TempleRun,
+                    UserInitiated, Countdown); GameServiceEvents and UGS_EventsEnum come
+                    from packages
 Track Import:       CrawfisSoftware > Track > Import JSON -> ScriptableObjects (one-shot)
 Cloud Code:         Services > Cloud Code > Generate All Modules Bindings
 Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_GameOnly_Windows]
@@ -45,12 +46,13 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 | Entry Scene | `Assets/UGS/Scenes/Boot/0_BootStrap` (build index 0); game-only: `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only` |
 | GameFlow Events | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | TempleRun Events | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
+| Countdown Events | `Assets/Countdown/Scripts/Events/CountdownEvents.cs` (its own assembly, `CrawfisSoftware.Countdown.asmdef`) |
 | Contract Events | `Runtime/GameServiceEvents.cs` in the **`com.crawfissoftware.contracts`** package — the vocabulary the game and the services layer share |
 | UGS Events | `Runtime/Events/UGS_EventsEnum.cs` in the **`com.crawfissoftware.ugs`** package. Read-only here: edit it in the [EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) repo |
 | UGS Glue | `Assets/UGSGlue/` — `UGSGameFlowBridge.cs`, `TempleRunUGSBridge.cs`, `Test_SubmitLeaderboardScore.cs`, `UGS_Glue.unity` (build index 1). This game's half of the contract |
-| Event Buses | `EventsFor<T>` from the `com.crawfissoftware.eventspublisher` package, aliased per file as `GameFlowBus` / `TempleRunBus` / `UserInputBus` / `GameServiceBus` / `UGSBus`. The buses are static — there are no `EventsPublisher*` singletons and no scene object hosting them |
-| Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, and `Runtime/Events/UGSAutoEventFlow.cs` in the UGS package |
-| Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow), `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` (input → gameplay), `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameServiceEvents), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameServiceEvents, one-way), `Runtime/Events/GameServiceEventsUGSBridge.cs` in the UGS package (GameServiceEvents ↔ UGS) |
+| Event Buses | `EventsFor<T>` from the `com.crawfissoftware.eventspublisher` package, aliased per file as `GameFlowBus` / `TempleRunBus` / `UserInputBus` / `CountdownBus` / `GameServiceBus` / `UGSBus`. The buses are static — there are no `EventsPublisher*` singletons and no scene object hosting them |
+| Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs`, `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Assets/Countdown/Scripts/Events/CountdownAutoEventFlow.cs`, and `Runtime/Events/UGSAutoEventFlow.cs` in the UGS package |
+| Cross-Domain Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow), `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` (input → gameplay), `Assets/GameFlow/Scripts/CountdownSpecific/CountdownGameFlowBridge.cs` (GameFlow → Countdown), `Assets/Countdown/Scripts/TempleRunSpecific/Countdown2TempleRunBridge.cs` (Countdown → gameplay), `Assets/UGSGlue/UGSGameFlowBridge.cs` (GameFlow ↔ GameServiceEvents), `Assets/UGSGlue/TempleRunUGSBridge.cs` (gameplay → GameServiceEvents, one-way), `Runtime/Events/GameServiceEventsUGSBridge.cs` in the UGS package (GameServiceEvents ↔ UGS) |
 | Game State | `Assets/GameFlow/Scripts/Config/GameState.cs`, `Assets/TempleRun/Scripts/Config/Blackboard.cs` |
 
 ## MANDATORY: Event System Enforcement
@@ -73,9 +75,12 @@ Build Profiles:     File > Build Profiles > [Windows | Test_UGS_Windows | Test_G
 |---------------|---------------|
 | `Assets/TempleRun/**/*.cs` (non-bridge) | `TempleRunEvents` only |
 | `Assets/GameFlow/**/*.cs` (non-bridge) | `GameFlowEvents` only |
+| `Assets/Countdown/**/*.cs` (non-bridge) | `CountdownEvents` only |
 | UGS package `Runtime/**/*.cs` (non-bridge) | `UGS_EventsEnum` only |
 | `Input2TempleRunAutoEventBridge.cs` | `UserInitiatedEvents` + `TempleRunEvents` (bridge duty) |
 | `TempleRunGameFlowBridge.cs` | `TempleRunEvents` + `GameFlowEvents` (bridge duty) |
+| `CountdownGameFlowBridge.cs` | `GameFlowEvents` + `CountdownEvents` (bridge duty; one-way, session -> ceremony) |
+| `Countdown2TempleRunBridge.cs` | `CountdownEvents` + `TempleRunEvents` (bridge duty; one-way, ceremony -> gameplay) |
 | `Assets/UGSGlue/TempleRunUGSBridge.cs` | `TempleRunEvents` + `GameServiceEvents` (bridge duty; one-way, gameplay -> contract) |
 | `Assets/UGSGlue/UGSGameFlowBridge.cs` | `GameFlowEvents` + `GameServiceEvents` (bridge duty) |
 | `GameServiceEventsUGSBridge.cs` (UGS package) | `GameServiceEvents` + `UGS_EventsEnum` (bridge duty) |
@@ -87,7 +92,8 @@ the UGS package. That is what lets either side be replaced without the other bei
 
 **Violations — what NOT to do:**
 - TempleRun scripts subscribing to or publishing `GameFlowEvents` (e.g., `GameFlowBus.Subscribe(GameFlowEvents.GameStarted, ...)` in a TempleRun file)
-- GameFlow scripts subscribing to or publishing `TempleRunEvents` (e.g., `TempleRunBus.Publish(TempleRunEvents.CountdownTick, ...)` in a GameFlow file)
+- GameFlow scripts subscribing to or publishing `TempleRunEvents` (e.g., `TempleRunBus.Publish(TempleRunEvents.PlayerActivateRequested, ...)` in a GameFlow file)
+- Gameplay or UI scripts outside `Assets/Countdown/` referencing `CountdownEvents` (e.g., `CountdownBus.Subscribe(CountdownEvents.CountdownTick, ...)` in a TempleRun file) — only the two Countdown bridges may
 - UGS package code naming `GameFlowEvents` or `TempleRunEvents` at all — it cannot even see them
 - Game code naming `UGS_EventsEnum` directly (go through `GameServiceEvents` and the UGSGlue bridges)
 
@@ -97,9 +103,18 @@ the UGS package. That is what lets either side be replaced without the other bei
 > URL in `Packages/manifest.json` — `com.crawfissoftware.contracts`, `.common` and `.ugs`, from
 > [EventDrivenUGS](https://github.com/crawfis/EventDrivenUGS) — so their code is **read-only here**;
 > change it in that repo and update the package. The game's own assemblies (`CrawfisSoftware.TempleRun`,
-> `.GameFlow`, `.ThirdParty`) reference `CrawfisSoftware.Contracts` but never `CrawfisSoftware.UGS`,
-> so a game-to-UGS reference is a compile error. Everything *within* a domain, and the deliberately
-> asmdef-free `Assets/UGSGlue/`, is still only enforced by review and `/audit-events`; run it.
+> `.GameFlow`, `.Countdown`, `.ThirdParty`) reference `CrawfisSoftware.Contracts` but never
+> `CrawfisSoftware.UGS`, so a game-to-UGS reference is a compile error. Everything *within* a domain,
+> and the deliberately asmdef-free `Assets/UGSGlue/`, is still only enforced by review and
+> `/audit-events`; run it.
+>
+> **Assembly layout (this repo only — the sibling has no asmdefs).** The Countdown domain owns
+> `Assets/Countdown/CrawfisSoftware.Countdown.asmdef`, which references `CrawfisSoftware.TempleRun`
+> (its outbound bridge names `TempleRunEvents`); `CrawfisSoftware.GameFlow` in turn references
+> `CrawfisSoftware.Countdown` (it hosts `CountdownGameFlowBridge`). The dependency direction is
+> therefore **GameFlow → Countdown → TempleRun**, and it is acyclic on purpose: gameplay never
+> names the ceremony, and the ceremony never names the session. A reference added in the opposite
+> direction will not compile — which is the point.
 
 The rule's purpose is **replaceability**: a domain that talks only through events can be
 swapped for a completely different implementation — or stubbed out with a trivial fake —
@@ -150,15 +165,16 @@ Unity 6 endless runner demonstrating **event-driven architecture** with Unity Ga
 | Domain | Enum | Bus alias | Purpose | Lives in | Bridges |
 |--------|------|-----------|---------|----------|---------|
 | **GameFlow** | `GameFlowEvents` | `GameFlowBus` | App lifecycle: loading, menus, sessions, pause, config/difficulty, save/load, quit | `Assets/GameFlow/` | ↔ TempleRun via `TempleRunGameFlowBridge`; ↔ GameServiceEvents via `UGSGameFlowBridge` |
-| **TempleRun** | `TempleRunEvents` | `TempleRunBus` | Gameplay: player lifecycle, countdown, movement, collisions, coins/power-ups, track/spline generation, teleportation | `Assets/TempleRun/` | ↔ GameFlow via `TempleRunGameFlowBridge`; → GameServiceEvents via `TempleRunUGSBridge` |
+| **TempleRun** | `TempleRunEvents` | `TempleRunBus` | Gameplay: player lifecycle and activation, movement, collisions, coins/power-ups, track/spline generation, teleportation | `Assets/TempleRun/` | ↔ GameFlow via `TempleRunGameFlowBridge`; → GameServiceEvents via `TempleRunUGSBridge`; ← Countdown via `Countdown2TempleRunBridge` |
+| **Countdown** | `CountdownEvents` | `CountdownBus` | Session ceremony: the pre-run 3…2…1 (start, ticks, end) and its overlay. Its own assembly, `CrawfisSoftware.Countdown` | `Assets/Countdown/` | ← GameFlow via `CountdownGameFlowBridge` (`GameStarting → CountdownStartRequested`); → TempleRun via `Countdown2TempleRunBridge` (`CountdownEnded → PlayerActivateRequested`) |
 | **UserInitiated** | `UserInitiatedEvents` | `UserInputBus` | Raw input requests (turns, lanes, jump, slide, dash, pause, quit) | `Assets/TempleRun/` | → TempleRun via `Input2TempleRunAutoEventBridge` |
 | **GameService** | `GameServiceEvents` | `GameServiceBus` | The game/service **contract**: score, currency total, session start/end, services status, remote config applied. Owned by neither side | `com.crawfissoftware.contracts` package | ↔ GameFlow and ← TempleRun via `Assets/UGSGlue/`; ↔ UGS via `GameServiceEventsUGSBridge` |
 | **UGS** | `UGS_EventsEnum` | `UGSBus` | Unity Gaming Services: init, auth, remote config, leaderboards, achievements, **economy/currency**, rewarded ads | `com.crawfissoftware.ugs` package | ↔ GameServiceEvents via `GameServiceEventsUGSBridge` — and nothing else |
 
 Two invariants keep this registry trustworthy:
-- **Placement:** three domain enums live in `Assets/*/Scripts/Events/`; the other two come from
-  packages (`GameServiceEvents` from contracts, `UGS_EventsEnum` from ugs). All five are marked
-  `[EventEnum]`, so **List Domains** reports the same five as this table: a domain in one list
+- **Placement:** four domain enums live in `Assets/*/Scripts/Events/`; the other two come from
+  packages (`GameServiceEvents` from contracts, `UGS_EventsEnum` from ugs). All six are marked
+  `[EventEnum]`, so **List Domains** reports the same six as this table: a domain in one list
   and not the other is drift. The `EventsPublisher*` singleton subclasses are gone — the buses
   are static and need no scene object.
 - **Registration:** `/add-event-domain` adds a row here as part of its checklist, and
@@ -193,11 +209,12 @@ private void OnGameStarting(string eventName, object sender, object data)
 
 **CRITICAL: Always unsubscribe in OnDestroy()** - failure causes null reference errors after scene unload.
 
-> TempleRun files synced from the sibling repo (track generation, several player
-> controllers) use the typed alternative: `TempleRunBus.Id<TrackSegmentInfo>(TempleRunEvents.ActiveTrackChanging)`
-> returns an `EventId<T>` whose Subscribe/Publish handlers take the payload already cast.
-> Both styles are valid — match the file you are editing, and do not rewrite synced files
-> back to the classic form (that re-creates cross-repo drift; see `/sync-templerun`).
+> There is now exactly **one** subscribe/publish style. The typed alternative —
+> `private static readonly EventId<T> X = Bus.Id<T>(...)`, minted once per call site — was
+> removed by owner ruling (2026-09: "it makes the code hard to read") and the sibling repo
+> has already been converted. Do not add `EventId<T>` fields, and do not "restore" one
+> while porting; `/audit-events` reports any that remain as a finding. See
+> [Typed Payloads](#typed-payloads) for what replaced it.
 
 ### Publishing Events
 
@@ -229,10 +246,40 @@ Auto-flows and bridges use `SubscribeToAllEnumEvents` / `UnsubscribeToAllEnumEve
 hear every event of one enum and dispatch through their dictionaries. Application code
 should subscribe to specific events instead.
 
+### Typed Payloads
+
+An event that carries data declares its type on the enum member with `[EventPayload]` —
+that declaration is the contract, and what StrictMode validates. Call sites do NOT mint
+`EventId<T>` fields: the `static readonly EventId<T> X = Bus.Id<T>(...)` pattern was
+removed by owner ruling (2026-09, "it makes the code hard to read"). Subscribe and publish
+through the bus alias directly, and cast the payload on the first line of the handler:
+
+```csharp
+[EventPayload(typeof(TrackSegmentInfo))]
+ActiveTrackChanging = 261,
+
+private void Awake()     => TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+private void OnDestroy() => TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
+
+private void OnTrackChanging(string eventName, object sender, object data)
+{
+    var segment = (TrackSegmentInfo)data;
+}
+```
+
+The cast is deliberately bare — no `is` guard, no null check: a wrong payload should throw
+at the cast, and the `[EventPayload]` declaration on the enum is what tells every call site
+(and StrictMode) which cast is right. `[EventDelivery(EventDelivery.Sticky)]` is unchanged
+too — a Sticky value (`TrackLevelApplied`, the difficulty tables) is read without
+subscribing via `EventsFor<T>.TryGetLast(eventEnum, out sender, out data)` (cast `data`),
+which is how `TrackManager` gets the selected level at init. Events with no
+payload, or a genuinely variable one, stay undeclared — no declaration means no checking,
+which is the intended default. Do not reintroduce `EventId<T>` fields in new code.
+
 ### Auto-Event Flow Pattern
 
 Events auto-chain through dictionary mappings in `GameFlowAutoEventFlow.cs`,
-`TempleRunAutoEventFlow.cs`, and `UGSAutoEventFlow.cs`:
+`TempleRunAutoEventFlow.cs`, `CountdownAutoEventFlow.cs`, and `UGSAutoEventFlow.cs`:
 
 ```csharp
 // In GameFlowAutoEventFlow.cs - GameFlow domain auto-chains
@@ -248,10 +295,13 @@ _autoGameFlow2GameFlowEvents = new Dictionary<GameFlowEvents, GameFlowEvents>()
 
 When `GameScenesLoaded` fires, it automatically triggers `GameStartRequested` → `GameStarting`.
 
-Note: Countdown events (`CountdownStartRequested`, `CountdownTick`, etc.) are now in `TempleRunEvents` since they are gameplay-specific.
+Note: the countdown is **not** a gameplay mechanic and no longer lives in `TempleRunEvents`
+(it used to occupy values 30–36). It is a session ceremony with its own domain — see
+`CountdownEvents` / `CountdownAutoEventFlow` — reached from `GameStarting` and reaching
+gameplay only as `PlayerActivateRequested`.
 
-> **Chains are declared as a flat list of pairs, not a dictionary.** All eight dispatch classes
-> (three auto-flows, five bridges) share one implementation in
+> **Chains are declared as a flat list of pairs, not a dictionary.** All eleven dispatch classes
+> (four auto-flows, seven bridges) share one implementation in
 > `Runtime/Events/AutoEventFlowBase.cs` in the common package: `EventChainDispatcher<TSource, TDest>` does
 > subscribe-to-all, lookup and publish; `AutoEventFlowBase<TSource, TDest>` is the
 > MonoBehaviour wrapper for a single direction. A bridge covering several directions cannot
@@ -273,7 +323,8 @@ Note: Countdown events (`CountdownStartRequested`, `CountdownTick`, etc.) are no
 
 **Step 1: Determine the correct domain**
 - `GameFlowEvents` - For app/session lifecycle (loading, menus, pause, config, quit)
-- `TempleRunEvents` - For gameplay mechanics (player actions, countdown, track, collisions)
+- `TempleRunEvents` - For gameplay mechanics (player actions, activation, track, collisions)
+- `CountdownEvents` - For the pre-run ceremony (start, ticks, end)
 - `UserInitiatedEvents` - For raw input events
 - `UGS_EventsEnum` - For UGS service callbacks
 
@@ -316,12 +367,15 @@ public enum GameFlowEvents
 ### Namespaces
 ```
 CrawfisSoftware.Events              - UserInitiatedEvents (+ the EventsPublisher core and the common package's dispatcher)
-CrawfisSoftware.GameFlow.Events     - GameFlowEvents, GameFlowAutoEventFlow, TempleRunGameFlowBridge
+CrawfisSoftware.GameFlow.Events     - GameFlowEvents, GameFlowAutoEventFlow, TempleRunGameFlowBridge, CountdownGameFlowBridge
 CrawfisSoftware.GameFlow.UI         - GameFlow UI controllers
 CrawfisSoftware.GameFlow.*          - Per-area: .GameConfig (GameConstants), .SceneManagement, .GameControl
 CrawfisSoftware.TempleRun           - Gameplay logic (TempleRunEvents, Blackboard, controllers)
 CrawfisSoftware.TempleRun.Events    - TempleRun auto-event flow + Input2TempleRunAutoEventBridge
 CrawfisSoftware.TempleRun.GameConfig - Difficulty / game-config managers
+CrawfisSoftware.Countdown           - Ceremony logic (CountdownController)
+CrawfisSoftware.Countdown.Events    - CountdownEvents, CountdownAutoEventFlow, Countdown2TempleRunBridge
+CrawfisSoftware.Countdown.UI        - CountdownUIController
 CrawfisSoftware.Contracts           - GameServiceEvents, ServicesStatus (contracts package; the game/service contract)
 CrawfisSoftware.UGS                 - Unity Gaming Services integration (ugs package: managers, initialization)
 CrawfisSoftware.UGS.Events          - UGS_EventsEnum, UGSAutoEventFlow, GameServiceEventsUGSBridge (ugs package)
@@ -366,7 +420,7 @@ internal class MyController : MonoBehaviour
 | **GameFlow Domain** | |
 | Event Enums | `Assets/GameFlow/Scripts/Events/GameFlowEvents.cs` |
 | Auto-Event Flow | `Assets/GameFlow/Scripts/Events/GameFlowAutoEventFlow.cs` |
-| Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow; the old TempleRun → UGS passthrough now lives in `Assets/UGSGlue/TempleRunUGSBridge.cs`) |
+| Bridges | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` (TempleRun ↔ GameFlow; the old TempleRun → UGS passthrough now lives in `Assets/UGSGlue/TempleRunUGSBridge.cs`), `Assets/GameFlow/Scripts/CountdownSpecific/CountdownGameFlowBridge.cs` (GameFlow → Countdown) |
 | Game State / Config | `Assets/GameFlow/Scripts/Config/GameState.cs`, `GameConstants.cs` |
 | Level System | `Assets/GameFlow/Scripts/Config/LevelConfig.cs`, `LevelConfigApplier.cs`, `LevelRegistry.cs`, `LevelProgressManager.cs`, `LevelProgressData.cs`; assets in `Assets/TempleRun/Scriptables/Levels/` |
 | UI Controllers | `Assets/GameFlow/Scripts/UI/GameFlowUIPanelController.cs` (loading / game-over overlays), `MainMenuController.cs`, `MainMenuPanelController.cs`, `LevelSelectorController.cs`, `LevelSelectorPanelController.cs`, `CoinBalanceHUDController.cs` |
@@ -376,7 +430,7 @@ internal class MyController : MonoBehaviour
 | Event Enums | `Assets/TempleRun/Scripts/Events/TempleRunEvents.cs`, `UserInitiatedEvents.cs` |
 | Auto-Event Flow | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Input2TempleRunAutoEventBridge.cs` (input → gameplay) |
 | Config | `Assets/TempleRun/Scripts/Config/Blackboard.cs`, `TempleRunGameConfig.cs`, `GameDifficultyManager.cs`, `DifficultySettings.cs`, `SetGameDifficulty.cs`, `LoadDefaultGameConfigs.cs`, `SpawnPrefabRegistry.cs`, `TempleRunConstants.cs`, `PlayerPrefKeys.cs`, per-mechanic configs (`CoinConfig.cs`, `DashConfig.cs`, `JumpConfig.cs`, `LaneConfig.cs`, `SlideConfig.cs`, `PowerUpDefinition.cs`, `PowerUpType.cs`) |
-| Player Controllers | `Assets/TempleRun/Scripts/Player/TurnController.cs`, `JumpController.cs`, `SlideController.cs`, `DashController.cs`, `LaneChangeController.cs`, `PlayerLifeController.cs`, `PowerUpBuffController.cs`, `CountdownController.cs`, `DistanceController.cs`, `MoveCharacterByDistance.cs`, `PauseController.cs`, `PlayerPauseController.cs`, `AIController.cs` |
+| Player Controllers | `Assets/TempleRun/Scripts/Player/TurnController.cs`, `JumpController.cs`, `SlideController.cs`, `DashController.cs`, `LaneChangeController.cs`, `PlayerLifeController.cs`, `PowerUpBuffController.cs`, `DistanceController.cs`, `MoveCharacterByDistance.cs`, `PauseController.cs`, `PlayerPauseController.cs`, `AIController.cs` |
 | Player Support | collision detectors (`ObstacleCollisionDetector.cs`, `CollectableCollisionDetector.cs`, `TurnCollisionDetector.cs`), `CoinCollectionController.cs`, motion shaping (`JumpArcController.cs`, `SlideArcController.cs`, `DashSpeedController.cs`, `LaneOffsetController.cs`), failure/teleport (`PlayerFailedController.cs`, `PlayerFailureAutoTurnController.cs`, `TeleportController.cs`, `CharacterTeleporter.cs`); `Assets/TempleRun/Scripts/GameTime.cs` |
 | Power-Up Effects | `Assets/TempleRun/Scripts/PowerUps/IPowerUpEffect.cs`, `PowerUpEffectBase.cs`, `SpeedBoostEffect.cs`, `ScoreMultiplierEffect.cs`, `CoinMagnetEffect.cs`, `CoinDoublerEffect.cs`, `ShieldEffect.cs` |
 | Track Generation | `Assets/TempleRun/Scripts/Track/TrackManager.cs` (+ `TrackManagerAbstract.cs`, `TrackManagerForTiles.cs`, `TrackManagerList.cs`), `PathProvider.cs`, `SegmentTransitionController.cs`, `SegmentAdvanceTrigger.cs`, `TrackSegmentLibrary.cs`, `TrackLibraryLoader.cs`, `TrackSegmentInfo.cs`, `Direction.cs`, `DistanceTracker.cs`, `DistanceInterestService.cs` |
@@ -385,10 +439,17 @@ internal class MyController : MonoBehaviour
 | Spawners | `Assets/TempleRun/Scripts/Track/SpawnerBase.cs`, `CoinSpawner.cs`, `ObstacleSpawner.cs`, `PowerUpSpawner.cs`, `PowerUpIdentifier.cs` |
 | Track Visuals | `Assets/TempleRun/Scripts/TrackVisuals/PrefabSpawnerAbstract.cs`, `SimplePlane/SplinePrefabSpawner.cs`, `SimplePlane/TextureScaler.cs`, `Voxels/VoxelPrefabSpawner.cs` |
 | Track Data | `Assets/TempleRun/Scriptables/Track/` — `Segments/*.asset` (one `TrackSegmentSO` per segment), `TrackSegmentRegistry.asset`, `TrackLevel_01..05_*.asset`, `TrackLevelRegistry.asset` |
-| Gameplay UI | `Assets/TempleRun/Scripts/UI/GUIController.cs`, `CountdownUIController.cs` |
+| Gameplay UI | `Assets/TempleRun/Scripts/UI/GUIController.cs` (distance HUD; the countdown overlay lives in the Countdown domain) |
 | Audio / Animation | `Assets/TempleRun/Scripts/Audio/` (`TurnAudioFeedback.cs`, `Metronome.cs`, …); `Assets/TempleRun/Scripts/Animation/CapsuleAnimationLink.cs` |
 | Input | `Assets/TempleRun/Scripts/Input/MovementInputActions.cs`, `SwipeDetectorActions.cs`, `DashInputActions.cs`, `AccelerometerInputActions.cs`, `PauseQuitInputActions.cs`; `GameControls.cs` + `LeftRightJumpSlide.cs` are source-generated from the `.inputactions` assets — regenerate, don't hand-edit |
 | Editor Tools | `Assets/TempleRun/Editor/TrackDataImporter.cs` (one-shot JSON -> SO importer) |
+| **Countdown Domain** | |
+| Assembly | `Assets/Countdown/CrawfisSoftware.Countdown.asmdef` — references `CrawfisSoftware.TempleRun`; `CrawfisSoftware.GameFlow` references it (GameFlow → Countdown → TempleRun) |
+| Event Enum | `Assets/Countdown/Scripts/Events/CountdownEvents.cs` (`CountdownStartRequested` 0 … `CountdownEnded` 5) |
+| Event Bus | `EventsFor<CountdownEvents>`, aliased as `CountdownBus` |
+| Auto-Event Flow | `Assets/Countdown/Scripts/Events/CountdownAutoEventFlow.cs` (`StartRequested -> Starting`, `Ending -> Ended`) |
+| Bridges | `Assets/GameFlow/Scripts/CountdownSpecific/CountdownGameFlowBridge.cs` (GameFlow -> Countdown), `Assets/Countdown/Scripts/TempleRunSpecific/Countdown2TempleRunBridge.cs` (Countdown -> TempleRun) |
+| Ceremony / UI | `Assets/Countdown/Scripts/CountdownController.cs`, `Assets/Countdown/Scripts/UI/CountdownUIController.cs`, `Assets/Countdown/UI Toolkit/Countdown.uxml` (both controllers sit in the `TempleRunGameplay` scene; the flow and both bridges sit on the `CountdownDomain` object in `Game_Boot_2_Play`) |
 | **UGS Domain** (the `com.crawfissoftware.ugs` package — read-only here) | |
 | Event Enum | `Runtime/Events/UGS_EventsEnum.cs` |
 | Auto-Event Flow | `Runtime/Events/UGSAutoEventFlow.cs` |
@@ -529,7 +590,7 @@ Or select the `Test_GameOnly_Windows` build profile, which uses that bootstrap.
 
 ## Folder Structure
 
-The codebase is organized into **three in-repo domains** plus the UGS domain and shared
+The codebase is organized into **four in-repo domains** plus the UGS domain and shared
 infrastructure, which now arrive as UPM packages rather than living here:
 
 ```
@@ -538,10 +599,20 @@ Assets/
 │                                     #   UGSGameFlowBridge, TempleRunUGSBridge, Test_SubmitLeaderboardScore,
 │                                     #   UGS_Glue.unity (build index 1)
 │
+├── Countdown/                        # Session-ceremony domain (the pre-run 3...2...1); own assembly
+│   ├── CrawfisSoftware.Countdown.asmdef  # references CrawfisSoftware.TempleRun; GameFlow references this
+│   ├── Scripts/
+│   │   ├── Events/                   # CountdownEvents, CountdownAutoEventFlow
+│   │   ├── TempleRunSpecific/        # Countdown2TempleRunBridge (CountdownEnded -> PlayerActivateRequested)
+│   │   ├── UI/                       # CountdownUIController
+│   │   └── CountdownController.cs    # Runs the ceremony: Starting, Started, Tick, Ending
+│   └── UI Toolkit/                   # Countdown.uxml (the overlay)
+│
 ├── GameFlow/                         # Application lifecycle domain
 │   ├── Scripts/
 │   │   ├── Events/                   # GameFlowEvents, GameFlowAutoEventFlow
 │   │   ├── TempleRunSpecific/        # TempleRunGameFlowBridge (TempleRun <-> GameFlow)
+│   │   ├── CountdownSpecific/        # CountdownGameFlowBridge (GameStarting -> CountdownStartRequested)
 │   │   ├── Config/                   # GameState, GameConstants, LevelConfig(+Applier), LevelRegistry,
 │   │   │                             #   LevelProgressManager/Data (BlackboardGameFlow is dead code)
 │   │   ├── GameControl/              # QuitController, UnloadNonActiveScenes
@@ -558,7 +629,7 @@ Assets/
 │   │   ├── Events/                   # TempleRunEvents, UserInitiatedEvents, TempleRunAutoEventFlow,
 │   │   │                             #   Input2TempleRunAutoEventBridge
 │   │   ├── Config/                   # Blackboard, TempleRunGameConfig, GameDifficultyManager, PlayerPrefKeys, per-mechanic configs, SpawnPrefabRegistry
-│   │   ├── Player/                   # Turn/Jump/Slide/Dash/Lane/Life controllers, collision detectors, countdown, distance,
+│   │   ├── Player/                   # Turn/Jump/Slide/Dash/Lane/Life controllers, collision detectors, distance,
 │   │   │                             #   pause, teleport, AI
 │   │   ├── PowerUps/                 # IPowerUpEffect strategy: PowerUpEffectBase + five concrete effects
 │   │   ├── Track/                    # TrackManager (+variants), PathProvider, SegmentTransitionController, spawners, SO classes,
@@ -567,7 +638,7 @@ Assets/
 │   │   │   └── Selection/            # ISegmentSelector/ISegmentPool + WeightedDifficulty/AuthoredSequence selectors
 │   │   ├── TrackVisuals/             # PrefabSpawnerAbstract; SimplePlane/ and Voxels/ spawners
 │   │   ├── Input/                    # Movement/Swipe/Dash/Accelerometer/PauseQuit actions; generated GameControls + LeftRightJumpSlide
-│   │   ├── UI/                       # GUIController (distance HUD), CountdownUIController
+│   │   ├── UI/                       # GUIController (distance HUD)
 │   │   ├── Audio/                    # TurnAudioFeedback, Metronome
 │   │   ├── Animation/                # CapsuleAnimationLink
 │   │   └── GameTime.cs               # Pausable gameplay clock (singleton)
@@ -607,7 +678,10 @@ Assets/
 - **Common** (the `com.crawfissoftware.common` package, not a folder here): shared base classes and
   utilities used across all domains — the one dispatch implementation, the live `DifficultyConfig`
 - **GameFlow**: Application lifecycle - boot, initialization, menus, level select, pause, quit, scene management
-- **TempleRun**: Gameplay mechanics - player movement, track generation, power-ups, input, audio
+- **TempleRun**: Gameplay mechanics - player movement and activation, track generation, power-ups, input, audio
+- **Countdown**: The session ceremony - the pre-run 3...2...1 and its overlay. Started by GameFlow's
+  `GameStarting`, and its end reaches gameplay only as `PlayerActivateRequested`. Replace this domain
+  with a cutscene, a "tap to start" gate, or nothing at all and neither neighbour is edited
 - **UGS** (the `com.crawfissoftware.ugs` package): Unity Gaming Services - authentication,
   leaderboards, achievements, remote config, economy. What remains under `Assets/UGS/` is assets:
   scenes, prefabs, the Cloud Code module, `COIN.ecc`
@@ -622,11 +696,23 @@ USER INPUT (UserInitiatedEvents, in TempleRun)
     ↓  Input2TempleRunAutoEventBridge
 TEMPLERUN GAMEPLAY (TempleRunEvents)
     ├─→ TempleRunGameFlowBridge ──→ GAMEFLOW SESSION (GameFlowEvents)
-    │                                     ↕  Assets/UGSGlue/UGSGameFlowBridge
+    │        ▲                            │    ↕  Assets/UGSGlue/UGSGameFlowBridge
+    │        │                            │  CountdownGameFlowBridge (GameStarting)
+    │        │                            ▼
+    │   Countdown2TempleRunBridge ←── COUNTDOWN CEREMONY (CountdownEvents)
+    │   (CountdownEnded -> PlayerActivateRequested)
+    │
     └─→ Assets/UGSGlue/TempleRunUGSBridge ──→ THE CONTRACT (GameServiceEvents)
                                                   ↕  GameServiceEventsUGSBridge   (UGS package)
                                               UGS SERVICES (UGS_EventsEnum)
 ```
+
+The countdown loop is a detour, not a relay. `GameStarting` starts the ceremony, and GameFlow
+declares `GameStarted` through its own `GameStarting → GameStarted` chain rather than waiting for
+the countdown to come back — the old round-trip (`CountdownEnded → GameStarted`, in the TempleRun
+enum) is gone. `GameStarted` brings the run's systems up (`TempleRunStartRequested`); the ceremony's
+end releases the player (`PlayerActivateRequested → PlayerActivating → PlayerActivated`). Gameplay
+cannot tell whether a countdown, a cutscene, or nothing at all sat in that gap.
 
 Neither end names the other. The game speaks `GameServiceEvents`; the services layer speaks
 `GameServiceEvents`; the enum belongs to neither and lives in its own package. Everything

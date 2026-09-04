@@ -745,7 +745,7 @@ If the balance does NOT move, you have found one of Act V's four defects live. S
 (<span class="t">GameServiceEvents.SessionEnded</span>,          <span class="u">UGS_EventsEnum.LeaderboardOpening</span>),</pre>
   <ul style="font-size:21px;margin-top:4px">
     <li style="margin:8px 0"><b>Chains are a flat list of pairs, not a dictionary</b>, so one source may declare several consequences. Targets fire synchronously, in declaration order.</li>
-    <li style="margin:8px 0">All eight dispatch classes — three auto-flows, five bridges — share <b>one implementation</b> in the common package. A two-way bridge holds two dispatchers.</li>
+    <li style="margin:8px 0">All eleven dispatch classes — four auto-flows, seven bridges — share <b>one implementation</b> in the common package. A two-way bridge holds two dispatchers.</li>
   </ul>
   <div class="warstory" style="font-size:19px;margin-top:8px"><b>War story — the dictionary ceiling</b>
   This used to be a dictionary: <i>one</i> successor per event. “That ceiling did not produce bugs directly — it produced workarounds. A developer who found a source event's slot already taken published the second consequence by hand inside a controller instead, which is how <b>failure logic came to publish pause events.</b>”</div>
@@ -1066,6 +1066,7 @@ OPTIONAL CLOSER: “The sibling talk is the trailer for the rule. This one was t
     <tr><td>Setup clicks · tasks · skills</td><td><b class="gold">109 · 33 · 8</b></td><td>numbered steps in the setup doc · numbered tasks in Q–W · <code class="inline">.claude/skills/*</code></td></tr>
   </table>
   <p class="mut" style="font-size:19px;margin-top:10px">Counted on <span class="mono">main</span>, 2026-09-02, against packages pinned at EventDrivenUGS <span class="mono">c5ecaef</span>. <span class="mono">CrawfisSoftware ▸ Events ▸ List Domains</span> is the authoritative event count.</p>
+  <p class="mut" style="font-size:19px;margin-top:6px"><b>Update 2026-09-04 — a sixth domain.</b> The pre-run countdown was extracted from <span class="mono">TempleRunEvents</span> into its own <span class="mono">Countdown</span> domain (six events, own assembly, two one-way bridges). TempleRun is now <b>117</b>, the totals stand at <b>208</b> in-repo / <b>273</b> overall, and the dispatch count is <b>11</b> (four auto-flows, seven bridges). Slides 5 and 7 still show the five-vocabulary picture and the pre-extraction numbers — re-cut them before presenting, or say "five, and since this deck was cut, a sixth."</p>
   <aside class="notes">The defensive slide. If anyone challenges a number, put this up rather than arguing from memory.
 
 The one to be careful about is 271: it includes the UGS enum's None placeholder, because that is what List Domains reports. Say “about 270” and you are safe.

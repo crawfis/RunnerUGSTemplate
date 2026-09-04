@@ -3,6 +3,7 @@
     "rootNamespace": "CrawfisSoftware.GameFlow",
     "references": [
         "CrawfisSoftware.Common",
+        "CrawfisSoftware.Countdown",
         "CrawfisSoftware.EventsPublisher",
         "CrawfisSoftware.TempleRun",
         "Unity.Services.Authentication",

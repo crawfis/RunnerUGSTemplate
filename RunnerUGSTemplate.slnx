@@ -6,5 +6,6 @@
   <Project Path="CrawfisSoftware.GameFlow.csproj" />
   <Project Path="CrawfisSoftware.ThirdParty.Random.Editor.csproj" />
   <Project Path="CrawfisSoftware.ThirdParty.Editor.csproj" />
+  <Project Path="CrawfisSoftware.Countdown.csproj" />
   <Project Path="CrawfisSoftware.ThirdParty.csproj" />
 </Solution>

@@ -10,7 +10,8 @@ namespace CrawfisSoftware.TempleRun
     /// Deterministic (and perfect?) AI that triggers a turn request whenever the current
     /// distances gets within a user-specified value of the end of the currently discovered track.
     ///    Dependency: TurnController, EventsFor<TempleRunEvents>, EventsFor<UserInitiatedEvents>
-    ///    Subscribes: TempleRunEvents.TempleRunStarted
+    ///    Subscribes: TempleRunEvents.PlayerActivated — the autopilot arms when the player is
+    ///                released, not when the run's systems come up
     ///    Publishes: UserInitiatedEvents.UserLeftTurnRequested
     ///    Publishes: UserInitiatedEvents.UserRightTurnRequested
     /// </summary>
@@ -25,10 +26,10 @@ namespace CrawfisSoftware.TempleRun
 
         private void Awake()
         {
-            TempleRunBus.Subscribe(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
+            TempleRunBus.Subscribe(TempleRunEvents.PlayerActivated, OnPlayerActivated);
         }
 
-        private void OnTempleRunStarted(string eventName, object sender, object data)
+        private void OnPlayerActivated(string eventName, object sender, object data)
         {
             _gameStarted = true;
         }
@@ -49,7 +50,7 @@ namespace CrawfisSoftware.TempleRun
         }
         private void OnDestroy()
         {
-            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunStarted, OnTempleRunStarted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.PlayerActivated, OnPlayerActivated);
         }
     }
 }

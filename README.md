@@ -39,10 +39,10 @@ The gameplay itself (a Temple Run-style endless runner) is intentionally simple.
 
 **What the template provides:**
 
-- **Event buses** — five static typed buses (`GameFlow`, `TempleRun`, `UserInitiated`, `GameService`, `UGS`), each an `EventsFor<TEnum>` aliased per file, that any system can publish to or subscribe from without holding a reference to anything else
-- **Bridge classes** — explicit cross-domain translators (`Input2TempleRunAutoEventBridge`, `TempleRunGameFlowBridge`, and — around the `GameServiceEvents` contract — `TempleRunUGSBridge`, `UGSGameFlowBridge`, `GameServiceEventsUGSBridge`) that are the *only* permitted places for one domain to react to another domain's events
+- **Event buses** — six static typed buses (`GameFlow`, `TempleRun`, `UserInitiated`, `Countdown`, `GameService`, `UGS`), each an `EventsFor<TEnum>` aliased per file, that any system can publish to or subscribe from without holding a reference to anything else
+- **Bridge classes** — explicit cross-domain translators (`Input2TempleRunAutoEventBridge`, `TempleRunGameFlowBridge`, `CountdownGameFlowBridge`, `Countdown2TempleRunBridge`, and — around the `GameServiceEvents` contract — `TempleRunUGSBridge`, `UGSGameFlowBridge`, `GameServiceEventsUGSBridge`) that are the *only* permitted places for one domain to react to another domain's events
 - **Auto-event chains** — dictionary-driven progressions (`Requested → Starting → Started`) that fire automatically, eliminating boilerplate sequencing code while allowing for new hooks to be injected at key times / events.
-- **Additive scene isolation** — each gameplay concern (obstacles, collectables, visuals, audio, HUD/countdown, track) lives in its own scene and communicates exclusively through events (preferred) or a shared Blackboard
+- **Additive scene isolation** — each gameplay concern (obstacles, collectables, visuals, audio, HUD, countdown, track) lives in its own scene and communicates exclusively through events (preferred) or a shared Blackboard
 - **Domain isolation enforcement** — rules and skills that prevent accidental coupling from creeping back in
 - **Multiple build profiles** — swap the gameplay or UGS layers independently to test either in isolation
 
@@ -52,31 +52,33 @@ Student teams can replace the Temple Run gameplay with their own game, add new U
 
 ## Codebase Statistics
 
-> In-repo domain code only (`Assets/GameFlow`, `Assets/TempleRun`, `Assets/UGSGlue`) — excludes
+> In-repo domain code only (`Assets/GameFlow`, `Assets/TempleRun`, `Assets/Countdown`,
+> `Assets/UGSGlue`) — excludes
 > `ThirdParty/`, `CloudCode/`, generated bindings, and the UGS + Common + Contracts code, which
 > now ships as UPM packages rather than as project source.
 
 | Metric | Count |
 |--------|-------|
-| C# source files | 132 |
+| C# source files | 139 |
 | Declared types (class / interface / enum / struct) | ~174 |
 | Files defining MonoBehaviours | ~72 |
 | Files defining ScriptableObjects | 14 |
-| Namespaces | 21 |
+| Namespaces | 24 |
 | Unity scenes | 28 |
-| Defined events (the 3 in-repo domains: GameFlow, TempleRun, UserInitiated) | 206 (76 + 121 + 9) |
+| Defined events (the 4 in-repo domains: GameFlow, TempleRun, UserInitiated, Countdown) | 208 (76 + 117 + 9 + 6) |
 
 The other two domains — `GameServiceEvents` and `UGS_EventsEnum` — are declared in packages and are
 not counted above. **`CrawfisSoftware → Events → List Domains` is the authoritative count**: it
-sweeps every `[EventEnum]` in edit mode and reports all five, so trust it over this table, which is
+sweeps every `[EventEnum]` in edit mode and reports all six, so trust it over this table, which is
 a hand-taken snapshot.
 
 ### Types by Domain
 
 | Domain | Files | Primary responsibility |
 |--------|-------|------------------------|
-| `TempleRun` | 107 | Gameplay mechanics, player, track, power-ups, input, audio, editor tools |
-| `GameFlow` | 22 | Boot, menus, level selection, scene management, UI panels |
+| `TempleRun` | 108 | Gameplay mechanics, player, track, power-ups, input, audio, editor tools |
+| `GameFlow` | 23 | Boot, menus, level selection, scene management, UI panels, the inbound Countdown bridge |
+| `Countdown` | 5 | The pre-run ceremony: enum, flow, outbound bridge, controller, overlay controller |
 | `UGSGlue` | 3 | This game's half of the `GameServiceEvents` contract |
 
 The UGS domain (~40 files) and the shared Common/Contracts code now live in the
@@ -96,8 +98,11 @@ CrawfisSoftware.GameFlow.GameControl           CrawfisSoftware.TempleRun.Input
 CrawfisSoftware.GameFlow.SceneManagement       CrawfisSoftware.TempleRun.PowerUps
 CrawfisSoftware.GameFlow.UI                    CrawfisSoftware.TempleRun.Track
                                                CrawfisSoftware.TempleRun.Track.Geometry
-CrawfisSoftware.UGS.Events (UGSGlue bridges)   CrawfisSoftware.TempleRun.UI
-CrawfisSoftware.UGS.Leaderboard.Test (UGSGlue) CrawfisSoftware.Utility.Testing
+CrawfisSoftware.Countdown                      CrawfisSoftware.TempleRun.UI
+CrawfisSoftware.Countdown.Events               CrawfisSoftware.Utility.Testing
+CrawfisSoftware.Countdown.UI
+
+CrawfisSoftware.UGS.Events (UGSGlue bridges)   CrawfisSoftware.UGS.Leaderboard.Test (UGSGlue)
 ```
 
 From the packages: `CrawfisSoftware.Contracts` (contracts); `CrawfisSoftware.Events`,
@@ -431,7 +436,8 @@ The **Windows** profile is the full production build with UGS integration and ac
 12  TempleRun/Scenes/Gameplay/TempleRunGameplay            ◄── Core gameplay logic (distance, lives)
 13  TempleRun/Scenes/Gameplay/TempleRunTrackPCG            ◄── Procedural track generation
 14  TempleRun/Scenes/Gameplay/TempleRunEnvironment         ◄── Skybox, lighting
-15  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay          ◄── Gameplay HUD and Countdown overlay
+15  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay          ◄── Gameplay HUD (the countdown overlay
+                                                              belongs to the Countdown domain)
 16  TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals       ◄── Player visual representation
 17  TempleRun/Scenes/Gameplay/TempleRunSfx                 ◄── Sound effects
 18  TempleRun/Scenes/Gameplay/TempleRunTrackVisuals        ◄── Track visual meshes
@@ -506,9 +512,20 @@ Once the level scenes finish loading:
 - HUD appears: `Score: 000000` and timer `00:00`
 - Countdown overlay: 3... 2... 1...
 
-Both the HUD and Countdown are part of the `TempleRunGuiOverlay` scene (TempleRun domain), managed by `CountdownController` and `CountdownUIController`.
+The HUD belongs to TempleRun; the countdown is its **own domain** (`Assets/Countdown/`,
+`CountdownEvents`), because a pre-run ceremony is neither app logic nor a gameplay mechanic.
+GameFlow's `GameStarting` reaches it as `CountdownStartRequested` via `CountdownGameFlowBridge`;
+`CountdownController` runs the clock and `CountdownUIController` draws
+`Assets/Countdown/UI Toolkit/Countdown.uxml`. When the clock ends, `CountdownEnded` crosses to
+gameplay as `PlayerActivateRequested` (`Countdown2TempleRunBridge`) — the ceremony's end means
+exactly one thing in gameplay's vocabulary: release the player.
 
-**Hierarchy:** Countdown overlay and HUD active inside `TempleRunGuiOverlay`
+Note the ordering: `GameStarted` fires at the *start* of the ceremony, not its end. It brings
+the run's systems up (`TempleRunStartRequested`) while the numbers are still counting down;
+only `PlayerActivated` starts the clock, distance, and turn detection.
+
+**Hierarchy:** countdown overlay and HUD active inside `TempleRunGameplay`; the Countdown
+domain's flow and both its bridges sit on the `CountdownDomain` object in `Game_Boot_2_Play`
 
 ---
 
@@ -559,7 +576,8 @@ HUD elements visible in the image:
 - `TempleRunPlayerVisuals` - Player character visual and animations
 - `TempleRunObstacles` - `ObstacleSpawner` (full-width and lane barriers)
 - `TempleRunCollectables` - `CoinSpawner`, `PowerUpSpawner`
-- `TempleRunGuiOverlay` - HUD (score, distance, timer) and Countdown overlay (`CountdownController`, `CountdownUIController`)
+- `TempleRunGuiOverlay` - HUD (score, distance, timer). The countdown overlay is the Countdown
+  domain's (`CountdownController`, `CountdownUIController`, hosted in `TempleRunGameplay`)
 - `TempleRunEnvironment` - Skybox, lighting
 - `TempleRunSfx` - Audio sources
 
@@ -795,9 +813,12 @@ After successful authentication:
 
 ### Step 3: Dummy Run
 
-There is no countdown and no HUD in this profile — the TempleRun scenes (including
-`TempleRunGuiOverlay`, which renders both) are not loaded. Instead, once `GameStarted`
-fires, the `Test_SubmitLeaderboardScore` component in `DummyGame_Boot_0_Initialization`:
+There is no countdown and no HUD in this profile — neither the TempleRun scenes nor the
+Countdown domain's `CountdownDomain` object (it lives in `Game_Boot_2_Play`) is loaded, which
+is exactly the swap-a-domain-out test. Instead, once `GameStarted` fires — and it now fires
+from GameFlow's own `GameStarting → GameStarted` chain rather than waiting on a countdown that
+is not there — the `Test_SubmitLeaderboardScore` component in
+`DummyGame_Boot_0_Initialization`:
 
 - Waits ~1 second, then publishes `GameServiceEvents.SessionEnding` on the contract bus
   with a random score — the same event a real game's glue publishes — twice by default
@@ -940,7 +961,8 @@ The **Test_GameOnly_Windows** profile runs actual Temple Run gameplay **without*
  4  TempleRun/Scenes/Gameplay/TempleRunCollectables      ◄── Coins and power-up spawning
  5  TempleRun/Scenes/Gameplay/TempleRunEnvironment       ◄── Skybox, lighting
  6  TempleRun/Scenes/Gameplay/TempleRunGameplay          ◄── Core gameplay logic (distance, lives)
- 7  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay        ◄── Gameplay HUD and Countdown overlay
+ 7  TempleRun/Scenes/Gameplay/TempleRunGuiOverlay        ◄── Gameplay HUD (the countdown overlay
+                                                            belongs to the Countdown domain)
  8  TempleRun/Scenes/Gameplay/TempleRunObstacles         ◄── Obstacle spawning
  9  TempleRun/Scenes/Gameplay/TempleRunPlayerVisuals     ◄── Player visual representation
 10  TempleRun/Scenes/Gameplay/TempleRunSfx               ◄── Sound effects
@@ -1052,7 +1074,7 @@ After Game Over, player can:
 
 ## Project Structure
 
-The codebase is organized into **three in-repo domains** — GameFlow, TempleRun, and
+The codebase is organized into **four in-repo domains** — GameFlow, TempleRun, Countdown, and
 UserInitiated (whose enum and input scripts live inside `Assets/TempleRun/`) — plus the UGS
 domain and the shared infrastructure, which arrive as UPM packages rather than living here.
 
@@ -1063,10 +1085,23 @@ domain and the shared infrastructure, which arrive as UPM packages rather than l
 ```
 RunnerUGSTemplate/
 ├── Assets/
+│   ├── Countdown/                        # Session-ceremony domain (the pre-run 3... 2... 1)
+│   │   ├── CrawfisSoftware.Countdown.asmdef  # references CrawfisSoftware.TempleRun;
+│   │   │                                 #   CrawfisSoftware.GameFlow references this one
+│   │   ├── Scripts/
+│   │   │   ├── Events/                   # CountdownEvents, CountdownAutoEventFlow
+│   │   │   ├── TempleRunSpecific/        # Countdown2TempleRunBridge
+│   │   │   │                             #   (CountdownEnded → PlayerActivateRequested)
+│   │   │   ├── UI/                       # CountdownUIController
+│   │   │   └── CountdownController.cs    # Runs the ceremony: Starting, Started, Tick, Ending
+│   │   └── UI Toolkit/                   # Countdown.uxml (the overlay)
+│   │
 │   ├── GameFlow/                         # Application lifecycle domain
 │   │   ├── Scripts/
 │   │   │   ├── Events/                   # GameFlowEvents, GameFlowAutoEventFlow
 │   │   │   │                             # TempleRunGameFlowBridge (bridges TempleRun ↔ GameFlow)
+│   │   │   ├── CountdownSpecific/        # CountdownGameFlowBridge
+│   │   │   │                             #   (GameStarting → CountdownStartRequested)
 │   │   │   ├── Config/                   # GameState, GameConstants, LevelConfig(+Applier),
 │   │   │   │                             #   LevelRegistry, LevelProgressManager/Data
 │   │   │   ├── GameControl/              # QuitController, UnloadNonActiveScenes
@@ -1144,7 +1179,11 @@ RunnerUGSTemplate/
 - **Common** (the `com.crawfissoftware.common` package): shared base classes and utilities — the
   one event-chain dispatcher, additive scene plumbing, the live `DifficultyConfig`
 - **GameFlow**: application lifecycle - boot, initialization, menus, pause, quit, scene management
-- **TempleRun**: gameplay mechanics - player movement, track generation, input, audio, visuals
+- **TempleRun**: gameplay mechanics - player movement and activation, track generation, input,
+  audio, visuals
+- **Countdown**: the pre-run ceremony and its overlay, in its own assembly. GameFlow starts it,
+  and its end reaches gameplay only as `PlayerActivateRequested` — swap it for a cutscene, a
+  "tap to start" gate, or nothing at all, and neither neighbour is edited
 - **UGSGlue**: this game's half of the `GameServiceEvents` contract (deliberately asmdef-free)
 - **UGS** (the `com.crawfissoftware.ugs` package): authentication, leaderboards, achievements,
   remote config, economy, cloud code — read-only here; edit in the EventDrivenUGS repo
@@ -1156,7 +1195,12 @@ USER INPUT (UserInitiatedEvents, in TempleRun)
     ↓  Input2TempleRunAutoEventBridge
 TEMPLERUN GAMEPLAY (TempleRunEvents)
     ├─→ TempleRunGameFlowBridge ──→ GAMEFLOW SESSION (GameFlowEvents)
-    │                                     ↕  Assets/UGSGlue/UGSGameFlowBridge
+    │        ▲                            │    ↕  Assets/UGSGlue/UGSGameFlowBridge
+    │        │                            │  CountdownGameFlowBridge (GameStarting)
+    │        │                            ▼
+    │   Countdown2TempleRunBridge ←── COUNTDOWN CEREMONY (CountdownEvents)
+    │   (CountdownEnded → PlayerActivateRequested)
+    │
     └─→ Assets/UGSGlue/TempleRunUGSBridge ──→ THE CONTRACT (GameServiceEvents)
                                                   ↕  GameServiceEventsUGSBridge   (UGS package)
                                               UGS SERVICES (UGS_EventsEnum)
@@ -1252,7 +1296,8 @@ A representative subset (76 events total — see the enum, or `CrawfisSoftware �
 |-------|--------------|-------------|
 | `LoadingScreenShowRequested/Showing/Shown` | `GameFlowUIPanelController` + auto-chain | Loading screen visibility |
 | `MainMenuShowRequested/Showing/Shown` | auto-chain from `GameplayReady`; panel controllers | Main menu visibility |
-| `GameStartRequested/Starting/Started` | auto-chain; `GameStarted` bridged from `CountdownEnded` | Game session lifecycle |
+| `GameStartRequested/Starting/Started` | auto-chain (all three; `GameStarting → GameStarted` is GameFlow's own — the old `CountdownEnded` round-trip is gone) | Game session lifecycle |
+| `GameStarting` → `CountdownStartRequested` | `CountdownGameFlowBridge` | Starts the pre-run ceremony (Countdown domain) |
 | `GameEnding/Ended` | bridged from `TempleRunEnded`; `GameFlowUIPanelController` | Game session end |
 | `GameScenesLoadRequested/Loading/Loaded` | auto-chain; `DynamicLevelSceneLoader` | Scene loading |
 | `PauseRequested/Pausing/Paused` | bridged from `PlayerPaused`; auto-chain | Game pause |
@@ -1263,7 +1308,7 @@ A representative subset (76 events total — see the enum, or `CrawfisSoftware �
 
 ### TempleRun Events (Gameplay)
 
-A representative subset (121 events total):
+A representative subset (117 events total):
 
 | Event | Published by | Description |
 |-------|--------------|-------------|
@@ -1271,7 +1316,8 @@ A representative subset (121 events total):
 | `PlayerFailingAtTurn` | `TurnCollisionDetector` | Player missed a turn |
 | `PlayerFailing/Failed` | auto-chain; `PlayerFailedController` | Failure freeze and recovery |
 | `PlayerDied` | `PlayerLifeController` (data: distance score) | Player lost all lives |
-| `CountdownStartRequested/Starting/Started/Tick/Ending/Ended` | `CountdownController` | Pre-game countdown |
+| `PlayerActivateRequested/Activating/Activated` | bridged from `CountdownEnded`; auto-chain | The player is released: `GameTime`, `DistanceController`, `AIController`, `TurnCollisionDetector`, `Metronome` all arm on `PlayerActivated` |
+| `TempleRunStartRequested/Starting/Started` | bridged from `GameStarted`; auto-chain | The run's systems come up — music, lanes, lives, segment advance. **Not** "the player is going"; that is `PlayerActivated` |
 | `LaneChangingLeft/ChangedLeft` (and Right) | `LaneChangeController` | Lane change mechanics |
 | `TeleportRequested/Starting/Started/Ending/Ended` | `TeleportController` | Teleportation to new segments |
 | `SlideRequested/Starting/Started/Ending/Ended` | `SlideController` | Slide mechanics with cooldown |
@@ -1282,6 +1328,22 @@ A representative subset (121 events total):
 | `CoinCollectRequested/Collecting/Collected` | `CollectableCollisionDetector`; `CoinCollectionController` | Coin collection (running total) |
 | `PowerUpActivateRequested/Activating/Activated` | `PowerUpBuffController` | Power-up usage |
 | `DistanceUpdated` | `DistanceController` | The score metric (bridged to the contract) |
+
+### Countdown Events (The Session Ceremony)
+
+All six events, in `Assets/Countdown/Scripts/Events/CountdownEvents.cs` — its own domain,
+its own assembly (`CrawfisSoftware.Countdown`), and its own bus (`CountdownBus`). Nothing
+outside `Assets/Countdown/` may name them except the two bridges:
+
+| Event | Published by | Description |
+|-------|--------------|-------------|
+| `CountdownStartRequested` | `CountdownGameFlowBridge`, from `GameFlowEvents.GameStarting` | The session asks for a ceremony |
+| `CountdownStarting` | auto-chain from `CountdownStartRequested` | |
+| `CountdownStarted` / `CountdownTick` / `CountdownEnding` | `CountdownController`, as the clock reaches each rung | 3… 2… 1… |
+| `CountdownEnded` | auto-chain from `CountdownEnding` | Bridged out as `TempleRunEvents.PlayerActivateRequested` |
+
+The old `CountdownCancelled` was dropped as dead code — nothing published or subscribed to it.
+Reintroduce it only alongside code that actually cancels a countdown.
 
 ### UserInitiated Events (Input)
 
@@ -1461,7 +1523,8 @@ each with enough context to hand to an AI assistant.
 - [x] **Player Animations**: Lean (left/right), jump, slide, and dash animations
 - [x] **Collectibles**: Coins (`CoinSpawner`, `CoinCollectionController`) and power-ups (`PowerUpSpawner`) in `TempleRunCollectables` scene
 - [x] **Level Selection**: `LevelSelectorPanelController`, `LevelRegistry`, `LevelConfig` ScriptableObjects, `DynamicLevelSceneLoader`
-- [x] **HUD and Countdown**: `CountdownController`, `CountdownUIController` in `TempleRunGuiOverlay` (TempleRun domain)
+- [x] **HUD**: `GUIController` in `TempleRunGuiOverlay` (TempleRun domain)
+- [x] **Countdown**: `CountdownController`, `CountdownUIController` — its own domain and assembly under `Assets/Countdown/`
 - [ ] **Difficulty Progression**: Wire `LevelConfig` values through to Remote Config
 
 ### UGS Features
@@ -1583,7 +1646,8 @@ Place animations in a dedicated `TempleRunPlayerAnimations` scene, loaded additi
 
 1. **Determine the correct domain** and add to the appropriate enum:
    - `GameFlowEvents` - App lifecycle (loading, menus, pause, config, quit)
-   - `TempleRunEvents` - Gameplay (player, countdown, turns, track, collisions)
+   - `TempleRunEvents` - Gameplay (player, activation, turns, track, collisions)
+   - `CountdownEvents` - The pre-run ceremony (start, ticks, end)
    - `UserInitiatedEvents` - Raw input
    - `GameServiceEvents` - The game/service contract (contracts package; add here deliberately rarely)
    - `UGS_EventsEnum` - UGS service callbacks (ugs package — edit in the EventDrivenUGS repo)
@@ -1633,7 +1697,8 @@ private void OnMyFeatureStarted(string eventName, object sender, object data)
 }
 ```
 
-5. **(Optional) Add auto-chaining** in `GameFlowAutoEventFlow.cs` or `TempleRunAutoEventFlow.cs`:
+5. **(Optional) Add auto-chaining** in `GameFlowAutoEventFlow.cs`, `TempleRunAutoEventFlow.cs`,
+   or `CountdownAutoEventFlow.cs`:
 ```csharp
 { GameFlowEvents.MyFeatureRequested, GameFlowEvents.MyFeatureStarting },
 ```

@@ -25,6 +25,8 @@ After adding a bridge mapping, remind the user that any existing code that direc
 |-------------|------|----------|
 | **Input2TempleRunAutoEventBridge** | `Assets/TempleRun/Scripts/Events/Input2TempleRunAutoEventBridge.cs` | UserInitiated -> TempleRun (one-way) |
 | **TempleRunGameFlowBridge** | `Assets/GameFlow/Scripts/TempleRunSpecific/TempleRunGameFlowBridge.cs` | TempleRun <-> GameFlow (bidirectional) |
+| **CountdownGameFlowBridge** | `Assets/GameFlow/Scripts/CountdownSpecific/CountdownGameFlowBridge.cs` | GameFlow -> Countdown (one-way; the session milestone starts the ceremony) |
+| **Countdown2TempleRunBridge** | `Assets/Countdown/Scripts/TempleRunSpecific/Countdown2TempleRunBridge.cs` | Countdown -> TempleRun (one-way; the ceremony's end releases the player) |
 | **TempleRunUGSBridge** | `Assets/UGSGlue/TempleRunUGSBridge.cs` | gameplay -> GameServiceEvents (one-way; e.g. `DistanceUpdated`, `CoinCollected`) |
 | **UGSGameFlowBridge** | `Assets/UGSGlue/UGSGameFlowBridge.cs` | GameFlow <-> GameServiceEvents (bidirectional) |
 | **GameServiceEventsUGSBridge** | `Runtime/Events/GameServiceEventsUGSBridge.cs` in the `com.crawfissoftware.ugs` package | GameServiceEvents <-> UGS (read-only here — edit in the EventDrivenUGS repo) |
@@ -86,6 +88,13 @@ explaining why this crossing exists.
 
 **TempleRunUGSBridge has one:** `GameplayToGameService` (one-way by design).
 **GameServiceEventsUGSBridge has two:** `GameServiceToUGS` and `UGSToGameService`.
+
+**The two Countdown bridges have one table each** — `GameFlowToCountdown` and
+`CountdownToTempleRun`. They inherit `AutoEventFlowBase<TSource, TDest>`, which covers a
+single direction. A mapping the other way does not belong there: either it belongs in the
+bridge for that direction, or the domain genuinely needs a second bridge class. Nothing
+bridges back *into* Countdown from TempleRun, and Countdown never publishes GameFlow events
+— that asymmetry is deliberate, and it is what lets the ceremony be swapped out whole.
 
 ### Step 5: Check for circular paths
 

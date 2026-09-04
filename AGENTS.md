@@ -50,7 +50,8 @@ skills especially. Two parity rules:
 - **Both repos are now on the same EventsPublisher API** — static `EventsFor<T>` buses,
   typed payloads, Sticky delivery — so code and guidance port between them directly. The
   structural differences that remain are real ones: this repo has the GameService and UGS
-  domains (five enums, eight dispatch classes) where the sibling has three and four.
+  domains (six enums, eleven dispatch classes) where the sibling has four and seven, and it
+  compiles its domains as assemblies (`.asmdef`) where the sibling has none.
 
 ## Documentation: audience and map
 

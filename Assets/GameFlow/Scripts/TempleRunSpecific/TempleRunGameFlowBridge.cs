@@ -8,6 +8,9 @@ namespace CrawfisSoftware.GameFlow.Events
     /// <summary>
     /// The sanctioned crossing between the TempleRun and GameFlow domains. Bidirectional, so it
     /// holds two dispatchers rather than inheriting AutoEventFlowBase, which covers one.
+    ///
+    /// The countdown no longer appears here at all: the ceremony is its own domain, triggered by
+    /// CountdownGameFlowBridge and released into gameplay by Countdown2TempleRunBridge.
     /// </summary>
     /// <remarks>The TempleRun -> UGS passthrough that used to live here now sits in
     /// <c>TempleRunUGSBridge</c>, under <c>Assets/UGS/</c>. A GameFlow file naming
@@ -25,9 +28,6 @@ namespace CrawfisSoftware.GameFlow.Events
             // stays true forever once the player has paused even once.
             (TempleRunEvents.PlayerResumed, GameFlowEvents.ResumeRequested),
 
-            // Countdown ended -> game officially started (absorbed from GameController)
-            (TempleRunEvents.CountdownEnded, GameFlowEvents.GameStarted),
-
             // Player died -> game ending (absorbed from GameController)
             (TempleRunEvents.TempleRunEnded, GameFlowEvents.GameEnding),
 
@@ -38,16 +38,15 @@ namespace CrawfisSoftware.GameFlow.Events
 
         private static readonly (GameFlowEvents From, TempleRunEvents To)[] GameFlowToTempleRun =
         {
-            // Bridge start: when the broader game signals started, fire TempleRun start requested
+            // Bridge start: when the broader game signals started, bring the TempleRun systems up.
+            // This is systems-up only, and it now happens BEFORE the ceremony finishes - the
+            // player is released separately, by Countdown2TempleRunBridge.
             (GameFlowEvents.GameStarted, TempleRunEvents.TempleRunStartRequested),
-
-            // GameFlow starting -> kick off countdown in TempleRun
-            (GameFlowEvents.GameStarting, TempleRunEvents.CountdownStartRequested),
 
             // Config/scenes bridged to TempleRun domain
             (GameFlowEvents.GameConfigApplied, TempleRunEvents.TempleRunConfigApplied),
-            (GameFlowEvents.LevelApplied, TempleRunEvents.TempleRunLevelApplied),
-            (GameFlowEvents.GameScenesLoaded, TempleRunEvents.TempleRunScenesReady),
+            (GameFlowEvents.LevelApplied, TempleRunEvents.TrackLevelApplied),
+            (GameFlowEvents.GameScenesLoaded, TempleRunEvents.RunInitializeRequested),
 
             // The difficulty table the services layer supplied. Both events are Sticky, which is
             // what makes this hop work at all: the publish happens during boot, and this bridge is

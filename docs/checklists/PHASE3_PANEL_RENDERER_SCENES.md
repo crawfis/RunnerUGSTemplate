@@ -44,6 +44,12 @@ references during the swap.
 |---|---|---|---|---|
 | `CountdownController` (UIDocument + controller on the same GameObject) | `Assets/Settings/GUI/PS_Overlay.asset` | `GameFlow/UI Toolkit/UI/UXML/Overlays/Countdown.uxml` | 0 | `CountdownUIController._countdownPanel` (renamed from `_countdownUI`) |
 
+> **Paths moved after this checklist was written (2026-09, Countdown domain extraction).** The
+> countdown became its own domain: the UXML is now `Assets/Countdown/UI Toolkit/Countdown.uxml`
+> and the controller is `Assets/Countdown/Scripts/UI/CountdownUIController.cs`. The GameObject,
+> its scene (`TempleRunGameplay`), the Panel Settings asset and the field name are unchanged —
+> only the two asset paths above are stale.
+
 #### 3. `Assets/TempleRun/Scenes/Gameplay/TempleRunGuiOverlay.unity` — 1 panel
 
 | GameObject | Panel Settings | Source Asset | Sort Order | Field to re-wire |

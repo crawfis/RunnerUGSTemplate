@@ -16,7 +16,7 @@ namespace CrawfisSoftware.TempleRun
     ///    Dependencies: None
     ///    Subscribes: TempleRunEvents.TempleRunConfigApplied (bridged from GameFlow)
     ///    Subscribes: TempleRunEvents.TempleRunDifficultyChanging (bridged from GameFlow)
-    ///    Subscribes: TempleRunEvents.TempleRunLevelApplied (bridged from GameFlow; data: int level number)
+    ///    Subscribes: TempleRunEvents.TrackLevelApplied (bridged from GameFlow; data: int level number)
     /// </summary>
     public class Blackboard : MonoBehaviour
     {
@@ -143,7 +143,7 @@ namespace CrawfisSoftware.TempleRun
             TempleRunBus.Subscribe(TempleRunEvents.TempleRunEnded, OnGameEnded);
             TempleRunBus.Subscribe(TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
             TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultyChanging, OnConfigApplied);
-            TempleRunBus.Subscribe(TempleRunEvents.TempleRunLevelApplied, OnLevelApplied);
+            TempleRunBus.Subscribe(TempleRunEvents.TrackLevelApplied, OnLevelApplied);
         }
 
         private void UnsubscribeToEvents()
@@ -151,7 +151,7 @@ namespace CrawfisSoftware.TempleRun
             TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunEnded, OnGameEnded);
             TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunConfigApplied, OnConfigApplied);
             TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunDifficultyChanging, OnConfigApplied);
-            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunLevelApplied, OnLevelApplied);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TrackLevelApplied, OnLevelApplied);
         }
 
 #if UNITY_EDITOR
