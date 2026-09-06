@@ -521,8 +521,7 @@ internal class MyController : MonoBehaviour
   `Wait.ForSecondsRealtime` is the unscaled wait for the quit delay, the failure hitch, the
   auto-turn delay, the teleport and the UI overlays. `Wait` ships in
   `com.crawfissoftware.common` 0.5.0 (`Runtime/Utility/Wait.cs`, namespace
-  `CrawfisSoftware.Utility`), which `Packages/manifest.json` pins by commit until
-  EventDrivenUGS PR #11 merges; drop the `#<sha>` then.
+  `CrawfisSoftware.Utility`).
   `NextFrameAsync` is frame-based, so a paused per-frame loop keeps ticking with
   `Time.deltaTime` at 0 and its arc freezes.
 - No pre-emptive `catch (OperationCanceledException)`: add the one-line catch only where a
