@@ -30,8 +30,8 @@ namespace CrawfisSoftware.UGS.Events
     {
         private static readonly (GameFlowEvents From, GameServiceEvents To)[] GameFlowToGameService =
         {
-            // A run has finished: its score is final, then the session is over.
-            (GameFlowEvents.GameEnding, GameServiceEvents.SessionEnding),
+            // A run has finished: its score is final (SessionEnding - see OnGameEnding, which
+            // cannot be a pair because the payload needs translating), then the session is over.
             (GameFlowEvents.GameEnded, GameServiceEvents.SessionEnded),
         };
 
@@ -65,7 +65,7 @@ namespace CrawfisSoftware.UGS.Events
 
             // Sticky: if services are already up, this fires immediately on subscribe.
             GameServiceBus.Subscribe(GameServiceEvents.ServicesStatusChanged, OnServicesStatusChanged);
-
+            GameFlowBus.Subscribe(GameFlowEvents.GameEnding, OnGameEnding);
         }
 
         protected virtual void OnDestroy()
@@ -74,6 +74,21 @@ namespace CrawfisSoftware.UGS.Events
             _gameServiceToGameFlow.Detach();
 
             GameServiceBus.Unsubscribe(GameServiceEvents.ServicesStatusChanged, OnServicesStatusChanged);
+            GameFlowBus.Unsubscribe(GameFlowEvents.GameEnding, OnGameEnding);
+        }
+
+        private void OnGameEnding(string eventName, object sender, object data)
+        {
+            // SessionEnding is declared to carry the session's score (float). GameEnding carries
+            // whatever ended the run: PlayerLifeController stamps the final distance onto
+            // PlayerDied and the chain forwards it, but a quit reaches the same ladder straight
+            // from the input bridge with the player id (int), so the run-end rungs are "score or
+            // player id" - deliberately undeclared, see TempleRunEvents.TempleRunEndRequested.
+            // This game scores a quit as 0: quitting is a testing convenience here, not a scored
+            // session. A game with progression should instead give the quit a real score (and a
+            // save) in TempleRun, where the score is owned - EndlessRunnerTemplate task L18.
+            float score = data is float finalScore ? finalScore : 0f;
+            GameServiceBus.Publish(GameServiceEvents.SessionEnding, sender, score);
         }
 
         private void OnServicesStatusChanged(string eventName, object sender, object data)
