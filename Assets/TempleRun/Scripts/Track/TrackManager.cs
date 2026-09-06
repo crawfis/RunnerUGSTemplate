@@ -14,7 +14,6 @@ namespace CrawfisSoftware.TempleRun
     ///       when needed (either to create visuals or to determine the currently active track).
     ///    Dependencies: EventsFor<TempleRunEvents>, Blackboard.GameConfig, Blackboard.MasterRandom,
     ///                  TrackLevelApplied (Sticky; read at init via TryGetLast), _trackLevels registry
-    ///    Subscribes to TempleRunConfigApplied - initializes as soon as the level's config lands
     ///    Subscribes to SegmentExited for all segment types (single advancement path)
     ///    Subscribes to SegmentRequested to resume lookahead after an Either (T-junction) segment
     ///    Publishes: TrackSegmentCreated. Useful for creating prefabs. Several of these will be created at the start. Data is a TrackSegmentInfo
@@ -53,7 +52,6 @@ namespace CrawfisSoftware.TempleRun
         private TrackSegmentDefinition _lastSegmentDefinition;
         private int _lastSegmentRepeatCount;
         private int _segmentIndex;
-        private bool _isInitialized = false;
 
         // Set when an Either (T-junction) segment is at the tail of the lookahead queue.
         // No further segments are generated until SegmentRequested fires with the chosen direction.
@@ -70,14 +68,12 @@ namespace CrawfisSoftware.TempleRun
         protected virtual void Awake()
         {
             TempleRunBus.Subscribe(TempleRunEvents.RunInitializeRequested, OnGameStarting);
-            TempleRunBus.Subscribe(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
             TempleRunBus.Subscribe(TempleRunEvents.SegmentRequested, OnSegmentRequested);
         }
 
         protected virtual void OnDestroy()
         {
             TempleRunBus.Unsubscribe(TempleRunEvents.RunInitializeRequested, OnGameStarting);
-            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunConfigApplied, OnGameConfigured);
             TempleRunBus.Unsubscribe(TempleRunEvents.SegmentExited, OnSegmentCompleted);
             TempleRunBus.Unsubscribe(TempleRunEvents.SegmentRequested, OnSegmentRequested);
         }
@@ -87,25 +83,16 @@ namespace CrawfisSoftware.TempleRun
             _trackSegments = new(_numberOfLookAheadTracks);
         }
 
-        private void OnGameConfigured(string eventName, object sender, object data)
-        {
-            Initialize();
-        }
-
         private void Initialize()
         {
             var gameConfig = Blackboard.Instance.GameConfig;
             Initialize(gameConfig.StartRunway, gameConfig.MinTrackLength,
                 gameConfig.MaxTrackLength, Blackboard.Instance.MasterRandom);
-            _isInitialized = true;
         }
 
         protected virtual void OnGameStarting(string eventName, object sender, object data)
         {
-            if (!_isInitialized)
-            {
-                Initialize();
-            }
+            Initialize();
             CreateInitialTrack();
         }
 

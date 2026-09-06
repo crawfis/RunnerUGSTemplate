@@ -48,11 +48,14 @@ namespace CrawfisSoftware.GameFlow.Events
             (GameFlowEvents.LevelApplied, TempleRunEvents.TrackLevelApplied),
             (GameFlowEvents.GameScenesLoaded, TempleRunEvents.RunInitializeRequested),
 
-            // The difficulty table the services layer supplied. Both events are Sticky, which is
-            // what makes this hop work at all: the publish happens during boot, and this bridge is
-            // in Game_Boot_2_Play, so it subscribes long afterwards and is handed the retained
-            // value on subscribe.
-            (GameFlowEvents.DifficultySettingsApplied, TempleRunEvents.DifficultySettingsApplied),
+            // Two difficulty tables, two channels, because they have different authority:
+            // remote outranks the level, the level outranks the built-in fallback that
+            // LoadDefaultGameConfigs supplies on the same TempleRun event as the level.
+            // GameDifficultyManager applies the rank. Every event here is Sticky, which is what
+            // makes the hop work at all: both publishes happen before this bridge, in
+            // Game_Boot_2_Play, exists - so it is handed the retained value on subscribe.
+            (GameFlowEvents.DifficultySettingsApplied, TempleRunEvents.TempleRunDifficultySettingsApplied),
+            (GameFlowEvents.RemoteDifficultySettingsApplied, TempleRunEvents.DifficultySettingsApplied),
         };
 
         private readonly EventChainDispatcher<TempleRunEvents, GameFlowEvents> _templeRunToGameFlow =

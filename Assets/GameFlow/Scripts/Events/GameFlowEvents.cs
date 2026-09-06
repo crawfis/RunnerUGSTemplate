@@ -84,20 +84,40 @@ namespace CrawfisSoftware.GameFlow.Events
         DifficultyChanged = 92,
         DifficultyChangeFailed = 93,
         /// <summary>
-        /// The difficulty table the services layer supplied, bridged from
-        /// <c>GameServiceEvents.DifficultySettingsAvailable</c>. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
+        /// The selected level's difficulty variants, published by <c>LevelConfigApplier</c> when a
+        /// level is chosen. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
         /// </summary>
         /// <remarks>
-        /// <para><b>Sticky.</b> A difficulty table is current state, not a one-time announcement:
-        /// self-describing, and true whenever it is read. It has to be retained, because the only
-        /// publisher is the services layer during boot and the only consumer is
-        /// <c>TempleRunGameFlowBridge</c>, which lives in <c>Game_Boot_2_Play</c> and does not
-        /// exist yet when that publish happens. Announced only once, it would reach nothing,
-        /// every time.</para>
+        /// <para>The level publishes its whole table rather than one resolved config, so the
+        /// level's tuning and the player's preference compose instead of racing: the difficulty
+        /// system picks a variant by name and is the single writer of the resolved config.</para>
+        /// <para><b>Sticky</b>, and here that is a local decision rather than an inherited one. A
+        /// table is a level, not an edge - self-describing and true whenever it is read - and this
+        /// repo's scene chain is UGS-driven, so retaining it costs nothing and removes any
+        /// dependence on when the bridge in <c>Game_Boot_2_Play</c> happens to subscribe.
+        /// EndlessRunnerTemplate leaves the same member Transient, on its own measurement.</para>
         /// </remarks>
         [EventDelivery(EventDelivery.Sticky)]
         [EventPayload(typeof(IList<DifficultyConfig>))]
         DifficultySettingsApplied = 94,
+
+        /// <summary>
+        /// The difficulty table the services layer supplied, bridged from
+        /// <c>GameServiceEvents.DifficultySettingsAvailable</c>. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>RUGS-only, and separate from <see cref="DifficultySettingsApplied"/> on purpose.
+        /// The two tables have different authority - remote overrides the level, the level
+        /// overrides the built-in fallback - and a rank needs its own channel to be expressed.
+        /// Sharing one event would make the winner depend on publish order.</para>
+        /// <para><b>Sticky.</b> The only publisher is the services layer during boot and the only
+        /// consumer is <c>TempleRunGameFlowBridge</c>, which lives in <c>Game_Boot_2_Play</c> and
+        /// does not exist yet when that publish happens. Announced only once, it would reach
+        /// nothing, every time.</para>
+        /// </remarks>
+        [EventDelivery(EventDelivery.Sticky)]
+        [EventPayload(typeof(IList<DifficultyConfig>))]
+        RemoteDifficultySettingsApplied = 95,
 
         // ---------- Save / Load (optional but useful hooks) ----------
         SaveLoadRequested = 100,

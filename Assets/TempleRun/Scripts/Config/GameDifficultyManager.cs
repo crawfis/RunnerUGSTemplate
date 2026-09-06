@@ -1,8 +1,8 @@
 using CrawfisSoftware.Config;
 using CrawfisSoftware.TempleRun.Events;
 
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -12,22 +12,23 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 {
     /// <summary>
     /// Manages difficulty configurations for TempleRun gameplay.
+    /// Subscribes to TempleRunEvents (via bridge from the GameFlow domain).
     ///    Dependencies: DifficultyConfig (shared, from the common package)
     ///    Subscribes: TempleRunEvents.TempleRunDifficultyChangeRequested,
-    ///                TempleRunEvents.TempleRunDifficultySettingsApplied (the LOCAL table),
+    ///                TempleRunEvents.TempleRunDifficultySettingsApplied (level, or the fallback),
     ///                TempleRunEvents.DifficultySettingsApplied (the REMOTE table, bridged from GameFlow)
     ///    Publishes: TempleRunEvents.TempleRunDifficultyChanging, TempleRunEvents.DifficultyChangeFailed
     /// </summary>
     /// <remarks>
-    /// <para><b>Remote wins, whichever arrives first.</b> Two tables can reach this component: the
-    /// local one that <c>LoadDefaultGameConfigs</c> publishes from a ScriptableObject in
-    /// <c>Start</c>, and the remote one Remote Config supplies during boot. Each replaces the table
-    /// wholesale, so without a rule the winner would be decided by scene load order - and the local
-    /// publish, running in a gameplay scene's <c>Start</c>, would usually land last and silently
-    /// discard the remote table.</para>
-    /// <para>So a remote table latches. Once one has been applied the local publish is ignored for
-    /// the life of this component. The remote event is Sticky, so arriving before this component
-    /// existed is not the same as never arriving: the retained table is delivered on subscribe.</para>
+    /// <para><b>Three sources, ranked: remote &gt; level &gt; built-in fallback.</b> Each replaces
+    /// the table wholesale, so without a rank the winner would be whichever published last -
+    /// which, before this rank existed, meant the built-in fallback running in a gameplay scene's
+    /// <c>Start</c> silently overwrote the level the player had just chosen.</para>
+    /// <para>The top rank latches: once a remote table has been applied, nothing displaces it for
+    /// the life of this component. The bottom rank stands itself down - <c>LoadDefaultGameConfigs</c>
+    /// publishes only when no table has been retained yet - so the middle rank needs no guard here.
+    /// Both table events are Sticky, so arriving before this component existed is not the same as
+    /// never arriving: the retained table is delivered on subscribe.</para>
     /// </remarks>
     public class GameDifficultyManager : MonoBehaviour
     {
@@ -56,30 +57,40 @@ namespace CrawfisSoftware.TempleRun.GameConfig
 
         public void Awake()
         {
-            TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+            TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChangeRequested);
             TempleRunBus.Subscribe(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
             TempleRunBus.Subscribe(TempleRunEvents.DifficultySettingsApplied, OnRemoteDifficultySettingsApplied);
         }
 
         private void OnDestroy()
         {
-            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChanging);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunDifficultyChangeRequested, OnDifficultyChangeRequested);
             TempleRunBus.Unsubscribe(TempleRunEvents.TempleRunDifficultySettingsApplied, OnDifficultySettingsChanged);
             TempleRunBus.Unsubscribe(TempleRunEvents.DifficultySettingsApplied, OnRemoteDifficultySettingsApplied);
         }
 
+        // The table is the selected level's difficulty variants, so a level decides which
+        // difficulties it offers. A preference the level does not offer resolves to the level's
+        // first variant rather than leaving GameConfig unset - the player asked for a level, and
+        // playing it at its own difficulty beats not playing it. That fallback is load-bearing
+        // now that levels carry their own variant sets: a level that offers only "Medium" would
+        // otherwise ignore the "Easy" that SetGameDifficulty reads out of PlayerPrefs.
         public void SetDifficulty(string difficultyName)
         {
             Debug.Log($"Attempting to set game difficulty from {CurrentDifficulty} to {difficultyName}");
-            if (_difficultyConfigs.ContainsKey(difficultyName))
+            if (!_difficultyConfigs.ContainsKey(difficultyName))
             {
-                CurrentDifficulty = difficultyName;
-                TempleRunBus.Publish(TempleRunEvents.TempleRunDifficultyChanging, this, _difficultyConfigs[CurrentDifficulty]);
+                if (_difficultyConfigs.Count == 0)
+                {
+                    Debug.LogWarning($"SetDifficulty failed: no difficulty configurations have been applied.");
+                    return;
+                }
+                string fallback = _difficultyConfigs.Keys.First();
+                Debug.LogWarning($"This level does not offer difficulty '{difficultyName}'; using '{fallback}'.");
+                difficultyName = fallback;
             }
-            else
-            {
-                Debug.LogWarning($"SetDifficulty failed: difficulty '{difficultyName}' not found in available configurations.");
-            }
+            CurrentDifficulty = difficultyName;
+            TempleRunBus.Publish(TempleRunEvents.TempleRunDifficultyChanging, this, _difficultyConfigs[CurrentDifficulty]);
         }
 
         public void PopulateDifficulties(IList<DifficultyConfig> difficulties)
@@ -101,9 +112,11 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             _difficultyConfigs[difficultyConfig.DifficultyName] = difficultyConfig;
         }
 
-        public void OnDifficultyChanging(string eventName, object sender, object data)
+        // An empty name is still worth reporting: a payload of the wrong type throws on the cast,
+        // but a caller can legitimately publish "" and there is no difficulty by that name.
+        public void OnDifficultyChangeRequested(string eventName, object sender, object data)
         {
-            string newDifficulty = data as string;
+            var newDifficulty = (string)data;
             if (string.IsNullOrEmpty(newDifficulty))
             {
                 TempleRunBus.Publish(TempleRunEvents.DifficultyChangeFailed, this, CurrentDifficultyConfig);
@@ -112,33 +125,27 @@ namespace CrawfisSoftware.TempleRun.GameConfig
             SetDifficulty(newDifficulty);
         }
 
+        // The level's table, or the built-in fallback when no level supplied one - they share this
+        // event, and LoadDefaultGameConfigs decides between them by standing down when a table has
+        // already been retained. Either way a remote table outranks both.
         public void OnDifficultySettingsChanged(string eventName, object sender, object data)
         {
             if (_remoteSettingsApplied)
             {
-                // The local ScriptableObject table is the fallback, not an override. Applying it
-                // over a table Remote Config supplied would undo the remote one for the rest of
-                // the session, and would do it invisibly.
+                // Applying a local table over one Remote Config supplied would undo the remote one
+                // for the rest of the session, and would do it invisibly.
                 return;
             }
 
-            PopulateDifficulties(RequireConfigs(data, nameof(OnDifficultySettingsChanged)));
+            var difficultyConfigs = (IList<DifficultyConfig>)data;
+            PopulateDifficulties(difficultyConfigs);
         }
 
         public void OnRemoteDifficultySettingsApplied(string eventName, object sender, object data)
         {
-            PopulateDifficulties(RequireConfigs(data, nameof(OnRemoteDifficultySettingsApplied)));
+            var difficultyConfigs = (IList<DifficultyConfig>)data;
+            PopulateDifficulties(difficultyConfigs);
             _remoteSettingsApplied = true;
-        }
-
-        private static IList<DifficultyConfig> RequireConfigs(object data, string handler)
-        {
-            var difficultyConfigs = data as IList<DifficultyConfig>;
-            if (difficultyConfigs == null)
-            {
-                throw new ArgumentException($"{handler} event data must be of type IList<DifficultyConfig>");
-            }
-            return difficultyConfigs;
         }
     }
 }
