@@ -11,10 +11,11 @@ namespace CrawfisSoftware.TempleRun
     ///    Dependencies: EventsFor<TempleRunEvents>
     ///    Subscribes: SegmentGeometryReady — caches geometry by sequence index
     ///    Subscribes: ActiveTrackChanging — publishes CurrentSplineChanging (approach sub-spline)
-    ///    Subscribes: TurnLeftCompleted, TurnRightCompleted — publishes CurrentSplineChanging (exit sub-spline)
+    ///    Subscribes: TurnLeftStarted, TurnRightStarted — publishes CurrentSplineChanging (exit sub-spline);
+    ///                the teleport onto it is the turn's duration, and ends with Turn*Ending
     ///    Subscribes: SegmentExited — publishes CurrentSplineChanged
-    ///    Publishes: CurrentSplineChanging (data: (Vector3, Vector3, Direction, float landingDistance))
-    ///    Publishes: CurrentSplineChanged (data: (Vector3, Vector3, Direction, float landingDistance))
+    ///    Publishes: CurrentSplineChanging (data: SplineSection)
+    ///    Publishes: CurrentSplineChanged (data: SplineSection)
     /// </summary>
     [DefaultExecutionOrder(-5)]
     internal class SegmentTransitionController : MonoBehaviour
@@ -38,8 +39,8 @@ namespace CrawfisSoftware.TempleRun
         {
             TempleRunBus.Subscribe(TempleRunEvents.SegmentGeometryReady, OnGeometryReady);
             TempleRunBus.Subscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            TempleRunBus.Subscribe(TempleRunEvents.TurnLeftCompleted, OnTurnCompleted);
-            TempleRunBus.Subscribe(TempleRunEvents.TurnRightCompleted, OnTurnCompleted);
+            TempleRunBus.Subscribe(TempleRunEvents.TurnLeftStarted, OnTurnStarted);
+            TempleRunBus.Subscribe(TempleRunEvents.TurnRightStarted, OnTurnStarted);
             TempleRunBus.Subscribe(TempleRunEvents.SegmentExited, OnSegmentExited);
         }
 
@@ -47,8 +48,8 @@ namespace CrawfisSoftware.TempleRun
         {
             TempleRunBus.Unsubscribe(TempleRunEvents.SegmentGeometryReady, OnGeometryReady);
             TempleRunBus.Unsubscribe(TempleRunEvents.ActiveTrackChanging, OnTrackChanging);
-            TempleRunBus.Unsubscribe(TempleRunEvents.TurnLeftCompleted, OnTurnCompleted);
-            TempleRunBus.Unsubscribe(TempleRunEvents.TurnRightCompleted, OnTurnCompleted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TurnLeftStarted, OnTurnStarted);
+            TempleRunBus.Unsubscribe(TempleRunEvents.TurnRightStarted, OnTurnStarted);
             TempleRunBus.Unsubscribe(TempleRunEvents.SegmentExited, OnSegmentExited);
         }
 
@@ -83,9 +84,11 @@ namespace CrawfisSoftware.TempleRun
                 _activatedCount++;
             }
 
-            // Publish approach sub-spline (Entrance -> Pivot, direction Straight).
-            float landingDistance = ComputeLandingDistance(segmentInfo);
-            var approachSpline = (_activeGeometry.ApproachStart, _activeGeometry.Pivot, Direction.Straight, landingDistance);
+            // Publish approach sub-spline (Entrance -> Pivot, direction Straight). An approach
+            // carries no landing distance: nothing teleports onto it, so nothing reads one. It
+            // used to be handed a computed value anyway, from a formula that disagreed with the
+            // exit section's - two answers to one question, neither of them consulted.
+            var approachSpline = SplineSection.Approach(_activeGeometry.ApproachStart, _activeGeometry.Pivot);
             TempleRunBus.Publish(
                 TempleRunEvents.CurrentSplineChanging, this, approachSpline);
         }
@@ -94,7 +97,7 @@ namespace CrawfisSoftware.TempleRun
         /// Fires when a turn completes. Publishes CurrentSplineChanging with the exit
         /// sub-spline truncated to TeleportDistance.
         /// </summary>
-        private void OnTurnCompleted(string eventName, object sender, object data)
+        private void OnTurnStarted(string eventName, object sender, object data)
         {
             _isOnExitSection = true;
             // _activeGeometry is always current: Either junction updates are handled directly
@@ -104,16 +107,17 @@ namespace CrawfisSoftware.TempleRun
             // not Pivot (the centre-line approach end). Anchoring the exit sub-spline here puts the
             // player on the tiles and lines its end up with the next segment — no sideways jump.
             // Truncate to TeleportDistance.
+            // Geometry supplies the points, the segment message supplies the distances - the same
+            // TeleportDistance on both lines, so where the player lands and how far that is agree.
             Vector3 exitDir = (_activeGeometry.ExitEnd - _activeGeometry.ExitStart).normalized;
             Vector3 teleportLanding = _activeGeometry.ExitStart + exitDir * _activeSegment.TeleportDistance;
 
-            // Geometry supplies the points, the segment message supplies the distances - the same
-            // TeleportDistance on both lines, so where the player lands and how far that is agree.
             // PivotDistance is run-absolute; TeleportDistance is a length past the pivot, so it
             // stays relative and is added on.
             float landingDistance = _activeSegment.PivotDistance + _activeSegment.TeleportDistance;
 
-            var exitSpline = (_activeGeometry.ExitStart, teleportLanding, _activeGeometry.Direction, landingDistance);
+            var exitSpline = new SplineSection(
+                _activeGeometry.ExitStart, teleportLanding, _activeGeometry.Direction, landingDistance);
             TempleRunBus.Publish(
                 TempleRunEvents.CurrentSplineChanging, this, exitSpline);
         }
@@ -123,8 +127,8 @@ namespace CrawfisSoftware.TempleRun
             // Publish the current sub-spline as "changed" (transition complete).
             float landingDistance = _activeSegment.EndDistance;
             var currentSpline = _isOnExitSection
-                ? (_activeGeometry.ExitStart, _activeGeometry.ExitEnd, _activeGeometry.Direction, landingDistance)
-                : (_activeGeometry.ApproachStart, _activeGeometry.Pivot, Direction.Straight, landingDistance);
+                ? new SplineSection(_activeGeometry.ExitStart, _activeGeometry.ExitEnd, _activeGeometry.Direction, landingDistance)
+                : new SplineSection(_activeGeometry.ApproachStart, _activeGeometry.Pivot, Direction.Straight, landingDistance);
 
             TempleRunBus.Publish(
                 TempleRunEvents.CurrentSplineChanged, this, currentSpline);
@@ -132,14 +136,6 @@ namespace CrawfisSoftware.TempleRun
             _isOnExitSection = false;
             // No cache cleanup needed: geometry is removed from the cache in OnTrackChanging
             // the moment it is consumed, so stale entries cannot accumulate.
-        }
-
-        private float ComputeLandingDistance(TrackSegmentInfo segmentInfo)
-        {
-            if (segmentInfo.Direction == Direction.Straight)
-                return 0f; // No teleport for straights.
-
-            return segmentInfo.TurnFailureDistance + segmentInfo.TeleportDistance;
         }
     }
 }

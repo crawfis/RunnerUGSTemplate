@@ -1,4 +1,8 @@
-﻿using CrawfisSoftware.Events;
+﻿using System.Collections.Generic;
+
+using CrawfisSoftware.Config;
+using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Config;
 
 namespace CrawfisSoftware.GameFlow.Events
 {
@@ -69,28 +73,51 @@ namespace CrawfisSoftware.GameFlow.Events
         // ---------- Config / Difficulty ----------
         GameConfigChangeRequested = 80,
         GameConfigApplying = 81,
+        [EventPayload(typeof(DifficultyConfig))]
         GameConfigApplied = 82,
         GameConfigApplyFailed = 83,
-        LevelApplied = 85,                    // data: int (selected level number; gameplay maps it to a track)
+        [EventPayload(typeof(int))]  // Selected level number
+        LevelApplied = 85,                    // gameplay maps it to a track
 
         DifficultyChangeRequested = 90,
         DifficultyChanging = 91,
         DifficultyChanged = 92,
         DifficultyChangeFailed = 93,
         /// <summary>
+        /// The selected level's difficulty variants, published by <c>LevelConfigApplier</c> when a
+        /// level is chosen. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>The level publishes its whole table rather than one resolved config, so the
+        /// level's tuning and the player's preference compose instead of racing: the difficulty
+        /// system picks a variant by name and is the single writer of the resolved config.</para>
+        /// <para><b>Sticky</b>, and here that is a local decision rather than an inherited one. A
+        /// table is a level, not an edge - self-describing and true whenever it is read - and this
+        /// repo's scene chain is UGS-driven, so retaining it costs nothing and removes any
+        /// dependence on when the bridge in <c>Game_Boot_2_Play</c> happens to subscribe.
+        /// EndlessRunnerTemplate leaves the same member Transient, on its own measurement.</para>
+        /// </remarks>
+        [EventDelivery(EventDelivery.Sticky)]
+        [EventPayload(typeof(IList<DifficultyConfig>))]
+        DifficultySettingsApplied = 94,
+
+        /// <summary>
         /// The difficulty table the services layer supplied, bridged from
         /// <c>GameServiceEvents.DifficultySettingsAvailable</c>. Data: <c>IList&lt;DifficultyConfig&gt;</c>.
         /// </summary>
         /// <remarks>
-        /// <para><b>Sticky.</b> A difficulty table is current state, not a one-time announcement:
-        /// self-describing, and true whenever it is read. It has to be retained, because the only
-        /// publisher is the services layer during boot and the only consumer is
-        /// <c>TempleRunGameFlowBridge</c>, which lives in <c>Game_Boot_2_Play</c> and does not
-        /// exist yet when that publish happens. Announced only once, it would reach nothing,
-        /// every time.</para>
+        /// <para>RUGS-only, and separate from <see cref="DifficultySettingsApplied"/> on purpose.
+        /// The two tables have different authority - remote overrides the level, the level
+        /// overrides the built-in fallback - and a rank needs its own channel to be expressed.
+        /// Sharing one event would make the winner depend on publish order.</para>
+        /// <para><b>Sticky.</b> The only publisher is the services layer during boot and the only
+        /// consumer is <c>TempleRunGameFlowBridge</c>, which lives in <c>Game_Boot_2_Play</c> and
+        /// does not exist yet when that publish happens. Announced only once, it would reach
+        /// nothing, every time.</para>
         /// </remarks>
         [EventDelivery(EventDelivery.Sticky)]
-        DifficultySettingsApplied = 94,
+        [EventPayload(typeof(IList<DifficultyConfig>))]
+        RemoteDifficultySettingsApplied = 95,
 
         // ---------- Save / Load (optional but useful hooks) ----------
         SaveLoadRequested = 100,
@@ -116,8 +143,10 @@ namespace CrawfisSoftware.GameFlow.Events
         LevelSelectorHideRequested = 133,
         LevelSelectorHiding = 134,
         LevelSelectorHidden = 135,
-        LevelSelected = 136,              // data: LevelConfig
-        LevelUnlocked = 137,              // data: LevelConfig (newly unlocked)
+        [EventPayload(typeof(LevelConfig))]
+        LevelSelected = 136,
+        [EventPayload(typeof(LevelConfig))]
+        LevelUnlocked = 137,              // newly unlocked
         LevelProgressSaved = 138,
 
         // ---------- Currency ----------
@@ -134,7 +163,7 @@ namespace CrawfisSoftware.GameFlow.Events
         /// scene loaded per run. Announced only once, it would be long gone before any HUD
         /// existed, and the display would stay blank until a run ended and banked.</para>
         /// </remarks>
-        [EventPayload(typeof(long))]
+        [EventPayload(typeof(long))]  // Lifetime coin balance
         [EventDelivery(EventDelivery.Sticky)]
         CurrencyBalanceChanged = 140,
 
@@ -153,7 +182,7 @@ namespace CrawfisSoftware.GameFlow.Events
         /// late subscriber to rescue. Retaining it would also outlive the run it describes and
         /// hand the next one a stale count before its first coin.</para>
         /// </remarks>
-        [EventPayload(typeof(int))]
+        [EventPayload(typeof(int))]  // Coins this run, a running total
         SessionCoinsChanged = 141,
     }
 }

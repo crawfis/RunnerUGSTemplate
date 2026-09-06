@@ -64,6 +64,25 @@ namespace CrawfisSoftware.TempleRun.Events
             (TempleRunEvents.TempleRunEnding, TempleRunEvents.TempleRunEnded),
 
             // ================================================================================
+            // TURN AUTO-CHAINS
+            // ================================================================================
+            // Turn*Requested -> Turn*Starting is NOT auto-chained: TurnController is the gate, and
+            // only publishes Starting if the player is inside the turn window and the segment
+            // actually bends that way.
+            // Turn*Starting -> Turn*Started is NOT auto-chained either. TurnCommitController
+            // subscribes to Starting, and a chain target and a subscriber of the same event have
+            // no defined order between them - Started could land before the Either junction had
+            // been committed. It commits first, then publishes Started itself.
+            //
+            // Started -> Ending is the turn's DURATION, and it is filled: Started publishes the
+            // exit spline, the player teleports onto it, and TeleportController publishes
+            // Turn*Ending when that motion finishes. The teleport used to hang off the terminal
+            // rung instead, which declared the turn over before the player had moved.
+            // Ending -> Ended stays chained - a turn settle goes there.
+            (TempleRunEvents.TurnLeftEnding, TempleRunEvents.TurnLeftEnded),
+            (TempleRunEvents.TurnRightEnding, TempleRunEvents.TurnRightEnded),
+
+            // ================================================================================
             // LANE CHANGE AUTO-CHAINS
             // ================================================================================
             // LaneChange*Requested -> LaneChanging* is NOT auto-chained. See the validation-gate
@@ -81,7 +100,10 @@ namespace CrawfisSoftware.TempleRun.Events
             // SlideController rejects the request (already sliding, or still on cooldown).
             // SlideController publishes SlideStarting once its checks pass.
             // SlideStarting -> SlideStarted: Published by SlideArcController (at animation start)
-            // SlideStarted -> SlideEnded: Published by SlideArcController (when animation completes)
+            // SlideStarting -> SlideStarted -> SlideEnding: published by SlideArcController as the
+            // animation reaches each rung. The last link is chained and left open: a stand-up
+            // animation or recovery window goes there, with no controller edit.
+            (TempleRunEvents.SlideEnding, TempleRunEvents.SlideEnded),
 
             // ================================================================================
             // DASH AUTO-CHAINS
@@ -91,7 +113,10 @@ namespace CrawfisSoftware.TempleRun.Events
             // translation of UserDashRequested, so DashStarting fired even when DashController had
             // rejected the request. DashController publishes DashStarting once its checks pass.
             // DashStarting -> DashStarted: Published by DashSpeedController (at animation start)
-            // DashEnding -> DashEnded: Published by DashSpeedController (when dash completes)
+            // DashStarting -> DashStarted -> DashEnding: published by DashSpeedController as the
+            // animation reaches each rung. The last link is chained and left open: a trail fade or
+            // camera FOV ease-out goes there, with no controller edit.
+            (TempleRunEvents.DashEnding, TempleRunEvents.DashEnded),
 
             // ================================================================================
             // JUMP AUTO-CHAINS
@@ -100,7 +125,20 @@ namespace CrawfisSoftware.TempleRun.Events
             // the top of this dictionary: chaining it would launch a second jump while one is
             // already in the air. JumpController publishes JumpStarting once its checks pass.
             // JumpStarting -> JumpStarted: Published by JumpArcController (at arc apex)
-            // JumpStarted -> JumpLanded: Published by JumpArcController (when arc completes)
+            // JumpStarting -> JumpStarted -> JumpEnding: published by JumpArcController as the arc
+            // reaches each rung. The last link is chained and left open: a landing recovery - a
+            // hook, or a delay before control returns - goes there, with no controller edit.
+            (TempleRunEvents.JumpEnding, TempleRunEvents.JumpEnded),
+
+            // ================================================================================
+            // TELEPORT AUTO-CHAINS
+            // ================================================================================
+            // TeleportController publishes only the *ing rungs; both links below are chained
+            // because the teleport has no warm-up or wind-down of its own today. They exist so
+            // one can be added later - a VFX wind-up before the move, an arrival sting after -
+            // by breaking the link, with no change to TeleportController or its subscribers.
+            (TempleRunEvents.TeleportStarting, TempleRunEvents.TeleportStarted),
+            (TempleRunEvents.TeleportEnding, TempleRunEvents.TeleportEnded),
 
             // ================================================================================
             // OBSTACLE AUTO-CHAINS

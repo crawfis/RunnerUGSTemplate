@@ -40,7 +40,9 @@ namespace CrawfisSoftware.UGS.Events
             // The host's choice, not the service's: config has arrived, so stop showing loading.
             (GameServiceEvents.RemoteConfigApplied, GameFlowEvents.LoadingScreenHideRequested),
 
-            (GameServiceEvents.DifficultySettingsAvailable, GameFlowEvents.DifficultySettingsApplied),
+            // The REMOTE table, on its own channel: GameFlowEvents.DifficultySettingsApplied
+            // now carries the selected level's variants, which the remote one outranks.
+            (GameServiceEvents.DifficultySettingsAvailable, GameFlowEvents.RemoteDifficultySettingsApplied),
 
             // The banked balance, forwarded unchanged. A pair is enough here, unlike on the UGS
             // side of the seam where the payload is a services type that had to be unwrapped: by
