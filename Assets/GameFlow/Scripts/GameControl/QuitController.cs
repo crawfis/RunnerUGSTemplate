@@ -1,8 +1,7 @@
 using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 using CrawfisSoftware.GameFlow.GameConfig;
-
-using System.Collections;
+using CrawfisSoftware.Utility;
 
 using UnityEngine;
 
@@ -25,11 +24,11 @@ namespace CrawfisSoftware.GameFlow
         private void OnQuitted(string EventName, object sender, object data)
         {
             GameFlowBus.Unsubscribe(GameFlowEvents.Quitting, OnQuitted);
-            StartCoroutine(Quit());
+            _ = Quit();
         }
-        private IEnumerator Quit()
+        private async Awaitable Quit()
         {
-            yield return new WaitForSecondsRealtime(GameConstants.QuitDelay);
+            await Wait.ForSecondsRealtime(GameConstants.QuitDelay, destroyCancellationToken);
 
             // This shows the proper way to quit a game both in Editor and with a build
 #if UNITY_EDITOR

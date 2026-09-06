@@ -1,8 +1,6 @@
 using CrawfisSoftware.Events;
 using CrawfisSoftware.GameFlow.Events;
 
-using System.Collections;
-
 using UnityEngine;
 
 using GameFlowBus = CrawfisSoftware.Events.EventsFor<CrawfisSoftware.GameFlow.Events.GameFlowEvents>;
@@ -31,19 +29,19 @@ namespace CrawfisSoftware.UGS.Leaderboard.Test
         }
         private void OnGameStarted(string eventName, object sender, object data)
         {
-            StartCoroutine(SubmitScoresCoroutine());
+            _ = SubmitScores();
         }
 
-        private IEnumerator SubmitScoresCoroutine()
+        private async Awaitable SubmitScores()
         {
-            yield return new WaitForSeconds(_initialDelayInSeconds);
+            await Awaitable.WaitForSecondsAsync(_initialDelayInSeconds, destroyCancellationToken);
             for (int i = 0; i < _numberOfTimesToSubmit; i++)
             {
                 float randomScore = UnityEngine.Random.Range((int)_minValue, (int)_maxValue + 1);
                 // Publishes the contract event a real game would, so this harness exercises
                 // the same path as gameplay rather than a UGS-internal shortcut.
                 GameServiceBus.Publish(GameServiceEvents.SessionEnding, this, randomScore);
-                yield return new WaitForSeconds(_delayBetweenSubmissionsInSeconds);
+                await Awaitable.WaitForSecondsAsync(_delayBetweenSubmissionsInSeconds, destroyCancellationToken);
             }
             if(_endGameAfterSubmissions)
             {
