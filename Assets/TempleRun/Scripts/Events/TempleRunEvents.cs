@@ -58,22 +58,32 @@ namespace CrawfisSoftware.TempleRun
         TempleRunEnded = 43,
 
         // ---------- Player movement: turning ----------
-        // The eight rungs below marked (int) are the bridge's translations of an input request,
-        // and the bridge forwards its payload unchanged - so the player id the input source
-        // published arrives here. They have no other publisher.
+        // Both directions carry the full ladder, published by two classes: TurnController is the
+        // gate and publishes Starting. TurnCommitController commits an Either junction and
+        // publishes Started; the teleport onto the new spline is the turn's duration, and
+        // TeleportController publishes Ending when it lands. Only Ending -> Ended is chained.
+        // Renumbered from the old 50-56 layout, which had no *Started rungs and left the
+        // terminal rungs stranded at 58/59. Safe because no TempleRunEvents member is
+        // serialized in a scene or prefab - verified in this repo, where the only serialized
+        // member name is TempleRunEvents/SplineSegmentCreated.
+        // (52-55 previously held TurnLeftCompleted/TurnRightRequested/Starting/Completed; 56 held
+        // SegmentRequested, now 340 with the rest of the segment vocabulary; 57 was a removed
+        // StraightSegmentCompleted.)
+        // The eight rungs marked (int) across this enum are the bridge's translations of an input
+        // request, and the bridge forwards its payload unchanged - so the player id the input
+        // source published arrives here. They have no other publisher.
         [EventPayload(typeof(int))]
         TurnLeftRequested = 50,
         TurnLeftStarting = 51,
-        TurnLeftCompleted = 52,
+        TurnLeftStarted = 52,
+        TurnLeftEnding = 53,
+        TurnLeftEnded = 54,
         [EventPayload(typeof(int))]
-        TurnRightRequested = 53,
-        TurnRightStarting = 54,
-        TurnRightCompleted = 55,
-        [EventPayload(typeof(Direction))]
-        SegmentRequested = 56,  // Data: Direction (Left or Right). Fires when player commits direction at an Either junction.
-        // 57: removed (was StraightSegmentCompleted, replaced by SegmentExited)
-        //LeftTurnSucceeded = TurnLeftCompleted, // Legacy naming
-        //RightTurnSucceeded = TurnRightCompleted, // Legacy naming
+        TurnRightRequested = 55,
+        TurnRightStarting = 56,
+        TurnRightStarted = 57,
+        TurnRightEnding = 58,
+        TurnRightEnded = 59,
 
         // ---------- Player movement: slide ----------
         [EventPayload(typeof(int))]
@@ -248,6 +258,11 @@ namespace CrawfisSoftware.TempleRun
         DistanceUpdated = 330,
 
         // ---------- Segment lifecycle ----------
+        // Moved here from 56: this is segment vocabulary, not a rung of the turn ladder. It is
+        // published by TurnCommitController between Turn*Started and Turn*Ending, and that
+        // position is load-bearing - see the comment there.
+        [EventPayload(typeof(Direction))]
+        SegmentRequested = 340,           // Data: Direction (Left or Right). Player commits a direction at an Either junction.
         // TrackSegmentInfo is a struct, so these declarations also make a null payload an error
         // rather than a default-valued segment silently reaching a handler.
         [EventPayload(typeof(TrackSegmentInfo))]

@@ -10,10 +10,10 @@ namespace CrawfisSoftware.TempleRun
     /// </summary>
     /// <remarks>
     /// CurrentSplineChanging (not CurrentSplineChanged) is intentional: Changing fires at the
-    /// start of each sub-spline with point1 = sub-spline start and distance ≈ start distance,
-    /// giving a correct anchor. Changed fires at segment END with point1 = segment start but
-    /// distance = exit distance, which would reset the anchor backward. For turn segments,
-    /// Changing fires twice (approach + exit); each call correctly re-anchors to the new sub-spline.
+    /// start of each section, so Section.Start is where the player actually is and the anchor is
+    /// correct. Changed fires at segment END carrying the section's original start, which would
+    /// reset the anchor backward. For turn segments, Changing fires twice (approach + exit); each
+    /// call correctly re-anchors to the new section.
     /// </remarks>
     public class MoveCharacterByDistance : MonoBehaviour
     {
@@ -37,12 +37,11 @@ namespace CrawfisSoftware.TempleRun
             _currentDirection = section.Heading;
             _lastAnchorPoint = section.Start;
             _lastAnchorDistance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
-            // NOTE: this places the player unconditionally. ERT returns early on
-            // section.TeleportOwnsTransform, because a turn's exit is lerped onto by
-            // CharacterTeleporter and snapping first makes that lerp run from the destination to
-            // the destination. Adding that guard here is a behaviour change and belongs with the
-            // turn-ladder rework this repo has not taken yet - the rule is named on the payload
-            // now, so it is a one-line change when it does.
+            // Re-anchor always; only place the player when nobody else is going to. Who that is
+            // is named on the message - see SplineSection.TeleportOwnsTransform, which is where
+            // the reason this must not snap now lives.
+            if (section.TeleportOwnsTransform) return;
+
             float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset + Blackboard.Instance.SlideHeightOffset;
             Vector3 basePos = new Vector3(section.Start.x, yPos, section.Start.z);
             basePos += GetLateralOffset();
