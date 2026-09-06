@@ -447,7 +447,7 @@ internal class MyController : MonoBehaviour
 | Auto-Event Flow | `Assets/TempleRun/Scripts/Events/TempleRunAutoEventFlow.cs`, `Input2TempleRunAutoEventBridge.cs` (input → gameplay) |
 | Config | `Assets/TempleRun/Scripts/Config/Blackboard.cs`, `TempleRunGameConfig.cs`, `GameDifficultyManager.cs`, `DifficultySettings.cs`, `SetGameDifficulty.cs`, `LoadDefaultGameConfigs.cs`, `SpawnPrefabRegistry.cs`, `TempleRunConstants.cs`, `PlayerPrefKeys.cs`, per-mechanic configs (`CoinConfig.cs`, `DashConfig.cs`, `JumpConfig.cs`, `LaneConfig.cs`, `SlideConfig.cs`, `PowerUpDefinition.cs`, `PowerUpType.cs`) |
 | Player Controllers | `Assets/TempleRun/Scripts/Player/TurnController.cs`, `JumpController.cs`, `SlideController.cs`, `DashController.cs`, `LaneChangeController.cs`, `PlayerLifeController.cs`, `PowerUpBuffController.cs`, `DistanceController.cs`, `MoveCharacterByDistance.cs`, `PauseController.cs`, `PlayerPauseController.cs`, `AIController.cs` |
-| Player Support | collision detectors (`ObstacleCollisionDetector.cs`, `CollectableCollisionDetector.cs`, `TurnCollisionDetector.cs`), `CoinCollectionController.cs`, motion shaping (`JumpArcController.cs`, `SlideArcController.cs`, `DashSpeedController.cs`, `LaneOffsetController.cs`), failure/teleport (`PlayerFailedController.cs`, `PlayerFailureAutoTurnController.cs`, `TeleportController.cs`, `CharacterTeleporter.cs`); `Assets/TempleRun/Scripts/GameTime.cs` |
+| Player Support | collision detectors (`ObstacleCollisionDetector.cs`, `CollectableCollisionDetector.cs`, `TurnCollisionDetector.cs`), `CoinCollectionController.cs`, motion shaping (`JumpArcController.cs`, `SlideArcController.cs`, `DashSpeedController.cs`, `LaneOffsetController.cs`), failure/teleport (`PlayerFailedController.cs`, `PlayerFailureAutoTurnController.cs`, `TeleportController.cs`, `CharacterTeleporter.cs`); `Assets/TempleRun/Scripts/GameTime.cs`; `Assets/TempleRun/Scripts/Utility/Wait.cs` (`Wait.ForSecondsRealtime`, the unscaled Awaitable wait — see Gotchas, *Async and coroutines*) |
 | Power-Up Effects | `Assets/TempleRun/Scripts/PowerUps/IPowerUpEffect.cs`, `PowerUpEffectBase.cs`, `SpeedBoostEffect.cs`, `ScoreMultiplierEffect.cs`, `CoinMagnetEffect.cs`, `CoinDoublerEffect.cs`, `ShieldEffect.cs` |
 | Track Generation | `Assets/TempleRun/Scripts/Track/TrackManager.cs` (+ `TrackManagerAbstract.cs`, `TrackManagerForTiles.cs`, `TrackManagerList.cs`), `PathProvider.cs`, `SegmentTransitionController.cs`, `SegmentAdvanceTrigger.cs`, `TrackSegmentLibrary.cs`, `TrackLibraryLoader.cs`, `TrackSegmentInfo.cs`, `Direction.cs`, `DistanceTracker.cs`, `DistanceInterestService.cs` |
 | Segment Selection | `Assets/TempleRun/Scripts/Track/Selection/` — `ISegmentSelector.cs`, `ISegmentPool.cs`, `WeightedDifficultySelector.cs` (default), `AuthoredSequenceSelector.cs` |
@@ -501,6 +501,32 @@ internal class MyController : MonoBehaviour
   `SplineSection`, `TeleportInfo`). A tuple's slots have no names, so every rule about them
   gets restated in each subscriber's comments instead of on the payload
   (the `ActiveTrackChanging` payload — see `TurnController.cs`)
+
+### Async and coroutines
+- This project uses Unity's `Awaitable`, not coroutines: `async Awaitable Foo()`, started
+  with `_ = Foo();`. There are no `StartCoroutine` / `IEnumerator` / `yield` sites left under
+  `Assets/` (the `IEnumerator` hits in the generated `Input/GameControls.cs` and
+  `Input/LeftRightJumpSlide.cs` are `IEnumerable` implementations, not coroutines). The one
+  remaining coroutine is `TimedEvent` inside the `com.crawfissoftware.common` package.
+- **Every `await` takes a token.** A coroutine died with its MonoBehaviour; an async method
+  does not. Pass `destroyCancellationToken`, or the controller's own
+  `CancellationTokenSource` where a restart is real (`LaneOffsetController`,
+  `CountdownController`, `Metronome`, `DistanceController`, `PowerUpBuffController`) — that
+  CTS is cancelled in `OnDestroy` and covers both cases; never link the two.
+- **Never `async void`.** `async void` routes a cancellation into Unity's unhandled-exception
+  path and logs an error every time a scene unloads; `Awaitable`-returning methods absorb it.
+- Realtime vs scaled is load-bearing because pause sets `Time.timeScale = 0`.
+  `Awaitable.WaitForSecondsAsync` is scaled (never completes while paused);
+  `Wait.ForSecondsRealtime` is the unscaled wait for the quit delay, the failure hitch, the
+  auto-turn delay, the teleport and the UI overlays. In this repo `Wait` lives at
+  `Assets/TempleRun/Scripts/Utility/Wait.cs` (namespace `CrawfisSoftware.Utility`, in the
+  TempleRun assembly, which GameFlow and Countdown both reference) because `_Common` is the
+  `com.crawfissoftware.common` package here; its natural home is that package's
+  `Runtime/Utility/`, beside `TimedEvent`, when the package is next touched.
+  `NextFrameAsync` is frame-based, so a paused per-frame loop keeps ticking with
+  `Time.deltaTime` at 0 and its arc freezes.
+- No pre-emptive `catch (OperationCanceledException)`: add the one-line catch only where a
+  cancelled await actually surfaces in the console on scene unload.
 
 ### Scene Loading
 - All scenes load **additively** from the persistent Boot scene
@@ -660,6 +686,7 @@ Assets/
 │   │   ├── UI/                       # GUIController (distance HUD)
 │   │   ├── Audio/                    # TurnAudioFeedback, Metronome
 │   │   ├── Animation/                # CapsuleAnimationLink
+│   │   ├── Utility/                  # Wait (the unscaled Awaitable wait; _Common is a package here)
 │   │   └── GameTime.cs               # Pausable gameplay clock (singleton)
 │   ├── Scenes/                       # Gameplay/: TempleRunGameplay, TempleRunTrackPCG, TempleRunTrackVisuals, TempleRunPlayerVisuals,
 │   │                                 #   TempleRunObstacles, TempleRunCollectables, TempleRunEnvironment, TempleRunSfx,
