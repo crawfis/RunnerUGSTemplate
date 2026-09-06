@@ -1,4 +1,8 @@
-﻿using CrawfisSoftware.Events;
+﻿using System.Collections.Generic;
+
+using CrawfisSoftware.Config;
+using CrawfisSoftware.Events;
+using CrawfisSoftware.GameFlow.Config;
 
 namespace CrawfisSoftware.GameFlow.Events
 {
@@ -69,9 +73,11 @@ namespace CrawfisSoftware.GameFlow.Events
         // ---------- Config / Difficulty ----------
         GameConfigChangeRequested = 80,
         GameConfigApplying = 81,
+        [EventPayload(typeof(DifficultyConfig))]
         GameConfigApplied = 82,
         GameConfigApplyFailed = 83,
-        LevelApplied = 85,                    // data: int (selected level number; gameplay maps it to a track)
+        [EventPayload(typeof(int))]  // Selected level number
+        LevelApplied = 85,                    // gameplay maps it to a track
 
         DifficultyChangeRequested = 90,
         DifficultyChanging = 91,
@@ -90,6 +96,7 @@ namespace CrawfisSoftware.GameFlow.Events
         /// every time.</para>
         /// </remarks>
         [EventDelivery(EventDelivery.Sticky)]
+        [EventPayload(typeof(IList<DifficultyConfig>))]
         DifficultySettingsApplied = 94,
 
         // ---------- Save / Load (optional but useful hooks) ----------
@@ -116,8 +123,10 @@ namespace CrawfisSoftware.GameFlow.Events
         LevelSelectorHideRequested = 133,
         LevelSelectorHiding = 134,
         LevelSelectorHidden = 135,
-        LevelSelected = 136,              // data: LevelConfig
-        LevelUnlocked = 137,              // data: LevelConfig (newly unlocked)
+        [EventPayload(typeof(LevelConfig))]
+        LevelSelected = 136,
+        [EventPayload(typeof(LevelConfig))]
+        LevelUnlocked = 137,              // newly unlocked
         LevelProgressSaved = 138,
 
         // ---------- Currency ----------
