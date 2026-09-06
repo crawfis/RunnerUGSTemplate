@@ -79,7 +79,7 @@ namespace CrawfisSoftware.GameFlow.UI
 
         // The PanelRenderer surfaces its tree only through this callback, and a reload rebuilds
         // it, so the label is re-queried and repainted every time rather than cached once.
-        private void OnUIReload(PanelRenderer renderer, VisualElement root)
+        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
         {
             _balanceLabel = root?.Q<Label>(_labelName);
             Repaint();
