@@ -28,18 +28,19 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnActiveSplineChanging(string EventName, object sender, object data)
         {
-            // Do not teleport if the new spline is a straight segment.
-            var (_, _, direction, _) = ((Vector3, Vector3, Direction, float))data;
-            if (direction == Direction.Straight)
+            // Only a turn's exit is teleported onto; an approach is run along. The section says
+            // which it is, so this test and any other half of the same rule read one named thing.
+            var section = (SplineSection)data;
+            if (!section.TeleportOwnsTransform)
                 return;
-            StartCoroutine(TeleportWithDelay(data));
+            StartCoroutine(TeleportWithDelay(section));
         }
 
-        private IEnumerator TeleportWithDelay(object data)
+        private IEnumerator TeleportWithDelay(SplineSection section)
         {
-            TempleRunBus.Publish(TempleRunEvents.TeleportStarted, this, (_teleportDuration, data));
+            TempleRunBus.Publish(TempleRunEvents.TeleportStarted, this, new TeleportInfo(_teleportDuration, section));
             yield return new WaitForSecondsRealtime(_teleportDuration);
-            TempleRunBus.Publish(TempleRunEvents.TeleportEnded, this, data);
+            TempleRunBus.Publish(TempleRunEvents.TeleportEnded, this, section);
             // No resume published here. A teleport never paused: the freeze during a teleport
             // is DistanceController._isMoving, toggled by TeleportStarted/TeleportEnded above.
             // Publishing a resume released a pause this class never took - and if the player

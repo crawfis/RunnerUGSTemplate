@@ -33,12 +33,18 @@ namespace CrawfisSoftware.TempleRun
 
         private void OnSplineChanging(string eventName, object sender, object data)
         {
-            var (point1, point2, direction, _) = ((Vector3, Vector3, Direction, float))data;
-            _currentDirection = (point2 - point1).normalized;
-            _lastAnchorPoint = point1;
+            var section = (SplineSection)data;
+            _currentDirection = section.Heading;
+            _lastAnchorPoint = section.Start;
             _lastAnchorDistance = Blackboard.Instance.DistanceTracker.DistanceTravelled;
+            // NOTE: this places the player unconditionally. ERT returns early on
+            // section.TeleportOwnsTransform, because a turn's exit is lerped onto by
+            // CharacterTeleporter and snapping first makes that lerp run from the destination to
+            // the destination. Adding that guard here is a behaviour change and belongs with the
+            // turn-ladder rework this repo has not taken yet - the rule is named on the payload
+            // now, so it is a one-line change when it does.
             float yPos = _yPosition + Blackboard.Instance.JumpHeightOffset + Blackboard.Instance.SlideHeightOffset;
-            Vector3 basePos = new Vector3(point1.x, yPos, point1.z);
+            Vector3 basePos = new Vector3(section.Start.x, yPos, section.Start.z);
             basePos += GetLateralOffset();
             _objectToMove.localPosition = basePos;
             SetRotation(_currentDirection);

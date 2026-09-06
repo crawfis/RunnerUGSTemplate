@@ -481,6 +481,9 @@ internal class MyController : MonoBehaviour
 - **ALWAYS** unsubscribe in `OnDestroy()` - failure causes errors after scene unload
 - Event handler signature: `(string eventName, object sender, object data)`
 - Cast data explicitly: `var score = (float)data;` or `var segment = (TrackSegmentInfo)data;`
+- **Prefer a named struct over a tuple for any payload with more than one part** (e.g.
+  `SplineSection`, `TeleportInfo`). A tuple's slots have no names, so every rule about them
+  gets restated in each subscriber's comments instead of on the payload
   (the `ActiveTrackChanging` payload — see `TurnController.cs`)
 
 ### Scene Loading

@@ -132,7 +132,12 @@ namespace CrawfisSoftware.TempleRun
         SplineSegmentReleased = 205,
 
         CurrentSplineChangeRequested = 220,
+        // The path the player is on and - via SplineSection.TeleportOwnsTransform - who writes
+        // their transform while it is current. That rule used to be a Direction comparison each
+        // subscriber made for itself against an unnamed four-slot tuple.
+        [EventPayload(typeof(SplineSection))]
         CurrentSplineChanging = 221,
+        [EventPayload(typeof(SplineSection))]
         CurrentSplineChanged = 222,
 
         // ---------- Track generation (segments/tiles) ----------
@@ -152,10 +157,19 @@ namespace CrawfisSoftware.TempleRun
 
         // ---------- Teleportation ----------
         TeleportRequested = 280,
+        // Duration plus destination. The terminal rungs carry the destination alone: by the time
+        // the teleport ends its duration is spent and nothing reads it. TeleportController here
+        // still publishes Started/Ended directly - the *ing rungs and their auto-chain are part of
+        // the turn-ladder rework this repo has not taken yet - but the payloads are declared for
+        // all four so the two enums stay aligned.
+        [EventPayload(typeof(TeleportInfo))]
         TeleportStarting = 281,
+        [EventPayload(typeof(TeleportInfo))]
         TeleportStarted = 282,
         TeleportEndRequested = 283,
+        [EventPayload(typeof(SplineSection))]
         TeleportEnding = 284,
+        [EventPayload(typeof(SplineSection))]
         TeleportEnded = 285,
 
         // ---------- Bridged from GameFlow ----------
