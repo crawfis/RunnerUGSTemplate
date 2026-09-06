@@ -1,13 +1,13 @@
 {
   "dependencies": {
     "com.crawfissoftware.common": {
-      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.common",
+      "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.common#4d5225d5dcdd8d0a03ee258d862398189bb0d0d0",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.modules.imageconversion": "1.0.0"
       },
-      "hash": "c5ecaef80f082dc9b66a7be56f058e3d47bdeafc"
+      "hash": "4d5225d5dcdd8d0a03ee258d862398189bb0d0d0"
     },
     "com.crawfissoftware.contracts": {
       "version": "https://github.com/crawfis/EventDrivenUGS.git?path=/Packages/com.crawfissoftware.contracts",
