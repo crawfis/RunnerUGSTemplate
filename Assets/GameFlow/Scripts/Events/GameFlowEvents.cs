@@ -134,7 +134,7 @@ namespace CrawfisSoftware.GameFlow.Events
         /// scene loaded per run. Announced only once, it would be long gone before any HUD
         /// existed, and the display would stay blank until a run ended and banked.</para>
         /// </remarks>
-        [EventPayload(typeof(long))]
+        [EventPayload(typeof(long))]  // Lifetime coin balance
         [EventDelivery(EventDelivery.Sticky)]
         CurrencyBalanceChanged = 140,
 
@@ -153,7 +153,7 @@ namespace CrawfisSoftware.GameFlow.Events
         /// late subscriber to rescue. Retaining it would also outlive the run it describes and
         /// hand the next one a stale count before its first coin.</para>
         /// </remarks>
-        [EventPayload(typeof(int))]
+        [EventPayload(typeof(int))]  // Coins this run, a running total
         SessionCoinsChanged = 141,
     }
 }
