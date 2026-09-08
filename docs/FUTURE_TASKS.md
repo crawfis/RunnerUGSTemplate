@@ -25,6 +25,7 @@ this repo that is the first question, not an afterthought:
 | *(contract)* | `GameServiceEvents` in `com.crawfissoftware.contracts` | Same fork; **deliberately rare** — see below |
 | *(module)* | The Cloud Code C# module, `Assets/UGS/CloudCode/TempleRunUGSCloud~/` | Directly (it's in this repo); redeploy + regenerate bindings after |
 | *(dashboard)* | [cloud.unity.com](https://cloud.unity.com) — services configuration, per environment | A person clicking. Not code at all |
+| *(external service)* | A backend that is not Unity's — PlayFab, LootLocker, Firebase, or a Nakama server you run yourself | Its own console or config files; you sign up, you click. Only section S uses this tag |
 
 **The one rule still applies.** Systems communicate through events; a feature starts with
 `/list-events` → `/add-event` → implement → `/audit-events`
@@ -37,7 +38,10 @@ crossing someone maintains forever.
 **The setup tax is real.** Services work means project linking, environments, deployments,
 and dashboard configuration before any code runs. Budget Q1 before everything, and remember
 that Economy and Remote Config are **per-environment**: a currency deployed to
-`development` does not exist in `production`.
+`development` does not exist in `production`. And check Economy before you plan around it:
+Unity closed it to new projects on September 8, 2026, so a project linked after that date
+cannot turn it on at all. [Section S](#s-economy--money) opens with what to do instead —
+the answer is one class long.
 
 ---
 
@@ -53,7 +57,7 @@ something new**.
 | Leaderboards | ✓ | **Working** — score submit on session end, panel UI |
 | Achievements (Cloud Save / Cloud Code) | ✓ | **Working** — catalog, two swappable backends, toasts, claim flow; the coin-based granter sits in no scene yet (T2 starts there) |
 | Remote Config | ✓ | **Working** — one fetch (`RemoteConfigManager`), `difficulty_settings` table applied live |
-| Economy | ✓ | **Working, minimal** — one currency (`COIN`), single-currency manager, two backends |
+| Economy | ✓ | **Working, minimal** — one currency (`COIN`), single-currency manager, two backends. **Closed to new projects since September 8, 2026** — this project keeps working, a freshly linked one cannot enable it; see [section S](#s-economy--money) |
 | Cloud Code | ✓ | **Working** — .NET module, 4 services / 7 endpoints (AdRewards, HandleProfileChange, PlayerData, PlayerEconomy) |
 | Cloud Save | ✓ | **Partially used** — one achievements backend only; no player profile sync |
 | Analytics | ✓ | Installed, **unused** |
@@ -247,9 +251,72 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
 
 ## S. Economy & Money
 
-1. **A second currency: gems (M/L · package + contract + dashboard).** The deep
-   architecture task hiding inside "add gems." `PlayerCurrencyManager` is deliberately
-   single-currency — one `CurrencyId`, defaulting to `COIN` — and the contract carries
+> **Unity closed Economy to new projects on September 8, 2026.** Existing configurations
+> keep working: the SDK, the dashboard and the APIs stay up, Unity has promised critical
+> fixes and at least six months' warning before any real shutdown, and the service became
+> free to use on August 25, 2026. This template's project has its `COIN` currency
+> configured already, so **the coin balance you can watch working today keeps working**.
+> A student who links a brand-new Unity project cannot turn Economy on at all.
+
+Read that twice, because it splits this section in two. Tasks S1, S2 and S4 below need
+Economy and are open only to a project that already had it. Everyone else puts the wallet
+somewhere else — and this template was built so that "somewhere else" costs about one
+class.
+
+**Where the swap happens.** The lifetime coin balance is read and changed in exactly one
+place: `ICurrencyBackend` in the ugs package, two methods long — `GetBalanceAsync(currencyId)`
+and `AddAsync(currencyId, amount)`, both returning the balance the service now holds.
+`PlayerCurrencyManager` owns everything around them: the cached number, the sign-out rules,
+answers that come back out of order, and every event it publishes. It does not care who
+answers. Two implementations ship (`EconomyCurrencyBackend` calls Economy directly,
+`CloudCodeCurrencyBackend` routes the same two calls through the Cloud Code module), and
+`PlayerCurrencyManager.Instance.Backend` is assignable so a third can replace both.
+
+So tasks S6–S10 are all the same short shape:
+
+- Write one class with two methods.
+- Write one small component that hands it over —
+  `PlayerCurrencyManager.Instance.Backend = new MyBackend(...)` — and put that component in
+  a boot scene, early. Early matters: the manager reads the balance the moment
+  `PlayerAuthenticated` fires, so the hand-over has to happen before sign-in finishes. A
+  backend assigned this way outranks the **Use Trusted Client** checkbox on
+  `PlayerCurrencyController`, by design.
+- Change nothing else. Not `GameServiceEvents`, not `Assets/UGSGlue/`, not the coin HUD,
+  not `CoinBasedAchievements`, not one line under `Assets/TempleRun/`. `/audit-events` has
+  nothing new to check, because you added no events.
+
+That last point is the whole lesson, and it belongs in your write-up in those words: a
+company discontinued a service and the game did not notice.
+
+Two practical notes before any of them:
+
+- **The class has to see `ICurrencyBackend`, which lives in the ugs package.** The game
+  assemblies (`CrawfisSoftware.TempleRun`, `.GameFlow`, `.Countdown`) deliberately cannot
+  reference that package, so the backend cannot live in them. Put it in a new folder with
+  no `.asmdef` in it — `Assets/CurrencyBackends/` — the way `Assets/UGSGlue/` has none, and
+  it compiles against the package with no fork needed. Keep it *out* of `Assets/UGSGlue/`,
+  which has one job. Your package fork, beside `EconomyCurrencyBackend`, is the other right
+  home, and the better one if two games will share it.
+- **Leave the Economy SDK package installed even when nothing calls it.** The ugs package's
+  assembly lists `Unity.Services.Economy` among its references, so removing the SDK stops
+  the whole package compiling. An unused `EconomyCurrencyBackend` costs nothing.
+
+| Task | Wallet lives in | Sign-up | Who can edit the balance | Cost at class scale |
+|------|-----------------|---------|--------------------------|---------------------|
+| S6 | The player's own device | None | Anyone with a text editor | Nothing to pay for |
+| S7 | Microsoft PlayFab | Microsoft account | Nobody | Free tier; the one studios know |
+| S8 | LootLocker | Email | Nobody | Free tier; the least reading of any of them |
+| S9 | Firebase (Firestore + Cloud Functions) | Google account **and a card** | Nobody, once the write is in a function | Free allowance, billing account required |
+| S10 | Nakama, in a container on your machine | None | Nobody | Free; you are the host |
+
+Check the free limits yourself before promising anything to a team — every one of these
+companies changes them, and a page from two years ago is not evidence.
+
+1. **A second currency: gems (M/L · package + contract + dashboard).** Needs a working
+   wallet — Economy if your project has it, otherwise whichever backend you built in
+   S6–S10; the argument below is the same either way, and the argument is the valuable
+   half. The deep architecture task hiding inside "add gems." `PlayerCurrencyManager` is
+   deliberately single-currency — one `CurrencyId`, defaulting to `COIN` — and the contract carries
    bare numbers: `CurrencyTotalChanged` is an `int`, `CurrencyBalanceChanged` a `long`,
    neither says *which* currency. Adding a rare premium currency forces the real decision:
    a second manager instance and a parallel pair of contract events per currency (the
@@ -268,7 +335,12 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
    contract looks the way it now does.
 
 2. **A skins shop on Economy (M/L · package + game + dashboard).** The sibling's shop
-   task (E5) designs the economy; this one gives it a real backend. UGS Economy's other
+   task (E5) designs the economy; this one gives it a real backend. On a project without
+   Economy, build it against the backend you chose in S6–S10: PlayFab and LootLocker both
+   ship catalogs, items and priced purchases, so the task reads the same with different
+   call names; on Firebase or Nakama you write the purchase yourself, server-side, which is
+   more work and a better lesson in why a purchase must never be a subtraction the client
+   does. UGS Economy's other
    two halves — **inventory items** (owned skins) and **virtual purchases** (COIN → skin,
    priced server-side) — deploy from definition files beside `COIN.ecc`. Client side: new
    purchase lifecycle events in `UGS_EventsEnum`, an adapter around the Economy purchase
@@ -312,7 +384,7 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
    the note keeps it honest.
    *Read first:* Unity IAP initialization docs (v5 changed the API surface — check the
    installed version's samples, not old tutorials); S1's gem wallet.
-   *Done when:* a fake-store purchase credits gems through the same Economy path S1 built
+   *Done when:* a fake-store purchase credits gems through the same wallet path S1 built
    — not a parallel one.
 
 5. **Daily reward with a streak (M · package + module).** A claim-once-per-day reward
@@ -326,6 +398,117 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
    the achievements claim flow (`Runtime/Achievements/`) as the pattern to copy.
    *Done when:* claiming twice in a day fails server-side, and the streak survives a
    reinstall (it lives in the cloud, not PlayerPrefs).
+
+6. **A wallet with no cloud at all (S · game).** The warm-up for S7–S10, and the honest
+   fallback for anyone with no service account and no card. Implement `ICurrencyBackend`
+   over `PlayerPrefs` or a JSON file in `Application.persistentDataPath`: `GetBalanceAsync`
+   reads the stored number, `AddAsync` adds to it and returns the result. Both are
+   `Task<long>`, so `Task.FromResult` finishes each of them; there is nothing to await. The
+   code is twenty lines and is not the point. The point is the paragraph you write
+   afterward, because this backend breaks two promises the interface was making on purpose.
+   Its comments say a balance comes back from the service that owns it, so two devices
+   cannot drift apart — with a local wallet the device *is* the owner, both devices are
+   right, and neither can be reconciled. And a player edits their coin total in a text
+   editor in about thirty seconds. Notice what that does and does not reach: the
+   leaderboard is still honest, because a score goes straight to the server, while every
+   coin achievement is now on the honor system. One trap: the manager refreshes the balance
+   when `UGS_EventsEnum.PlayerAuthenticated` fires, so on a project with no services at all
+   nothing ever asks. Anonymous sign-in still works and is the normal answer; to run with
+   no cloud whatsoever, publish that event yourself with a `Test_AutoFireEventOnStart` —
+   the way the game-only bootstrap fires `GameplayReady` — and put it in a UGS boot scene,
+   so the name of a UGS event stays on the services side of the fence.
+   *Read first:* `Runtime/Economy/Service/ICurrencyBackend.cs` and its remarks — read the
+   remarks as the specification they are; `PlayerCurrencyManager.cs`, especially "the
+   cached balance only ever comes from the backend," a sentence you are about to weaken.
+   *Done when:* coins survive quitting and reopening the game, the HUD shows the balance
+   after a restart, and a short note in the repo names the two guarantees you traded away
+   and who they were protecting against.
+
+7. **The wallet on PlayFab (M · game + external service).** Microsoft's, and the one a
+   studio is most likely to recognize when it reads your project list. PlayFab's economy is a superset of the one closing:
+   currencies, catalogs, stores and player inventories, with a free tier sized for a class
+   and then some. Install the PlayFab Unity SDK, create a title in Game Manager, define a
+   `COIN` currency in the catalog and publish it, then write the backend: read this
+   player's balances, and add or subtract an amount. Read the current docs for the call
+   names rather than a tutorial — this part of PlayFab has been revised, and the old
+   virtual-currency calls are not the ones you want. The interesting decision is identity:
+   PlayFab needs its own login, and the cheap right answer is to log in with a custom id
+   equal to the UGS player id, so one human stays one player across both services. Write
+   down what happens to the wallet when that id changes — the manager already treats a
+   sign-out as a different person, and now two services have to agree about it.
+   *Read first:* the preamble above; `EconomyCurrencyBackend.cs` as the shape to copy;
+   `CloudCodeCurrencyBackend.cs` for how a failure is reported rather than swallowed;
+   PlayFab's Unity quickstart and its economy/inventory reference.
+   *Human steps:* PlayFab account and title, catalog entry, publish. A title is an
+   environment — the same discipline as Q1, with different buttons.
+   *Done when:* the balance survives a reinstall, and a spend that would go below zero is
+   refused by the server rather than by your C#.
+
+8. **The wallet on LootLocker (S/M · game + external service).** The quickest of the real
+   backends to stand up, built for games and free well past any class project. Its player wallets and
+   balance calls line up with the two methods almost one for one, and its documentation is
+   short enough to read in a sitting — which makes this the task to pick when the point is
+   *that the swap works*, not which company hosts it. Days, not weeks. Identity again is the
+   real work: a LootLocker session starts as a guest identified by a key you choose, so
+   choose the UGS player id and keep one human as one player.
+   *Read first:* the preamble above; LootLocker's Unity SDK setup and its balances /
+   wallets reference; `EconomyCurrencyBackend.cs`.
+   *Human steps:* LootLocker account, a game entry, its API key into the SDK settings.
+   *Done when:* you can switch between the Economy backend and the LootLocker backend by
+   changing one line in the hand-over component, run both, and see a coin HUD that behaves
+   identically — then say in one sentence why nothing above `ICurrencyBackend` had to be
+   recompiled. That demonstration is worth more than the backend.
+
+9. **The wallet on Firebase, written from parts (M/L · game + external service).** Google's
+   backend has no economy button, which is exactly why it is here: you build a currency
+   service instead of configuring one. A Firestore document per player holds the balance; a
+   Cloud Function adds to it inside a transaction, because two clients crediting at once is
+   the textbook way to lose a coin; security rules refuse any direct client write to that
+   document, and writing those rules is part of the task, not paperwork after it. Pick this
+   one to learn what a currency service *is*. Skip it if a deadline is close — with S10 it
+   is the longest of the five. **Check this before committing:** Cloud Functions
+   requires the pay-as-you-go plan with a billing account attached — a card — even for
+   usage inside the free allowance. Firestore alone stays on the free plan, but Firestore
+   alone means the client writes its own balance, which is S6 with more steps and a network
+   connection; if that is where you land, say so plainly rather than calling it
+   server-authoritative.
+   *Read first:* the preamble above; `CloudCodeCurrencyBackend.cs`, which is the same shape
+   you are about to build — a client that asks a server function to move a number and
+   trusts the number that comes back; Firestore transactions; Firebase security rules;
+   the Firebase Unity SDK setup.
+   *Human steps:* Firebase project, plan upgrade with billing, deploy the function and the
+   rules.
+   *Done when:* a direct client write to the balance is rejected — test it, do not assume
+   it — and the function is provably transactional, which means calling it twice at once
+   and getting both coins.
+
+10. **The wallet on Nakama, on your own machine (M/L · game + external service).** Heroic
+    Labs' open-source game server: two containers with Docker Compose (Nakama and Postgres),
+    no account, no card, and no internet once it is pulled — which makes it the one that
+    works in a locked-down lab. Wallets are built into the user record, and the server, not
+    the client, moves them: you write a small server function (TypeScript, Lua or Go) that
+    credits the wallet and returns the new balance, and your `ICurrencyBackend` calls it.
+    That is the same arrangement as `CloudCodeCurrencyBackend`, learned a second time in
+    someone else's runtime, which is the strongest reason to pick this one. Be honest about
+    the cost: it is infrastructure. You will meet Docker, a database container, ports, and
+    "it works on my machine" as a literal statement. Budget that time separately — it is a
+    real education and it is not currency code. Putting the server somewhere other than your
+    machine is a whole further project; do not promise it in the same assignment.
+    *Read first:* the preamble above; Nakama's Docker Compose quickstart, its Unity client
+    setup, and the wallet section of its user docs; `CloudCodeCurrencyBackend.cs` for the
+    pattern you are repeating; `PlayerCurrencyController.cs` remarks on coins that fail to
+    bank.
+    *Human steps:* install Docker Desktop, `docker compose up`, and use the Nakama console
+    in a browser — a dashboard, just a local one.
+    *Done when:* with the server running, a balance survives restarting the game; with the
+    container stopped, the credit fails, the run's coins stay pending, and the next run
+    banks both — that carry-forward already exists in `PlayerCurrencyController`, so this
+    is a test of it rather than new code.
+
+Whichever you pick, S1 and S2 come back into range. A second currency is a second id in
+someone else's console, and the contract argument S1 asks you to write down — one pair of
+events per currency, or one pair carrying a currency id — does not depend on who holds the
+number.
 
 ## T. Leaderboards, Achievements, Friends & Identity
 
@@ -641,7 +824,7 @@ task and its cloud half make one honest vertical slice:
 | A12 Revive / second chance | S3 — pay for the revive with a rewarded ad, granted server-side |
 | E1 Mission system | T2 achievements as the visible tier ladder; W1 measures completion rates |
 | E4 Daily challenge & streaks | R1 serves the daily seed to everyone; S5 makes the streak server-truthful |
-| E5 Shop & monetization design | S1 gems, S2 Economy inventory & purchases, S4 IAP — the stub becomes real |
+| E5 Shop & monetization design | S1 gems, S2 items & priced purchases, S4 IAP — the stub becomes real, on Economy or on whatever S6–S10 replaced it with |
 | E11 Arcade initials & local scores | T5 real display names, T1 real boards — the arcade table goes online |
 | G6 Seeded run variation | V2 shared-seed lobby races; R3 seeded A/B cohorts |
 | L3 Save system | U1 — the pluggable backend it asks for is Cloud Save |
@@ -671,4 +854,8 @@ task and its cloud half make one honest vertical slice:
 - **Pick a vertical slice across both catalogs.** The pairs table in section X is the
   menu: one gameplay task plus its cloud half beats either alone, and forces the
   integration this architecture exists to teach.
+- **A closed service is a design exercise, not a dead end.** Unity shut Economy to new
+  projects and the answer was one class with two methods, because the balance was only ever
+  read and changed in one place (S6–S10). When a task tempts you to reach for a service's
+  types from three files, remember what that costs the day the service goes away.
 - **Run `/audit-events` before every merge.** Here it guards the glue too.
