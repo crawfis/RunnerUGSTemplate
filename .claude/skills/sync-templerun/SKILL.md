@@ -76,8 +76,8 @@ diff -u <(norm "$SIB/Assets/TempleRun/$f") <(norm "$UGS/Assets/TempleRun/$f")
   none. Port ceremony work as a separate pass, not inside a TempleRun sync.
 - Both repos resolve the same EventsPublisher commit (check `Packages/packages-lock.json`
   hashes if in doubt), and both are now on the same subscribe/publish style — bus alias plus
-  a bare payload cast in the handler. The `EventId<T>` mint pattern was removed by owner
-  ruling (2026-09) in both, so a ported file must not carry one in either direction.
+  a bare payload cast in the handler. Neither repo uses the `EventId<T>` mint
+  pattern, so a ported file must not carry one in either direction.
 
 ## Step 5 — Verify
 
@@ -128,7 +128,7 @@ Reconciling that is a design decision, not a sync task.
 
 One style note, now settled: there is a single subscribe/publish form in both repos —
 `Bus.Subscribe(enum, handler)` with the payload cast on the handler's first line. The typed
-`TempleRunBus.Id<T>(...)` / `EventId<T>` mint pattern that synced files used to carry was
-removed by owner ruling (2026-09) and both repos were converted, so a drift row showing one
+`TempleRunBus.Id<T>(...)` / `EventId<T>` mint pattern that synced files used to carry is gone
+from both repos, so a drift row showing one
 side minting `EventId<T>` is a file that missed the conversion — port the converted side,
 never the other way. `/audit-events` flags any remaining field.

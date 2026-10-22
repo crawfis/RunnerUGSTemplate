@@ -29,7 +29,7 @@ this repo that is the first question, not an afterthought:
 
 **The one rule still applies.** Systems communicate through events; a feature starts with
 `/list-events` → `/add-event` → implement → `/audit-events`
-(see [CLAUDE.md](../CLAUDE.md#required-skills-workflow)). Two rules are stricter here than
+(see [AGENTS.md](../AGENTS.md#required-skills-workflow)). Two rules are stricter here than
 in the sibling: nothing under `Assets/GameFlow/` or `Assets/TempleRun/` may name a UGS type
 or event — the game and the services meet only at `GameServiceEvents`, translated in
 `Assets/UGSGlue/` — and the contract grows *deliberately rarely*, because every member is a
@@ -81,7 +81,7 @@ Each task below ends with a short **hand-off brief** — enough context that you
 the task into an AI assistant and get useful work instead of confident guesses. The
 ground rules for that hand-off:
 
-**Give it the right context.** Paste (or point it at) [CLAUDE.md](../CLAUDE.md), the task's
+**Give it the right context.** Paste (or point it at) [AGENTS.md](../AGENTS.md), the task's
 entry from this file, and the *Read first* files the entry names. Require the skills
 workflow: in Claude Code the skills run as slash commands; in any other tool, the same
 procedures are plain markdown checklists in `.claude/skills/*/SKILL.md`.
@@ -141,7 +141,7 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
    trivial; teaches the entire cloud workflow — project linking, environments, the
    Deployment window, Cloud Code binding generation — and every other task in this file
    assumes it. The one-coin walkthrough at the end of
-   [CLAUDE.md](../CLAUDE.md#event-flow-architecture) is your verification script: if the
+   [ARCHITECTURE.md](ARCHITECTURE.md#event-flow-architecture) and the README's "How the Glue Works" is your verification script: if the
    banked balance comes back after a run, the whole chain is alive.
    *Read first:* [ConfigureUnityGamingServicesand-RunnerUGSTemplate.md](ConfigureUnityGamingServicesand-RunnerUGSTemplate.md)
    (click-by-click), README "Getting Started" steps 3 and 6–8.
@@ -174,7 +174,7 @@ bridges to GameFlow or TempleRun directly with its own bridge class, the way
    for play-mode tests, and the sharpest proof the contract means what it claims.
    *Read first:* `Assets/UGSGlue/UGSGameFlowBridge.cs`, `GameServiceEvents.cs` (contracts
    package), `Assets/GameFlow/Scenes/Boot/0_BootStrap_Game_Only.unity`'s
-   `Test_AutoFireEventOnStart` trick (described in CLAUDE.md's Testing section).
+   `Test_AutoFireEventOnStart` trick (described in [KNOWN_ISSUES.md](KNOWN_ISSUES.md#test-without-ugs)).
    *Human steps:* the new scene and boot variant, plus a build profile.
    *Done when:* full game plays, HUD balance shows a number, no network, no UGS package
    scene in memory.
