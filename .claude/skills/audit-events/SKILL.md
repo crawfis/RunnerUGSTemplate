@@ -21,8 +21,7 @@ Search for classes that call `.Subscribe(` (on a bus alias) or a dispatcher `.At
 but do NOT have the matching `.Unsubscribe(` / `.Detach()` in `OnDestroy()`.
 
 Also flag any `EventId<T>` static field (`private static readonly EventId<T> X = Bus.Id<T>(...)`)
-as a finding in itself - that mint pattern was removed by owner ruling (2026-09, "it makes the
-code hard to read"). Call sites go through the bus alias directly and cast the payload on the
+as a finding in itself. Call sites go through the bus alias directly and cast the payload on the
 handler's first line; `[EventPayload]` on the enum member remains the contract.
 
 **Pattern to find:**
@@ -168,7 +167,7 @@ asmdef-free `Assets/UGSGlue/`.
    (`CrawfisSoftware > Events > List Domains`).
 
 8. **Registry drift:** compare the `[EventEnum]` enums List Domains reports against the
-   Domain Registry table in `CLAUDE.md` (Architecture Overview). Flag any domain missing
+   Domain Registry table in `docs/ARCHITECTURE.md` (Event domains). Flag any domain missing
    from the table, or any table row with no matching enum.
 
 **Report format:**

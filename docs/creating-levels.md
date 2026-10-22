@@ -380,7 +380,7 @@ testing, but none of your authored segments will appear.
 
 > Do **not** do this by disabling `Load_UGS_Init` in `0_BootStrap` — that used to work and no
 > longer does; the boot then sits on the loading screen because nothing publishes
-> `GameplayReady`. See CLAUDE.md, "Test Without UGS".
+> `GameplayReady`. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md#test-without-ugs).
 
 ### Enable event logging
 Turn on `CrawfisSoftware > Events > Log Events`. Every `TrackSegmentCreated` and `SplineSegmentCreated` event will be printed to the Console, showing the segment ID, direction, length, and spawn mode. Good for verifying the correct segments are selected.

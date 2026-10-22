@@ -131,9 +131,10 @@ table.
 
 This is the step people forget. Update every place that enumerates domains:
 
-- `CLAUDE.md` — the Domain Registry table, Domain Isolation table (plus the asmdef
-  dependency-direction note), Namespaces block, Key Files table, folder tree, Event Flow
-  Architecture diagram, and every "N domains / N dispatch classes" count
+- `AGENTS.md` — the Domain Isolation table (plus the asmdef dependency-direction note)
+- `docs/ARCHITECTURE.md` — the Domain Registry table, the Event Flow Architecture diagram, and
+  every "N domains / N dispatch classes" count
+- `docs/CODEBASE_MAP_AND_KEY_FILES.md` — Namespaces block, Key Files table, folder tree
 - Skills — `list-events`, `add-event`, `add-auto-chain` (their domain/file tables),
   `add-bridge-mapping` (Available Bridges), `audit-events` (isolation + registry checks)
 - Pointer files — `GEMINI.md` and `.github/copilot-instructions.md` (the domain-isolation
@@ -156,5 +157,5 @@ Created domain: [Name]
   Bus:       [Name]Bus = EventsFor<[Name]Events>  (static — no scene object)
   Flow:      [path, or "none yet — no same-domain progressions"]
   Bridge:    [path]  ([n] mappings [Name]->X, [m] mappings X->[Name])
-  Registered in: CLAUDE.md, AGENTS.md, 6 skills, 2 pointer files, README.md
+  Registered in: AGENTS.md, ARCHITECTURE.md, CODEBASE_MAP_AND_KEY_FILES.md, 6 skills, 2 pointer files, README.md
 ```
